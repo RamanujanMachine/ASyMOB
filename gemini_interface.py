@@ -1,19 +1,13 @@
 import google.generativeai as genai
 from llm_interface import LLMInterface
-import json
 
 
 class GeminiInterface(LLMInterface):
-    def __init__(self, api_key: str = None, model: str = 'gemini-pro'):
+    def __init__(self, api_key: str = None, 
+                 model: str = 'models/gemini-2.0-flash-exp'):
         super().__init__()
-        if api_key is None:
-            with open('api_key.txt', 'r') as f:
-                keys = json.load(f)
-            if 'gemini' not in keys:
-                raise ValueError("Gemini API key not found in api_key.txt and "
-                                 "was not provided.")
-            api_key = keys['gemini']
-        genai.configure(api_key=api_key)
+        self._load_api_key(api_key, 'gemini')
+        genai.configure(api_key=self.api_key)
         
         # Load the Gemini Pro model
         self.model = genai.GenerativeModel(model)
