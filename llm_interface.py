@@ -18,3 +18,10 @@ class LLMInterface:
         Read a message from the language model.
         """
         pass
+
+    @abstractmethod
+    def chat(self):
+        """
+        Write a single message and read the response from the language model.
+        """
+        pass
