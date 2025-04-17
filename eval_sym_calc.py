@@ -1,34 +1,30 @@
-from llm_interface import send_and_receive_message
+from llm_interface import GenericLLMInterface
+from gemini_interface import GeminiInterface
+from openai_interface import OpenAIInterface
 from models import MODELS
 import json
 import sympy as sp
 from sympy.parsing.sympy_parser import parse_expr, standard_transformations, implicit_multiplication_application
 import pandas as pd
+from sp_vars import *
 
 
 QUESTIONS_PATH = 'questions.json'
-SYMPY_CONVERTER_MODEL = 'openai/gpt-4o'# 'gemini/gemini-2.5-pro-exp-03-25'
-NO_CODE_PREFIX = (
-    "Assume you don't have access to a computer: do not use "
-    "code, solve this manually - using your internal reasoning.\n"
-)
-USE_CODE_PREFIX = (
-    "Please use Python to solve the following question. Don't show it, "
-    "just run it internally.\n"
-)
+# SYMPY_CONVERTER_MODEL = 'openai/gpt-4o'# 'gemini/gemini-2.5-pro-exp-03-25'
+# SYMPY_CONVERTER = GeminiInterface("gemini-2.5-pro-exp-03-25") # ge(SYMPY_CONVERTER_MODEL)
+SYMPY_CONVERTER = OpenAIInterface("o3-mini")
+
+C = sp.symbols('C')
+
 
 def parse_sympy_expr_no_simplify(expr_str):
-    # Use transformations that avoid implicit simplification
-    transformations = (
-        standard_transformations + 
-        (implicit_multiplication_application,)
+    return sp.parse_expr(
+        expr_str, 
+        local_dict=var_mapping, 
+        transformations=(
+            standard_transformations + (implicit_multiplication_application,)
+        )
     )
-    
-    # Parse without simplifying, but still recognizing variables and constants
-    expr = parse_expr(expr_str, transformations=transformations, 
-                      evaluate=False)
-    
-    return expr
 
 
 def load_questions(path=QUESTIONS_PATH):
@@ -40,15 +36,15 @@ def load_questions(path=QUESTIONS_PATH):
     return questions
     
 
-def format_final_answer_to_sympy(textual_answer, converter_model):
-    sp_expr = send_and_receive_message(
-        model=converter_model,
+def format_final_answer_to_sympy(textual_answer):
+    sp_expr = SYMPY_CONVERTER.send_message(
         message="Following is an answer to a mathematical question. "
                 "Please write the final answer as a string formatted such "
                 "that it could later be evaluated using sympy. "
                 "Only print this expression, without additional " 
                 "text. Do not wrap it in parentheses, only a symbolic "
-                "expression in unformatted plain text.\n\n" + textual_answer
+                "expression in unformatted plain text. Use underscores for "
+                "all subscripted variables \n\n" + textual_answer
     )
     sp_expr = sp_expr.strip("`'\n\"")
     if sp_expr.startswith('sympy\n'):
@@ -60,7 +56,39 @@ def format_final_answer_to_sympy(textual_answer, converter_model):
     return sp_expr
 
 
-def ask_model(model, question_text, sympy_converter_model=SYMPY_CONVERTER_MODEL):
+def generate_sympy_obj(textual_answer):
+    """
+    Generate a sympy object from the final answer string.
+
+    Returns a sympy object.
+    """
+    function_def = SYMPY_CONVERTER.send_message(
+        message="Following is an answer to a mathematical question. "
+                "Please create a python function that implements the final "
+                "answer, using sympy. The function signature will be "
+                "`solution(x, n, A, B, C, D, E, F)` and it will return the "
+                "final answer as a sympy object. If the answer is not "
+                "dependent on one or more of the parameters accepted it may "
+                "not use them. The function will not "
+                "simplify the result. Only print the function, without "
+                "imports in plain text. Assume all necessary parameters "
+                "and symbols already exists. Access sympy functions "
+                "through the sp module (e.g. sp.hyper)\n\n" + textual_answer,
+        code_execution=None
+    )
+    print(function_def)
+    function_def = function_def.strip("`\n")
+    if function_def.startswith('python\n'):
+        function_def = function_def[6:]
+
+    exec(function_def, globals())
+    
+    # Function solution defined dynamically
+    return solution(
+        x, n, A, B, C, D, E, F
+    )
+    
+def ask_model(model, question_text, code_execution):
     
     """
     Ask the model a question and get the answer as a sympy expression.
@@ -68,16 +96,16 @@ def ask_model(model, question_text, sympy_converter_model=SYMPY_CONVERTER_MODEL)
     Returns a sympy object extracted from the textual answer, the sympy 
     expression as a string and the textual answer itself.
     """
-    textual_answer = send_and_receive_message(
-        model=model,
-        message=question_text
+    textual_answer = model.send_message(
+        message=question_text,
+        code_execution=code_execution,
     )
     # print(f"Textual answer: {textual_answer}")
-    sp_expr = format_final_answer_to_sympy(textual_answer, sympy_converter_model)
+    sp_expr = format_final_answer_to_sympy(textual_answer)
     try:
-        sp_obj = parse_sympy_expr_no_simplify(sp_expr)
+        sp_obj = generate_sympy_obj(textual_answer)
     except Exception as e:
-        print(f"Error parsing sympy expression: {sp_expr}")
+        print(f"Error parsing sympy expression: {sp_expr}:\n{e}")
         return -1, sp_expr, textual_answer
     return sp_obj, sp_expr, textual_answer
 
@@ -89,12 +117,13 @@ def symbolic_comparison(A, B):
     Returns True if they are equal, False otherwise.
     """
     try:
-        return sp.simplify(A - B) == 0
+        return sp.simplify(A - B) == 0 or sp.simplify(A - B) == C or \
+                sp.simplify(B - A) == C
     except Exception as e:
         print(f"Error comparing expressions: {A}, {B}")
         return None
 
-def assess_model(model, question_text, true_answer):
+def assess_model(model, question_text, true_answer, code_execution):
     """
     Assess the model's performance on a given question.
 
@@ -102,8 +131,8 @@ def assess_model(model, question_text, true_answer):
     whether they are equal.
     """
     try:
-        sp_obj, sp_expr, textual_answer = ask_model(model, question_text)
-        print(f'Answer: {sp_expr}')
+        sp_obj, sp_expr, textual_answer = ask_model(model, question_text, code_execution)
+        print(f'Answer: {sp_expr}, {sp_obj}')
         symbolic_equal = symbolic_comparison(sp_obj, true_answer)
         return {
             'question_text': question_text,
@@ -126,32 +155,34 @@ def assess_model(model, question_text, true_answer):
 def main():
     questions = load_questions()
     results = []
-    for q_id, question_text, true_answer in questions:
-        for model in MODELS[:1]:
-            print(f"Model: {model}, Question: {question_text}")
+    for q_id, question_text, true_answer in questions[:4]:
+        for model_name, model in MODELS.items():
+            print(f"Model: {model_name}, Question: {question_text}")
 
             # Use python
             results.append(
                 {
                     'question_id': q_id,
-                    'model': model,
+                    'model': model_name,
                     'use_python': True,
                     **assess_model(
                         model, 
-                        USE_CODE_PREFIX + question_text, 
-                        true_answer)
+                        question_text, 
+                        true_answer,
+                        code_execution=True)
                 })
             
             # No python
             results.append(
                 {
                     'question_id': q_id,
-                    'model': model,
+                    'model': model_name,
                     'use_python': False,
                     **assess_model(
                         model, 
-                        NO_CODE_PREFIX + question_text, 
-                        true_answer)
+                        question_text, 
+                        true_answer,
+                        code_execution=False)
                 })
                 
     df = pd.DataFrame.from_records(results)

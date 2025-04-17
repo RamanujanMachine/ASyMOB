@@ -1,0 +1,67 @@
+from google import genai
+from google.genai import types
+import os
+from llm_interface import GenericLLMInterface, USE_CODE_PREFIX, NO_CODE_PREFIX
+
+
+class GeminiInterface(GenericLLMInterface):
+    """
+    A class to interact specifically with Google Gemini models using the native API.
+
+    Inherits from GenericLLMInterface but overrides send_message to use
+    the google-generativeai SDK.
+    """
+    def __init__(self, model):
+        self.model = model
+        self._load_api_key(provider='gemini')
+        self.client = genai.Client(api_key=self.api_key)
+
+    def send_message(self, message, code_execution=False):
+        message = self._incentivize_code_execution(message, use_code=code_execution)
+        tools = []
+        if code_execution:
+            tools.append(
+                types.Tool(code_execution=types.ToolCodeExecution)
+            )
+
+        generate_content_config = types.GenerateContentConfig(
+            tools=tools,
+            response_mime_type="text/plain",
+        )
+
+        contents = [
+            types.Content(
+                role="user",
+                parts=[
+                    types.Part.from_text(text=message),
+                ],
+            ),
+        ]
+
+        response = ''
+
+        for chunk in self.client.models.generate_content_stream(
+            model=self.model,
+            contents=contents,
+            config=generate_content_config,
+        ):
+            if chunk.candidates is None or chunk.candidates[0].content is None or chunk.candidates[0].content.parts is None:
+                continue
+            if chunk.candidates[0].content.parts[0].text:
+                # print(chunk.candidates[0].content.parts[0].text, end="")
+                response += chunk.candidates[0].content.parts[0].text
+            if chunk.candidates[0].content.parts[0].executable_code:
+                # print(chunk.candidates[0].content.parts[0].executable_code)
+                response += str(chunk.candidates[0].content.parts[0].executable_code)
+                if not code_execution:
+                    # Should't be here, but just in case
+                    print("Code execution is not enabled.")
+                    raise ValueError("Code execution is not enabled.")
+            if chunk.candidates[0].content.parts[0].code_execution_result:
+                response += str(chunk.candidates[0].content.parts[0].code_execution_result)
+                if not code_execution:
+                    # Should't be here, but just in case
+                    print("Code execution is not enabled.")
+                    raise ValueError("Code execution is not enabled.")
+                # print(chunk.candidates[0].content.parts[0].code_execution_result)
+        return response
