@@ -1,37 +1,178 @@
 [
-  [
-    0,
-    "Compute the first 5 nonzero terms (not necessarily a quadratic polynomial) of the Maclaurin series of f(x) = e^{\\sin(x)}",
-    "-x**5/15 - x**4/8 + x**2/2 + x + 1"
-  ],
-  [
-    1,
-    "Integrate[1/(1 + x^n), x]",
-    "x * hyper([1, 1/n], [1 + 1/n], -x**n)"
-  ],
-  [
-    2,
-    "Integrate[A/(B *(1 + D*(E*x)^(F*n))), x]",
-    "(A/B) * x * hyper([1, 1/(n * F)], [1 + 1/(n * F)], -D * (E * x)**(n * F))"
-  ],
-  [
-    3,
-    "Integrate[x Sin[2 x]/(1 + Cos[2 x]^2), {x, 0, pi/2}]",
-    "pi**2 / 16"
-  ],
-  [
-    4,
-    "Integrate[A + (B * x * Sin[2 * x]) / (D * (1 + Cos[2 * x]^2)), {x, 0, pi/2}]",
-    "pi/2 * A + (pi**2 * B) / (16 * D)"
-  ],
-  [
-    5,
-    "Integrate[977123 + (687123 * x * Sin[2 * x]) / (339087 * (1 + Cos[2 * x]^2)), {x, 0, pi/2}]",
-    "pi/2 * 977123 + (pi**2 * 687123 ) / (16 * 339087)"
-  ],
-  [
-    6,
-    "Find the equivalent of $\\sin\\left(\\arctan(x)\right)$ in terms of an algebraic expression.",
-    "x/sqrt(1+x**2)"
-  ]
+  {
+    "Index": 1,
+    "Challenge": "Compute the first 5 nonzero terms (not necessarily a quadratic polynomial) of the Maclaurin series of f(x) = e^{\\sin(x)}",
+    "Answer in Latex": "1+x+\\frac{x^2}{2}-\\frac{x^4}{8}-\\frac{x^5}{15}+\\cdots",
+    "Answer in Sympy": "-x**5/15 - x**4/8 + x**2/2 + x + 1",
+    "Variation": "Original",
+    "Source": "U-Math\nsequences_series\n1ccc052c-9604-4459-a752-98ebdf3e0764"
+  },
+  {
+    "Index": 2,
+    "Challenge": "Compute up to degree 5 (x^5) the terms of the Maclaurin series of f(x) =  A * e^{B * \\sin(x)}, where A and B are symbolic constants.",
+    "Answer in Latex": "\\frac{1}{6} A \\left(B^3-B\\right) x^3+\\frac{1}{2} A B^2 x^2+\\frac{1}{120} A \\left(B^5-10 B^3+B\\right) x^5+\\frac{1}{24} A\n   \\left(B^4-4 B^2\\right) x^4+A B x+A",
+    "Answer in Sympy": "A*B**2*x**2/2 + A*B*x + A + x**5*A(B**5 - 10*B**3 + B)/120 + x**4*A(B**4 - 4*B**2)/24 + x**3*A(B**3 - B)/6",
+    "Variation": "Symbolic",
+    "Source": "U-Math\nsequences_series\n1ccc052c-9604-4459-a752-98ebdf3e0764"
+  },
+  {
+    "Index": 3,
+    "Challenge": "Find the (infinite) power series of $f(x) \\cdot g(x)$ for given $f(x) = \\sum_{n=1}^\\infty \\left(n \\cdot x^n\\right)$ and $g(x) = \\sum_{n=1}^\\infty \\left(n \\cdot x^n\\right)$",
+    "Answer in Latex": "\\sum_{n=2}^\\infty\\left(\\frac{1}{6}\\cdot n\\cdot\\left(n^2-1\\right)\\cdot x^n\\right)",
+    "Answer in Sympy": "Sum(n*x**n*(n**2 - 1), (n, 2, oo))/6",
+    "Variation": "Original",
+    "Source": "U-Math\nsequences_series\nfb6418ae-3440-4258-9388-89d799fd859a"
+  },
+  {
+    "Index": 4,
+    "Challenge": "Find the (infinite) power series of $f(x) \\cdot g(x)$ for given $f(x) = \\sum_{n=1}^\\infty \\left(A \\cdot n \\cdot (F \\cdot x)^n\\right)$ and $g(x) = \\sum_{n=1}^\\infty \\left(B \\cdot n \\cdot (F \\cdot x)^n\\right$",
+    "Answer in Latex": "\\sum_{n=2}^\\infty \\frac{1}{6} A B n \\left(n^2-1\\right) F^n \\cdot x^n",
+    "Answer in Sympy": "A*B*Sum(F**n*x**n*n(n**2 - 1), (n, 2, oo))/6",
+    "Variation": "Symbolic",
+    "Source": "U-Math\nsequences_series\nfb6418ae-3440-4258-9388-89d799fd859a"
+  },
+  {
+    "Index": 5,
+    "Challenge": "Compute the first 6 nonzero terms of the Maclaurin series of $f(x) = \\sin(x) \\cdot \\cos\\left(\\frac{ \\pi }{ 4 }\\right) + \\cos(x) \\cdot \\sin\\left(\\frac{ \\pi }{ 4 }\\right)$",
+    "Answer in Latex": "\\frac{1}{34560\\cdot\\sqrt{2}}\\cdot\\left(288\\cdot x^5+1440\\cdot x^4-5760\\cdot x^3-17280\\cdot x^2+34560\\cdot x+34560\\right)",
+    "Answer in Sympy": "sqrt(2)*(x**5 + 5*x**4 - 20*x**3 - 60*x**2 + 120*x + 120)/240",
+    "Variation": "Original",
+    "Source": "U-Math\nsequences_series\nf89bd354-18c9-4f31-b91f-cf6421e24921"
+  },
+  {
+    "Index": 6,
+    "Challenge": "Compute the first 6 nonzero terms of the Maclaurin series of $f(x) = F \\cdot \\left(\\sin(A \\cdot x) \\cdot \\cos\\left(\\frac{ B \\cdot \\pi }{ 4 }\\right) + \\cos(A \\cdot x) \\cdot \\sin\\left(\\frac{ B \\cdot \\pi }{ 4 }\\right)\\right)$",
+    "Answer in Latex": "\\frac{1}{120} A^5 F x^5 \\cos \\left(\\frac{\\pi  B}{4}\\right)+\\frac{1}{24} A^4 F x^4 \\sin \\left(\\frac{\\pi \n   B}{4}\\right)-\\frac{1}{6} A^3 F x^3 \\cos \\left(\\frac{\\pi  B}{4}\\right)-\\frac{1}{2} A^2 F x^2 \\sin \\left(\\frac{\\pi \n   B}{4}\\right)+A F x \\cos \\left(\\frac{\\pi  B}{4}\\right)+F \\sin \\left(\\frac{\\pi  B}{4}\\right)",
+    "Answer in Sympy": "F*(A**5*x**5*cos(B*pi/4) + 5*A**4*x**4*sin(B*pi/4) - 20*A**3*x**3*cos(B*pi/4) - 60*A**2*x**2*sin(B*pi/4) + 120*A*x*cos(B*pi/4) + 120*sin(B*pi/4))/120",
+    "Variation": "Symbolic",
+    "Source": "U-Math\nsequences_series\nf89bd354-18c9-4f31-b91f-cf6421e24921"
+  },
+  {
+    "Index": 7,
+    "Challenge": "Compute the first 4 nonzero terms of the Maclaurin series of $f(x) = e^x \\cdot \\cos(x)$",
+    "Answer in Latex": "1+x-\\frac{x^3}{3}-\\frac{x^4}{6}",
+    "Answer in Sympy": "-x**4/6 - x**3/3 + x + 1",
+    "Variation": "Original",
+    "Source": "U-Math\nsequences_series\nd1fe21df-ee7f-40c2-9655-6bd6a7a23ff1"
+  },
+  {
+    "Index": 8,
+    "Challenge": "Compute the terms up to order 4 (x^4) of the Maclaurin series of $f(x) = F \\cdot e^{A \\cdot x} \\cdot \\cos(B \\cdot x)$",
+    "Answer in Latex": "F x^3 \\left(\\frac{A^3}{6}-\\frac{A B^2}{2}\\right)+\\frac{1}{2} F x^2 \\left(A^2-B^2\\right)+F x^4 \\left(\\frac{A^4}{24}-\\frac{A^2\n   B^2}{4}+\\frac{B^4}{24}\\right)+A F x+F",
+    "Answer in Sympy": "F*(4*A*x**3*(A**2 - 3*B**2) + 24*A*x + x**4*(A**4 - 6*A**2*B**2 + B**4) + 12*x**2*(A**2 - B**2) + 24)/24",
+    "Variation": "Symbolic",
+    "Source": "U-Math\nsequences_series\nd1fe21df-ee7f-40c2-9655-6bd6a7a23ff1"
+  },
+  {
+    "Index": 9,
+    "Challenge": "Compute $\\lim_{x \\to 0}\\left(\\frac{ 2 \\cdot \\cos(x)+4 }{ 5 \\cdot x^3 \\cdot \\sin(x) }-\\frac{ 6 }{ 5 \\cdot x^4 }\\right)$",
+    "Answer in Latex": "\\frac{1}{150}",
+    "Answer in Sympy": "1/150",
+    "Variation": "Original",
+    "Source": "U-Math\nsequences_series\n068e40ce-9108-4ef8-8ee5-0d1471ebbe43"
+  },
+  {
+    "Index": 10,
+    "Challenge": "Compute $\\lim_{x \\to 0}\\frac{(2 \\cos (F x)+4) \\csc (F x)}{5 A F^3 x^3}-\\frac{6}{5 A F^4 x^4}$",
+    "Answer in Latex": "\\frac{1}{A 150}",
+    "Answer in Sympy": "1/(150*A)",
+    "Variation": "Symbolic",
+    "Source": "U-Math\nsequences_series\n068e40ce-9108-4ef8-8ee5-0d1471ebbe43"
+  },
+  {
+    "Index": 11,
+    "Challenge": "Evaluate $\\lim_{x \\to 0^{+}}\\left(\\left(\\frac{ \\tan\\left(\\frac{ x }{ 2 }\\right) }{ \\frac{ x }{ 2 } }\\right)^{\\frac{ 3 }{ x^2 }}\\right)$",
+    "Answer in Latex": "$e^{\\frac{1}{4}}$",
+    "Answer in Sympy": "exp(1/4)",
+    "Variation": "Original",
+    "Source": "U-Math\ndifferential_calc\n363dd580-f1fc-4867-a6ef-db2a03139745"
+  },
+  {
+    "Index": 12,
+    "Challenge": "\\lim_{x \\to 0^+} A \\cdot \\left( \\frac{ \\tan\\left( \\frac{B \\cdot x}{2} \\right) }{ \\frac{B \\cdot x}{2} } \\right)^{ \\frac{F \\cdot 3}{(B \\cdot x)^2} }",
+    "Answer in Latex": "$A /cdot e^{\\frac{F}{4}}$",
+    "Answer in Sympy": "A*e**(F/4)",
+    "Variation": "Symbolic",
+    "Source": "U-Math\ndifferential_calc\n363dd580-f1fc-4867-a6ef-db2a03139745"
+  },
+  {
+    "Index": 13,
+    "Challenge": "\\lim_{x \\to 5} \\left( \\frac{ 3 \\cdot x }{ x-5 }-\\frac{ 3 }{ \\ln\\left(\\frac{ x }{ 5 }\\right) } \\right)",
+    "Answer in Latex": "\\frac{3}{2}",
+    "Answer in Sympy": "3/2",
+    "Variation": "Original",
+    "Source": "U-Math\ndifferential_calc\n2d799998-115a-489b-a48b-57090954303e"
+  },
+  {
+    "Index": 14,
+    "Challenge": "\\lim_{x \\to A \\cdot 5} \\left( \\frac{ B \\cdot 3 \\cdot x }{ x - A \\cdot 5 }-\\frac{ B \\cdot 3 }{ \\ln\\left(\\frac{ x }{ A \\cdot 5 }\\right) } \\right)^{F}",
+    "Answer in Latex": "\\left( \\frac{3B}{2} \\right)^F",
+    "Answer in Sympy": "(3*B/2)**F",
+    "Variation": "Symbolic",
+    "Source": "U-Math\ndifferential_calc\n2d799998-115a-489b-a48b-57090954303e"
+  },
+  {
+    "Index": 15,
+    "Challenge": "\\lim_{x \\to \\infty} \\left(x - x^2 \\cdot \\ln\\left(1 + \\frac{ 1 }{ x }\\right)\\right)",
+    "Answer in Latex": "\\frac{1}{2}",
+    "Answer in Sympy": "1/2",
+    "Variation": "Original",
+    "Source": "U-Math\ndifferential_calc\nefdc4110-cf56-4f37-bf54-40fdd5d58145"
+  },
+  {
+    "Index": 16,
+    "Challenge": "\\lim_{x \\to \\infty} \\left(A \\cdot x - A \\cdot F \\cdot x^2 \\cdot \\ln\\left(1 + \\frac{ 1 }{ F \\cdot x }\\right)\\right)^B",
+    "Answer in Latex": "\\left(\\frac{A}{2 F}\\right)^{B}",
+    "Answer in Sympy": "(A/(2*F))**B",
+    "Variation": "Symbolic",
+    "Source": "U-Math\ndifferential_calc\nefdc4110-cf56-4f37-bf54-40fdd5d58145"
+  },
+  {
+    "Index": 17,
+    "Challenge": "\\lim_{x \\to 0^{+}} \\left( \\left( \\frac{ \\tan(2 \\cdot x) }{ 2 \\cdot x } \\right)^{\\frac{ 1 }{ 3 \\cdot x^2 }} \\right)",
+    "Answer in Latex": "e^{\\frac{4}{9}}",
+    "Answer in Sympy": "e**(4/9)",
+    "Variation": "Original",
+    "Source": "U-Math\ndifferential_calc\n99a2304d-5d8e-4245-90da-a80651ca15d8"
+  },
+  {
+    "Index": 18,
+    "Challenge": "\\lim_{x \\to 0^+} F \\cdot \\left( \\frac{\\tan(Ax)}{Ax} \\right)^{\\frac{D}{3Bx^2}}",
+    "Answer in Latex": "F e^{\\frac{A^{2} D}{9 B}}",
+    "Answer in Sympy": "F*e**((A**2*D)/((9*B)))",
+    "Variation": "Symbolic",
+    "Source": "U-Math\ndifferential_calc\n99a2304d-5d8e-4245-90da-a80651ca15d8"
+  },
+  {
+    "Index": 19,
+    "Challenge": "\\lim_{x \\to 0}\\left( \\left| \\frac{ -\\sin(x) }{ x } \\right| \\right)^{\\frac{ 1 }{ 4 \\cdot x^2 }}",
+    "Answer in Latex": "e^{\\frac{-1}{24}}",
+    "Answer in Sympy": "e**(-1/24)",
+    "Variation": "Original",
+    "Source": "U-Math\ndifferential_calc\n84c6a419-c103-41d5-aad5-dd8e690c6e88"
+  },
+  {
+    "Index": 20,
+    "Challenge": "\\lim_{x \\to 0} \\left| F \\cdot \\left( \\frac{-\\sin(Ax)}{Ax} \\right)^{\\frac{1}{4Bx^2}} \\right|",
+    "Answer in Latex": "\\left( e^{-\\frac{A^2}{6B}} \\right)^{\\frac{1}{4}} \\left| F \\right|",
+    "Answer in Sympy": "(exp(-A**2 / (6 * B)))**Rational(1, 4) * Abs(F)",
+    "Variation": "Symbolic",
+    "Source": "U-Math\ndifferential_calc\n84c6a419-c103-41d5-aad5-dd8e690c6e88"
+  },
+  {
+    "Index": 21,
+    "Challenge": "\\int \\sin(x)^4 \\cdot \\cos(x)^6 dx",
+    "Answer in Latex": "$C+\\frac{1}{320}\\cdot\\left(\\sin(2\\cdot x)\\right)^5+\\frac{1}{128}\\cdot\\left(\\frac{3\\cdot x}{2}-\\frac{\\sin(4\\cdot x)}{2}+\\frac{\\sin(8\\cdot x)}{16}\\right)$",
+    "Answer in Sympy": "C + 3*x/256 + sin(2*x)**5/320 - sin(4*x)/256 + sin(8*x)/2048",
+    "Variation": "Original",
+    "Source": "U-Math\nintegral_calc\n0c0ba3db-1470-4c36-975c-91ff5f51986f"
+  },
+  {
+    "Index": 22,
+    "Challenge": "\\int A + B \\cdot \\sin(F \\cdot x)^4 \\cdot \\cos(F \\cdot x)^6 dx",
+    "Answer in Latex": "\\frac{\\frac{B \\sin{\\left(2 F x \\right)}}{512} - \\frac{B \\sin{\\left(4 F x \\right)}}{256} - \\frac{B \\sin{\\left(6 F x \\right)}}{1024} + \\frac{B \\sin{\\left(8 F x \\right)}}{2048} + \\frac{B \\sin{\\left(10 F x \\right)}}{5120} + \\frac{F x \\left(256 A + 3 B\\right)}{256}}{F}",
+    "Answer in Sympy": "A*x + (3*B*x)/256 + (B*sin(2*F*x))/(512*F) - (B*sin(4*F*x))/(256*F) - (B*sin(6*F*x))/(1024*F) + (B*sin(8*F*x))/(2048*F) + (B*sin(10*F*x))/(5120*F)",
+    "Variation": "Symbolic",
+    "Source": "U-Math\nintegral_calc\n0c0ba3db-1470-4c36-975c-91ff5f51986f"
+  }
 ]
