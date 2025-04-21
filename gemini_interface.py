@@ -3,7 +3,13 @@ from google.genai import types
 import os
 from llm_interface import GenericLLMInterface, USE_CODE_PREFIX, NO_CODE_PREFIX
 
-
+CODE_RUNNING_MODELS = [
+    'gemini-2.0-flash',
+    # 2.0 flash light does not support code execution
+    'gemini-2.5-flash-preview-04-17',
+    'gemini-2.5-pro-preview-03-25',
+    # gemma-3-27b-it does not support code execution
+]
 class GeminiInterface(GenericLLMInterface):
     """
     A class to interact specifically with Google Gemini models using the native API.
@@ -19,7 +25,7 @@ class GeminiInterface(GenericLLMInterface):
     def send_message(self, message, code_execution=False):
         message = self._incentivize_code_execution(message, use_code=code_execution)
         tools = []
-        if code_execution:
+        if code_execution and self.model in CODE_RUNNING_MODELS:
             tools.append(
                 types.Tool(code_execution=types.ToolCodeExecution)
             )
