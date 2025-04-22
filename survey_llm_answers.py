@@ -69,7 +69,7 @@ def extract_latex_answer(textual_answer):
     latex_answer = latex_answer.replace(r'\displaystyle', '')
     latex_answer = latex_answer.replace(r'\dots', '')
     if latex_answer.startswith(r'\boxed{'):
-        latex_answer = latex_answer[8:-1].strip()
+        latex_answer = latex_answer[7:-1].strip()
     
     return latex_answer
 
@@ -99,15 +99,20 @@ def ask_model(model, question_text, code_execution):
         latex_answer = extract_latex_answer(textual_answer)
         result['final_answer_latex'] = latex_answer
         
+        # not doing this for now - it is not working well and might 
+        # crash the pickling later. Just use the latex answer as is.
+        # result['sp_deter'] = None
+        # result['sp_llm'] = None
         # convert the latex answer to a sympy expression
-        result['sp_deter'] = math_parsers.latex_to_sympy_deter(latex_answer)
+        # result['sp_deter'] = math_parsers.latex_to_sympy_deter(latex_answer)
         # result['sp_llm'] = math_parsers.latex_to_sympy_llm(latex_answer)
-        result['sp_llm'] = None
+        
     except Exception as e:
         print(f"Error processing the answer: {e}")
         print(f"Textual answer: {textual_answer}")
-        result['sp_deter'] = None if 'sp_deter' not in result else result['sp_deter']
-        result['sp_llm'] = None if 'sp_llm' not in result else result['sp_llm']
+        result['final_answer_latex'] = None
+        # result['sp_deter'] = None if 'sp_deter' not in result else result['sp_deter']
+        # result['sp_llm'] = None if 'sp_llm' not in result else result['sp_llm']
     
     return result
 
@@ -152,6 +157,10 @@ def main():
             'results.xlsx', 
             index=False, 
             sheet_name='results'
+        )
+        df.to_pickle(
+            'results.pkl', 
+            index=False, 
         )
 
 
