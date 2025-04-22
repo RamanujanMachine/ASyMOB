@@ -9,6 +9,7 @@ F = sp.symbols('F')
 
 x = sp.symbols('x')
 n = sp.symbols('n')
+m = sp.symbols('m')
 k = sp.symbols('k')
 
 var_mapping = {
@@ -20,7 +21,8 @@ var_mapping = {
     'F': F,
     'x': x,
     'k': k,
-    'n': n
+    'n': n,
+    'm': m
 }
 
 used_vars = list(var_mapping.keys())
