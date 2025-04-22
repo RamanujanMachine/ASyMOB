@@ -39,7 +39,15 @@ def latex_to_sympy_deter(latex_str):
     """
     Convert a LaTeX string to a sympy expression, using the sympy parser.
     """
-    return remove_equality(fix_expr(parse_latex(latex_str)))
+    if pd.isna(latex_str):
+        return pd.NA
+    try:
+        return remove_equality(fix_expr(parse_latex(latex_str)))
+    except Exception as e:
+        print('Error parsing latex string:')
+        print(latex_str)
+        print(e)
+        return pd.NA
 
 
 def latex_to_sympy_llm(latex_str):
