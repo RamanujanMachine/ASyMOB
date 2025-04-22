@@ -49,6 +49,10 @@ def main():
         index=False, 
         sheet_name='results'
     )
+    df.to_pickle(
+        'results.pkl', 
+    )
+
 
 if __name__ == '__main__':
     main()
