@@ -16,8 +16,9 @@ QUESTIONS_PATH = 'questions.json'
 SYMPY_CONVERTER = OpenAIInterface("gpt-4o")
 MATH_INSTRUCTIONS = (
     'Finish your answer by writing "The final answer is:" and then the '
-    'answer in latex in a new line. use $$ to wrap over the latex text. '
-    'Do not write anything after the latex answer.\n'
+    'answer in latex in a new line. Write the answer as a single expression. '
+    'Do not split your answer to different terms. Use $$ to wrap over the '
+    'latex text. Do not write anything after the latex answer.\n'
 )
 C = sp.symbols('C')
 
@@ -42,18 +43,35 @@ def extract_latex_answer(textual_answer):
     Extract the latex answer from the textual answer.
     """
     # Find the last occurrence of "The final answer is:"
-    match = re.search(
-        r'[Tt]he final answer is:\s*\$\$(.*)\$\$', 
+    # Then use different parentheses to options to wrap the answer.
+    # The reges will not consume the parentheses, but will consume the text 
+    # inside.
+    matches = re.findall(
+        r'[Tt]he final answer is:?\s*'
+        r'(?:(?:\\\()|(?:\\\[)|(?:\$\$))'
+        r'(.*?)'
+        r'(?:(?:\\\))|(?:\\\])|(?:\$\$))',
         textual_answer, 
         re.DOTALL)
-    if match:
-        latex_answer = match.group(1).strip()
-        # clean up the latex answer
-        latex_answer = latex_answer.replace(r'\displaystyle', '')
-        latex_answer = latex_answer.replace(r'\dots', '')
-        return latex_answer
-    else:
+    if not matches:
+        # escalate - just look for the last boxed{.*}
+        matches = re.findall(
+            r'\\boxed\{(.*?)\}' + '(?:\n|$)',
+            textual_answer, 
+            re.DOTALL)
+    
+    if not matches:
         raise ValueError("No latex answer found in the textual answer.")
+    
+    latex_answer = matches[-1].strip()
+
+    # clean up the latex answer
+    latex_answer = latex_answer.replace(r'\displaystyle', '')
+    latex_answer = latex_answer.replace(r'\dots', '')
+    if latex_answer.startswith(r'\boxed{'):
+        latex_answer = latex_answer[8:-1].strip()
+    
+    return latex_answer
 
 
 def ask_model(model, question_text, code_execution):
