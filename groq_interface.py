@@ -14,7 +14,7 @@ class GroqInterface(GenericLLMInterface):
         self.client = Groq(api_key=self.api_key)
 
     def send_message(self, message, code_execution=False, 
-                     max_completion_tokens=50_000):
+                     max_completion_tokens=100_000):
         message = self._incentivize_code_execution(
             message, use_code=code_execution)
         print(f"Sending message to Groq model: {self.model}")
