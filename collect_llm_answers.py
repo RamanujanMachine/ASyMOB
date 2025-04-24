@@ -32,8 +32,10 @@ def load_questions(path=QUESTIONS_PATH):
         q_id = question['Index']
         question_text = question['Challenge']
         sympy_str_answer = question['Answer in Sympy']
-
-        true_answer = math_parsers.parse_sympy_str(sympy_str_answer)
+        try:
+            true_answer = math_parsers.parse_sympy_str(sympy_str_answer)
+        except Exception as e:
+            print(f"Error parsing sympy string: {sympy_str_answer}")
         parsed_questions.append((q_id, question_text, true_answer))
     return parsed_questions
     
@@ -48,9 +50,9 @@ def extract_latex_answer(textual_answer):
     # inside.
     matches = re.findall(
         r'[Tt]he final answer is:?\s*'
-        r'(?:(?:\\\()|(?:\\\[)|(?:\$\$))'
+        r'(?:(?:\\\()|(?:\\\[)|(?:\$+))'
         r'(.*?)'
-        r'(?:(?:\\\))|(?:\\\])|(?:\$\$))',
+        r'(?:(?:\\\))|(?:\\\])|(?:\$+))',
         textual_answer, 
         re.DOTALL)
     if not matches:

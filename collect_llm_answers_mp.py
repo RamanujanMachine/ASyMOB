@@ -1,7 +1,7 @@
 from models import MODELS
 import multiprocessing as mp
 import pandas as pd
-from survey_llm_answers import load_questions, ask_model
+from collect_llm_answers import load_questions, ask_model
 
 def llm_survey_wrapper(q_id, question_text, true_answer, model_name, code_execution):
     """
