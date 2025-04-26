@@ -6,6 +6,10 @@ C = sp.symbols('C')
 D = sp.symbols('D')
 E = sp.symbols('E')
 F = sp.symbols('F')
+G = sp.symbols('G')
+H = sp.symbols('H')
+J = sp.symbols('J')
+K = sp.symbols('K')
 
 x = sp.symbols('x')
 n = sp.symbols('n')
@@ -19,6 +23,7 @@ var_mapping = {
     'D': D,
     'E': E,
     'F': F,
+    'G': G,
     'x': x,
     'k': k,
     'n': n,

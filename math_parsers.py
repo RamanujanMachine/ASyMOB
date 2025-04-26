@@ -1,3 +1,4 @@
+import re
 from sp_vars import *
 import sympy as sp
 import pandas as pd
@@ -23,13 +24,13 @@ def parse_sympy_str(expr_str):
     try:
         if pd.isna(expr_str):
             return None
-        return remove_equality(sp.parse_expr(
+        return remove_equality(fix_expr(sp.parse_expr(
             expr_str, 
             local_dict=var_mapping, 
             transformations=(
                 standard_transformations + (implicit_multiplication_application,)
             )
-        ))
+        )))
     except Exception as e:
         print(expr_str)
         raise e
@@ -42,6 +43,30 @@ def latex_to_sympy_deter(latex_str):
     if pd.isna(latex_str):
         return pd.NA
     try:
+        latex_str = re.sub(
+            r'\\(?:left|big|Big|Biggl|Bigl)' # Non-consuming left indicator
+            r'[\[\(\|\{]', 
+            lambda match: match.group(0)[-1], 
+            latex_str)
+        latex_str = re.sub(
+            r'\\(?:right|big|Big|Biggr|Bigr)'
+            r'[\]\)\|\}]', 
+            lambda match: match.group(0)[-1], 
+            latex_str)
+        
+        # Fix the latex string to be compatible with sympy
+        latex_str = re.sub(
+            r'(?<!\\)atan',
+            '\\atan',
+            latex_str)
+        
+        # Fix the latex string to be compatible with sympy
+        latex_str = re.sub(
+            r'(\\operatorname{.*?})',
+            lambda match: '\\' + match.group(0)[:-1].split('{')[1],
+            latex_str)
+        
+
         return remove_equality(fix_expr(parse_latex(latex_str)))
     except Exception as e:
         print('Error parsing latex string:')

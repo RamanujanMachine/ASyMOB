@@ -1,0 +1,254 @@
+import pandas as pd
+import numpy as np
+import sympy as sp
+import math_parsers
+from sp_vars import *
+from collect_llm_answers import extract_latex_answer
+import multiprocessing as mp
+
+
+RESULTS_FILE = 'results_mp - 122 questions.xlsx'
+OUTPUT_FILE = 'checked_results.xlsx'
+DISCARDED_FILE = 'discarded.xlsx'
+
+
+# TODO - generate automatically.
+NORMAL_DIST_GENERATOR = lambda: 100 * np.random.randn()
+VAR_SUBSTITUTIONS = {
+    A: lambda: np.random.randint(1, 10),
+    B: lambda: np.random.randint(1, 10),
+    D: lambda: np.random.randint(1, 10),
+    E: lambda: np.random.randint(1, 10),
+    F: lambda: np.random.randint(1, 10),
+    G: lambda: np.random.randint(1, 10),
+    H: lambda: np.random.randint(1, 10),
+    J: lambda: np.random.randint(1, 10),
+    K: lambda: np.random.randint(1, 10),
+    x: lambda: np.random.randn()*10,
+    sp.var('e'): lambda: sp.exp(1), # e is not a variable, but a constant
+    sp.var('pi'): lambda: sp.pi, # pi is not a variable, but a constant
+
+    C: lambda: 0, # C is the integration constant, so we can set it to 0
+}
+UPPER_LIMIT_FINITE = 10
+DEBUG = False
+
+
+def compare_numeric(expr_a, expr_b, n_attempts=5, allowed_diff=1e-5, 
+                         strict=True, debug=DEBUG):
+    def replace_infinite_sums(expr, new_upper=UPPER_LIMIT_FINITE):
+        """
+        Recursively replaces all infinite sums (Sum objects with upper limit of oo)
+        with versions using `new_upper` as the upper limit.
+        """
+        replacements = {}
+
+        for s in expr.atoms(sp.Sum):
+            new_limits = []
+            changed = False
+            for lim in s.limits:
+                var, lower, upper = lim
+                if upper == sp.oo:
+                    new_limits.append((var, lower, new_upper))
+                    changed = True
+                else:
+                    new_limits.append(lim)
+            if changed:
+                replacements[s] = sp.Sum(s.function, *new_limits)
+
+        return expr.xreplace(replacements)
+
+
+    free_symbols = expr_a.free_symbols.union(expr_b.free_symbols)
+
+    expr_a = expr_a.removeO()
+    if expr_a.has(sp.Sum):
+        expr_a = replace_infinite_sums(expr_a)
+
+    expr_b = expr_b.removeO()
+    if expr_b.has(sp.Sum):
+        expr_b = replace_infinite_sums(expr_b)
+
+    if expr_a.has(sp.Integral) != expr_b.has(sp.Integral):
+        # If the model answer has an integral, but the true answer does not,
+        # we can assume that the model is wrong.
+        return False
+    
+    if DEBUG:
+        print('expr_a: ', expr_a)
+        print('expr_b: ', expr_b)
+
+    diffs = []
+    for _ in range(n_attempts):
+        subs = {}
+        for symb in free_symbols:
+            subs[symb] = VAR_SUBSTITUTIONS[symb]()
+
+        numer_val_a = expr_a.subs(subs).doit()
+        numer_val_b = expr_b.subs(subs).doit()
+        diffs.append(abs(complex(
+            (numer_val_a - numer_val_b) / 
+            (numer_val_a + numer_val_b)
+        )))
+
+        if DEBUG:
+            print('subs: ', subs)
+            print('diff: ', diffs[-1])
+        
+    try:
+        if strict:
+            if any([diff == sp.nan for diff in diffs]):
+                return False
+            return all([diff < allowed_diff for diff in diffs])
+        # Currently will fail
+        return pd.NA
+        return (max(diffs) - min(diffs)) < allowed_diff
+    except Exception as e:
+        print(e)
+        print(expr_a, expr_b)
+        return pd.NA
+
+
+def clean_df(df, save_discarded=False):
+    df.true_answer = df.true_answer.map(math_parsers.parse_sympy_str)
+    df['model_answer'] = df.final_answer_latex.map(
+        math_parsers.latex_to_sympy_deter)
+
+    # Filter out invalid answers
+    n_entries = len(df)
+    print(f'Total number of entries: {n_entries}')
+
+    succ_latex = df[~df.final_answer_latex.isna()]
+    n_succ_latex = len(succ_latex)
+    print(f'Successfully extracted latex: {n_succ_latex}.'
+          f'Drop of {n_entries-n_succ_latex}')
+
+    succ_sp = succ_latex[~succ_latex.model_answer.isna()]
+    n_succ_sp = len(succ_sp)
+    print(f'Successfully extracted sympy: {n_succ_sp}.'
+          f'Drop of {n_succ_latex-n_succ_sp}')
+    
+    # Funny edge case - sometimes the model spits a wrong, numeric answer
+    # like 1=0, which is translated to `False` in sympy. This later breaks the
+    # comparison with the true answer. Discard these cases.
+    clean_df = succ_sp[
+        ~((succ_sp.model_answer != 0) & (succ_sp.model_answer == False))]
+    
+    if save_discarded:
+        invalid_latex = df[df.final_answer_latex.isna()]
+        invalid_sp = succ_latex[succ_latex.model_answer.isna()]
+        invalid_sp_bool = df[
+           (df.model_answer != 0) & (df.model_answer == False)]
+        
+        invalid_latex['discard_reason'] = 'Invalid latex'
+        invalid_sp['discard_reason'] = 'Invalid sympy'
+        invalid_sp_bool['discard_reason'] = 'Invalid sympy boolean'
+
+        discarded = pd.concat([invalid_latex, invalid_sp, invalid_sp_bool])
+        discarded.to_excel(DISCARDED_FILE, index=False)
+        print(f'Discarded {len(discarded)} entries.')
+    
+    return clean_df
+
+
+def check_symbolic_comparison(df, print_debug=False):
+    def safe_simplify(expr):
+        # was tested on ~ 2K expressions, and and its slower by 0.5% from 
+        # the original one. So we can keep it.
+        try:
+            return sp.simplify(expr)
+        except Exception:
+            return pd.NA
+    
+    symb_equal = []
+    for i, row in df.iterrows():
+        true_answer = row.true_answer
+        model_answer = row.model_answer
+        if not true_answer.has(sp.Integral) and model_answer.has(sp.Integral):
+            # If the model answer has an integral, but the true answer does not,
+            # we can assume that the model is wrong.
+            symb_equal.append(False)
+            continue
+
+        raw_diff = (true_answer.removeO() - model_answer.removeO())
+        raw_diff = raw_diff.subs(
+            {sp.var('pi'): sp.pi, sp.var('e'): sp.exp(1)}
+        )
+        try:
+            diff = raw_diff.simplify()
+        except Exception:
+            symb_equal.append(pd.NA)
+            continue
+        
+        symb_equal.append(
+            (diff == 0) or (diff == C) or (diff == -C)
+        )
+        if print_debug and i % 10 == 0:
+            print(i)
+    return pd.Series(symb_equal, index=df.index)
+
+
+def check_answer_numeric(df, print_debug=False):
+    numer_correct = []
+    errors = []
+    for i, row in df.iterrows():
+        try:
+            numer_correct.append(
+                compare_numeric(row.true_answer, row.model_answer))
+        except Exception as e:
+            print(f'Error on row {i}:', e)
+            print(row)
+            errors.append(row)
+            numer_correct.append(pd.NA)
+    return pd.Series(numer_correct, index=df.index)
+
+
+#def check_answers(results_file, start_idx, output_file):
+def check_answers(df, output_file):
+    print(output_file)
+    try:
+        df['model_answer'] = df.final_answer_latex.map(
+            math_parsers.latex_to_sympy_deter)
+        # df = pd.read_excel(results_file, sheet_name='results')
+        # df = clean_df(df, save_discarded=True)
+
+        # df = df.iloc[start_idx:start_idx+200]
+
+        df['symbolic_comparison'] = check_symbolic_comparison(df)
+        df['numeric_comparison'] = check_answer_numeric(df)
+
+        df.to_excel(output_file)
+    except Exception as e:
+        print(f'Error processing file {output_file} :', e)
+        df = pd.DataFrame(columns=['question_id', 'model', 'true_answer', 
+                                   'model_answer', 'final_answer_latex'])
+        df['error'] = str(e)
+        df.to_excel(output_file, index=False)
+        raise e
+        return df
+    return df
+
+
+def main():
+    df = pd.read_excel(RESULTS_FILE, sheet_name='results')
+    df = clean_df(df, save_discarded=True)
+
+    pickleable_df = df[
+        ['full_answer', 'final_answer_latex', 'question_id', 'model',
+       'true_answer', 'question_text', 'code_execution']]
+    args = []
+    for i in range(0, len(df), 200):
+        args.append((pickleable_df.iloc[i:i+200].copy(), 
+                     f'checked_{i}-{i+200-1}.xlsx'))
+        # args.append((RESULTS_FILE, i, f'checked_{i}-{i+200-1}.xlsx'))
+
+    with mp.Pool(processes=10) as pool:
+        # Map the function to the pool
+        results = pool.starmap(check_answers, args)
+
+    # Combine the results into a single DataFrame
+    combined_df = pd.concat(results, ignore_index=True)
+    combined_df.to_excel(OUTPUT_FILE, index=False)
+
+if __name__ == '__main__':
+    main()
