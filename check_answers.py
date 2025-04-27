@@ -1,19 +1,21 @@
 import pandas as pd
 import numpy as np
 import sympy as sp
+import json
 import math_parsers
 from sp_vars import *
 from collect_llm_answers import extract_latex_answer
 import multiprocessing as mp
+from pathlib import Path
 
 
 RESULTS_FILE = 'results_mp - 122 questions.xlsx'
 OUTPUT_FILE = 'checked_results.xlsx'
 DISCARDED_FILE = 'discarded.xlsx'
-
+OUTPUT_FOLDER = Path('checked_results_chunks')
+NUMER_SUBS_FILE = 'numerical_subs.json'
 
 # TODO - generate automatically.
-NORMAL_DIST_GENERATOR = lambda: 100 * np.random.randn()
 VAR_SUBSTITUTIONS = {
     A: lambda: np.random.randint(1, 10),
     B: lambda: np.random.randint(1, 10),
@@ -25,73 +27,82 @@ VAR_SUBSTITUTIONS = {
     J: lambda: np.random.randint(1, 10),
     K: lambda: np.random.randint(1, 10),
     x: lambda: np.random.randn()*10,
-    sp.var('e'): lambda: sp.exp(1), # e is not a variable, but a constant
-    sp.var('pi'): lambda: sp.pi, # pi is not a variable, but a constant
+    # sp.var('e'): lambda: sp.exp(1), # e is not a variable, but a constant
+    # sp.var('pi'): lambda: sp.pi, # pi is not a variable, but a constant
 
     C: lambda: 0, # C is the integration constant, so we can set it to 0
 }
 UPPER_LIMIT_FINITE = 10
+CHUNK_SIZE = 100
 DEBUG = False
 
 
-def compare_numeric(expr_a, expr_b, n_attempts=5, allowed_diff=1e-5, 
-                         strict=True, debug=DEBUG):
-    def replace_infinite_sums(expr, new_upper=UPPER_LIMIT_FINITE):
-        """
-        Recursively replaces all infinite sums (Sum objects with upper limit of oo)
-        with versions using `new_upper` as the upper limit.
-        """
-        replacements = {}
+def replace_infinite_sums(expr, new_upper=UPPER_LIMIT_FINITE):
+    """
+    Recursively replaces all infinite sums (Sum objects with upper limit of oo)
+    with versions using `new_upper` as the upper limit.
+    """
+    replacements = {}
 
-        for s in expr.atoms(sp.Sum):
-            new_limits = []
-            changed = False
-            for lim in s.limits:
-                var, lower, upper = lim
-                if upper == sp.oo:
-                    new_limits.append((var, lower, new_upper))
-                    changed = True
-                else:
-                    new_limits.append(lim)
-            if changed:
-                replacements[s] = sp.Sum(s.function, *new_limits)
+    for s in expr.atoms(sp.Sum):
+        new_limits = []
+        changed = False
+        for lim in s.limits:
+            var, lower, upper = lim
+            if upper == sp.oo:
+                new_limits.append((var, lower, new_upper))
+                changed = True
+            else:
+                new_limits.append(lim)
+        if changed:
+            replacements[s] = sp.Sum(s.function, *new_limits)
 
-        return expr.xreplace(replacements)
+    return expr.xreplace(replacements)
 
 
-    free_symbols = expr_a.free_symbols.union(expr_b.free_symbols)
+def compare_numeric(true_answer, model_answer, subs_vals, allowed_diff=1e-5, 
+                    strict=True, debug=DEBUG):
+    model_answer = model_answer.removeO()
+    if model_answer.has(sp.Sum):
+        model_answer = replace_infinite_sums(model_answer)
 
-    expr_a = expr_a.removeO()
-    if expr_a.has(sp.Sum):
-        expr_a = replace_infinite_sums(expr_a)
-
-    expr_b = expr_b.removeO()
-    if expr_b.has(sp.Sum):
-        expr_b = replace_infinite_sums(expr_b)
-
-    if expr_a.has(sp.Integral) != expr_b.has(sp.Integral):
+    if true_answer.has(sp.Integral) != model_answer.has(sp.Integral):
         # If the model answer has an integral, but the true answer does not,
         # we can assume that the model is wrong.
         return False
     
-    if DEBUG:
-        print('expr_a: ', expr_a)
-        print('expr_b: ', expr_b)
+    if debug:
+        print('true_answer: ', true_answer)
+        print('model_answer: ', model_answer)
+        print('subs_vals:', subs_vals)
 
     diffs = []
-    for _ in range(n_attempts):
-        subs = {}
-        for symb in free_symbols:
-            subs[symb] = VAR_SUBSTITUTIONS[symb]()
+    for subs, true_answer_numer in subs_vals:
+        if C in model_answer.free_symbols:
+            subs[C] = 0
+        model_answer_numer = model_answer.subs(subs).doit()
+        
+        try:
+            model_answer_numer = float(model_answer_numer.evalf())
+        except Exception as e:
+            # Couldn't cast to float -> invalid answer
+            return False
+        
+        if true_answer_numer == 0 and model_answer_numer == 0:
+            diffs.append(0)
+            continue
+        
+        try:
+            diffs.append(abs(
+                (true_answer_numer - model_answer_numer) / 
+                (true_answer_numer + model_answer_numer)
+            ))
+        except ZeroDivisionError:
+            # If the sum is 0, but the terms themselves are not, we can
+            # assume that the model is wrong by a sign
+            return False
 
-        numer_val_a = expr_a.subs(subs).doit()
-        numer_val_b = expr_b.subs(subs).doit()
-        diffs.append(abs(complex(
-            (numer_val_a - numer_val_b) / 
-            (numer_val_a + numer_val_b)
-        )))
-
-        if DEBUG:
+        if debug:
             print('subs: ', subs)
             print('diff: ', diffs[-1])
         
@@ -111,8 +122,10 @@ def compare_numeric(expr_a, expr_b, n_attempts=5, allowed_diff=1e-5,
 
 def clean_df(df, save_discarded=False):
     df.true_answer = df.true_answer.map(math_parsers.parse_sympy_str)
-    df['model_answer'] = df.final_answer_latex.map(
-        math_parsers.latex_to_sympy_deter)
+    model_answer = df.final_answer_latex.map(
+        math_parsers.latex_to_sympy)
+    df['model_answer'] = model_answer.apply(lambda x: x[0])
+    df['model_answer_type'] = model_answer.apply(lambda x: x[1])
 
     # Filter out invalid answers
     n_entries = len(df)
@@ -175,7 +188,7 @@ def check_symbolic_comparison(df, print_debug=False):
             {sp.var('pi'): sp.pi, sp.var('e'): sp.exp(1)}
         )
         try:
-            diff = raw_diff.simplify()
+            diff = sp.powsimp(raw_diff.simplify(), force=True)
         except Exception:
             symb_equal.append(pd.NA)
             continue
@@ -189,12 +202,18 @@ def check_symbolic_comparison(df, print_debug=False):
 
 
 def check_answer_numeric(df, print_debug=False):
+    with open(NUMER_SUBS_FILE, 'r') as f:
+        numer_subs = json.load(f)
     numer_correct = []
     errors = []
     for i, row in df.iterrows():
         try:
             numer_correct.append(
-                compare_numeric(row.true_answer, row.model_answer))
+                compare_numeric(
+                    row.true_answer, 
+                    row.model_answer, 
+                    numer_subs[str(row.question_id)]
+                ))
         except Exception as e:
             print(f'Error on row {i}:', e)
             print(row)
@@ -206,9 +225,8 @@ def check_answer_numeric(df, print_debug=False):
 #def check_answers(results_file, start_idx, output_file):
 def check_answers(df, output_file):
     print(output_file)
+    df = clean_df(df, save_discarded=True)
     try:
-        df['model_answer'] = df.final_answer_latex.map(
-            math_parsers.latex_to_sympy_deter)
         # df = pd.read_excel(results_file, sheet_name='results')
         # df = clean_df(df, save_discarded=True)
 
@@ -217,29 +235,26 @@ def check_answers(df, output_file):
         df['symbolic_comparison'] = check_symbolic_comparison(df)
         df['numeric_comparison'] = check_answer_numeric(df)
 
-        df.to_excel(output_file)
+        # Convert sympys to strings for pickling on process exit
+        df['model_answer'] = df.model_answer.astype('str')
+        df.to_excel(OUTPUT_FOLDER / output_file)
     except Exception as e:
         print(f'Error processing file {output_file} :', e)
         df = pd.DataFrame(columns=['question_id', 'model', 'true_answer', 
                                    'model_answer', 'final_answer_latex'])
         df['error'] = str(e)
         df.to_excel(output_file, index=False)
-        raise e
-        return df
     return df
 
 
 def main():
     df = pd.read_excel(RESULTS_FILE, sheet_name='results')
-    df = clean_df(df, save_discarded=True)
+    # df = clean_df(df, save_discarded=True)
 
-    pickleable_df = df[
-        ['full_answer', 'final_answer_latex', 'question_id', 'model',
-       'true_answer', 'question_text', 'code_execution']]
     args = []
-    for i in range(0, len(df), 200):
-        args.append((pickleable_df.iloc[i:i+200].copy(), 
-                     f'checked_{i}-{i+200-1}.xlsx'))
+    for i in range(0, len(df), CHUNK_SIZE):
+        args.append((df.iloc[i:i+CHUNK_SIZE].copy(), 
+                     f'checked_{i}-{i+CHUNK_SIZE-1}.xlsx'))
         # args.append((RESULTS_FILE, i, f'checked_{i}-{i+200-1}.xlsx'))
 
     with mp.Pool(processes=10) as pool:

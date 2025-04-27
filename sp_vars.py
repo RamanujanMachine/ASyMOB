@@ -16,6 +16,10 @@ n = sp.symbols('n')
 m = sp.symbols('m')
 k = sp.symbols('k')
 
+# This is a constant, not a variable. It is used since sympy identifies 
+# it as `E`, which causes ambiguity in the code.
+e = sp.var('e')
+
 var_mapping = {
     'A': A,
     'B': B,
@@ -24,9 +28,13 @@ var_mapping = {
     'E': E,
     'F': F,
     'G': G,
+    'H': H,
+    'J': J,
+    'K': K,
     'x': x,
     'k': k,
     'n': n,
+    'e': e,
     'm': m
 }
 
