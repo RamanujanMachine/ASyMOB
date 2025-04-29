@@ -47,3 +47,6 @@ class GroqInterface(GenericLLMInterface):
             response += chunk.choices[0].delta.content
 
         return response
+    
+    def support_code(self):
+        return False

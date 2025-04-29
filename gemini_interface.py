@@ -71,3 +71,6 @@ class GeminiInterface(GenericLLMInterface):
                     raise ValueError("Code execution is not enabled.")
                 # print(chunk.candidates[0].content.parts[0].code_execution_result)
         return response
+
+    def support_code(self):
+        return True

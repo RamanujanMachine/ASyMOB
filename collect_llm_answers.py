@@ -10,7 +10,7 @@ from sp_vars import *
 import re
 
 
-QUESTIONS_PATH = 'questions.json'
+QUESTIONS_PATH = 'questions-183.json'
 # SYMPY_CONVERTER_MODEL = 'openai/gpt-4o'# 'gemini/gemini-2.5-pro-exp-03-25'
 # SYMPY_CONVERTER = GeminiInterface("gemini-2.5-pro-exp-03-25") # ge(SYMPY_CONVERTER_MODEL)
 SYMPY_CONVERTER = OpenAIInterface("gpt-4o")
@@ -139,8 +139,8 @@ def main():
         for model_name, model in MODELS.items():
             print(f"Model: {model_name}, Question: {question_text}")
 
-            for code_execution in [True, False]:
-                print(f"Code execution: {code_execution}")
+            if not model.support_code():
+                # Check if the model supports code execution
                 results.append(
                     {
                         'question_id': q_id,
@@ -151,8 +151,23 @@ def main():
                         **ask_model(
                             model, 
                             question_text, 
-                            code_execution=code_execution)
+                            code_execution=None)
                     })
+            else: 
+                for code_execution in [True, False]:
+                    print(f"Code execution: {code_execution}")
+                    results.append(
+                        {
+                            'question_id': q_id,
+                            'model': model_name,
+                            'question_text': question_text,
+                            'code_execution': code_execution,
+                            'true_answer': true_answer,
+                            **ask_model(
+                                model, 
+                                question_text, 
+                                code_execution=code_execution)
+                        })
 
         df = pd.DataFrame.from_records(results)
         df.to_excel(

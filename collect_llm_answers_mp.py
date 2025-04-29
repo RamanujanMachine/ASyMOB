@@ -2,6 +2,7 @@ from models import MODELS
 import multiprocessing as mp
 import pandas as pd
 from collect_llm_answers import load_questions, ask_model
+import time
 
 def llm_survey_wrapper(q_id, question_text, true_answer, model_name, code_execution):
     """
@@ -30,13 +31,18 @@ def main():
     questions = load_questions()
     args = []
     for q_id, question_text, true_answer in questions:
-        for model_name in MODELS.keys():
-            for code_execution in [True, False]:
+        for model_name, model in MODELS.items():
+            if not model.support_code():
                 args.append((q_id, question_text, true_answer, model_name, 
-                             code_execution))
+                             None))
+            else:
+                for code_execution in [True, False]:
+                    args.append((q_id, question_text, true_answer, model_name, 
+                                code_execution))
 
     print(f"Number of tasks: {len(args)}")
 
+    start = time.time()
     # Create a pool of workers
     with mp.Pool(processes=10) as pool:
         # Map the function to the pool
@@ -49,6 +55,7 @@ def main():
         index=False, 
         sheet_name='results'
     )
+    print(f'that took {time.time() - start}')
     df.to_pickle(
         'results.pkl', 
     )

@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 from litellm import completion
 import json
 
@@ -69,3 +70,7 @@ class GenericLLMInterface:
             api_key=self.api_key, 
             messages=messages)
         return response.choices[0].message.content
+
+    @abstractmethod
+    def support_code(self):
+        pass

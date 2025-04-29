@@ -31,3 +31,6 @@ class OpenAIInterface(GenericLLMInterface):
         )
 
         return response.output_text
+    
+    def support_code(self):
+        return True
