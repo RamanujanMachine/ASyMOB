@@ -3,6 +3,7 @@ from gemini_interface import GeminiInterface
 from openai_interface import OpenAIInterface
 from groq_interface import GroqInterface
 from claude_interface import ClaudeInterface
+from hugging_face_interface import HuggingFaceInterface
 
 MODELS = {
     # OpenAI models
@@ -21,10 +22,10 @@ MODELS = {
     # Claude
     'claude': ClaudeInterface(),
 
-    # Groq models
-    # MOVE to qwen-math
-    'qwen-qwq-32b' : GroqInterface("qwen-qwq-32b"),
+    # HuggingFace models
+    'Qwen/Qwen3-235B-A22B': HuggingFaceInterface('Qwen/Qwen3-235B-A22B'),
 
+    # Groq models
     'meta-llama/llama-4-maverick-17b-128e-instruct': \
         GroqInterface("meta-llama/llama-4-maverick-17b-128e-instruct"),
     'meta-llama/llama-4-scout-17b-16e-instruct': \
