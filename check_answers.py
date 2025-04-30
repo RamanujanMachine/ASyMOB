@@ -4,16 +4,18 @@ import sympy as sp
 import json
 import math_parsers
 from sp_vars import *
-from collect_llm_answers import extract_latex_answer
 import multiprocessing as mp
 from pathlib import Path
+from timeout_utils import apply_with_timeout
 
 
-RESULTS_FILE = 'results_mp - 122 questions.xlsx'
+# RESULTS_FILE = 'results_mp - 122 questions.xlsx'
+RESULTS_FILE = 'results_mp_180_q.xlsx'
 OUTPUT_FILE = 'checked_results.xlsx'
 DISCARDED_FILE = 'discarded.xlsx'
 OUTPUT_FOLDER = Path('checked_results_chunks')
 NUMER_SUBS_FILE = 'numerical_subs.json'
+SIMPLIFY_TIMEOUT = 60 # seconds
 
 # TODO - generate automatically.
 VAR_SUBSTITUTIONS = {
@@ -107,12 +109,18 @@ def compare_numeric(true_answer, model_answer, subs_vals, allowed_diff=1e-5,
             print('diff: ', diffs[-1])
         
     try:
-        if strict:
-            if any([diff == sp.nan for diff in diffs]):
+        if any([diff == sp.nan for diff in diffs]):
                 return False
+        if strict:
+            # In strict mode, we check if the model and true answers are
+            # numerically equal within the allowed difference.
             return all([diff < allowed_diff for diff in diffs])
-        # Currently will fail
-        return pd.NA
+        else:
+            # In non-strict mode, we check if the model and true answers are
+            # equal up to a constant factor.
+            # It's meant to address integral answers, where the model might have
+            # a constant factor in front of the answer.
+            return pd.NA
         return (max(diffs) - min(diffs)) < allowed_diff
     except Exception as e:
         print(e)
@@ -164,14 +172,12 @@ def clean_df(df, save_discarded=False):
     return clean_df
 
 
-def check_symbolic_comparison(df, print_debug=False):
-    def safe_simplify(expr):
-        # was tested on ~ 2K expressions, and and its slower by 0.5% from 
-        # the original one. So we can keep it.
-        try:
-            return sp.simplify(expr)
-        except Exception:
-            return pd.NA
+def check_symbolic_comparison(df, print_debug=False, timeout=None):
+    if timeout is None:
+        simplifyer = sp.simplify
+    else:
+        simplifyer = lambda expr: apply_with_timeout(
+            sp.simplify, timeout, expr=expr)
     
     symb_equal = []
     for i, row in df.iterrows():
@@ -188,7 +194,13 @@ def check_symbolic_comparison(df, print_debug=False):
             {sp.var('pi'): sp.pi, sp.var('e'): sp.exp(1)}
         )
         try:
-            diff = sp.powsimp(raw_diff.simplify(), force=True)
+            diff = sp.powsimp(
+                simplifyer(raw_diff, timeout), 
+                force=True)
+        except TimeoutError:
+            print('Timeout error on row', i)
+            symb_equal.append('Timeout')
+            continue
         except Exception:
             symb_equal.append(pd.NA)
             continue
@@ -196,8 +208,8 @@ def check_symbolic_comparison(df, print_debug=False):
         symb_equal.append(
             (diff == 0) or (diff == C) or (diff == -C)
         )
-        if print_debug and i % 10 == 0:
-            print(i)
+        if print_debug:
+            print('Finished', i)
     return pd.Series(symb_equal, index=df.index)
 
 
@@ -208,6 +220,7 @@ def check_answer_numeric(df, print_debug=False):
     errors = []
     for i, row in df.iterrows():
         try:
+            print(i)
             numer_correct.append(
                 compare_numeric(
                     row.true_answer, 
@@ -222,17 +235,11 @@ def check_answer_numeric(df, print_debug=False):
     return pd.Series(numer_correct, index=df.index)
 
 
-#def check_answers(results_file, start_idx, output_file):
-def check_answers(df, output_file):
+def check_answers(df, output_file, timeout=None):
     print(output_file)
     df = clean_df(df, save_discarded=True)
     try:
-        # df = pd.read_excel(results_file, sheet_name='results')
-        # df = clean_df(df, save_discarded=True)
-
-        # df = df.iloc[start_idx:start_idx+200]
-
-        df['symbolic_comparison'] = check_symbolic_comparison(df)
+        df['symbolic_comparison'] = check_symbolic_comparison(df, timeout=timeout)
         df['numeric_comparison'] = check_answer_numeric(df)
 
         # Convert sympys to strings for pickling on process exit
