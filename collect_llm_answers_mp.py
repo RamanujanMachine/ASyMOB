@@ -1,4 +1,4 @@
-from models import MODELS
+from models import MODELS, get_model
 import multiprocessing as mp
 import pandas as pd
 from collect_llm_answers import load_questions, ask_model
@@ -10,7 +10,7 @@ def llm_survey_wrapper(q_id, question_text, true_answer, model_name, code_execut
     """
     try:
         print(f"Processing question {q_id} with model {model_name}...")
-        model = MODELS[model_name]
+        model = get_model(model_name) # MODELS[model_name]
         result = ask_model(model, question_text, code_execution=code_execution)
         result['question_id'] = q_id
         result['model'] = model_name
@@ -24,6 +24,24 @@ def llm_survey_wrapper(q_id, question_text, true_answer, model_name, code_execut
         return {}
 
 
+def collect_single_question(q_id, question_text, true_answer):
+    for model_name, model in MODELS.items():
+        if not model.support_code():
+            llm_survey_wrapper(
+                q_id, 
+                question_text, 
+                true_answer, 
+                model_name, 
+                None)
+        else:
+            for code_execution in [True, False]:
+                llm_survey_wrapper(
+                    q_id, 
+                    question_text, 
+                    true_answer, 
+                    model_name, 
+                    code_execution)
+
 def main():
     """
     Main function to run the multiprocessing.
@@ -31,14 +49,7 @@ def main():
     questions = load_questions()
     args = []
     for q_id, question_text, true_answer in questions:
-        for model_name, model in MODELS.items():
-            if not model.support_code():
-                args.append((q_id, question_text, true_answer, model_name, 
-                             None))
-            else:
-                for code_execution in [True, False]:
-                    args.append((q_id, question_text, true_answer, model_name, 
-                                code_execution))
+        args.append((q_id, question_text, true_answer))
 
     print(f"Number of tasks: {len(args)}")
 
@@ -46,7 +57,7 @@ def main():
     # Create a pool of workers
     with mp.Pool(processes=10) as pool:
         # Map the function to the pool
-        results = pool.starmap(llm_survey_wrapper, args)
+        results = pool.starmap(collect_single_question, args)
 
     # Process the results
     df = pd.DataFrame.from_records(results)
