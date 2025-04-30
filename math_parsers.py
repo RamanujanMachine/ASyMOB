@@ -29,20 +29,34 @@ def remove_equality(sp_expr):
         raise e
 
 
+def clean_sp_object(sp_expr):
+    # Sometimes, the answer is a number, and the parsing might result in a 
+    # pythonic-number, which is not compatible with sympy the rest of the 
+    # pipeline. We need to convert it to a sympy object.
+    if isinstance(sp_expr, float):
+        return sp.Float(sp_expr)
+    elif isinstance(sp_expr, int):
+        return sp.Integer(sp_expr)
+    
+    sp_expr = fix_expr(remove_equality(sp_expr))
+    sp_expr =  sp_expr.subs({
+        sp.var('e'): sp.exp(1),
+        sp.var('pi'): sp.pi
+    })
+    return sp_expr
+
+
 def parse_sympy_str(expr_str):
     try:
         if pd.isna(expr_str):
             return None
-        return fix_expr(remove_equality(sp.parse_expr(
+        return clean_sp_object(sp.parse_expr(
             expr_str, 
             local_dict=var_mapping, 
             transformations=(
                 standard_transformations + (implicit_multiplication_application,)
             )
-        ))).subs({
-            sp.var('e'): sp.exp(1),
-            sp.var('pi'): sp.pi
-        })
+        ))
     except Exception as e:
         print(expr_str)
         raise e
@@ -80,11 +94,7 @@ def latex_to_sympy_deter(latex_str):
             latex_str)
         
         # use constants for e and pi
-        sp_expr = fix_expr(remove_equality(parse_latex(latex_str)))
-        return sp_expr.subs({
-            sp.var('e'): sp.exp(1),
-            sp.var('pi'): sp.pi
-        })
+        return clean_sp_object(parse_latex(latex_str))
     except Exception as e:
         print('Error parsing latex string:')
         print(latex_str)
@@ -128,9 +138,9 @@ def latex_to_sympy_llm(latex_str):
     filtered_args = {k: v for k, v in var_mapping.items() if k in accepted_params}
 
     # Function solution defined dynamically
-    return solution(
+    return clean_sp_object(solution(
         **filtered_args
-    )
+    ))
 
 def latex_to_sympy(latex_str, return_type=True):
     """
