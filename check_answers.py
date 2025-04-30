@@ -15,7 +15,8 @@ OUTPUT_FILE = 'checked_results.xlsx'
 DISCARDED_FILE = 'discarded.xlsx'
 OUTPUT_FOLDER = Path('checked_results_chunks')
 NUMER_SUBS_FILE = 'numerical_subs.json'
-SIMPLIFY_TIMEOUT = 60 # seconds
+CHUNK_TIMEOUT = 1 * 60  # 10 minutes
+ROW_TIMEOUT = 10  # 60 seconds
 
 # TODO - generate automatically.
 VAR_SUBSTITUTIONS = {
@@ -181,6 +182,8 @@ def check_symbolic_comparison(df, print_debug=False, timeout=None):
     
     symb_equal = []
     for i, row in df.iterrows():
+        if print_debug:
+            print('Starting', i)
         true_answer = row.true_answer
         model_answer = row.model_answer
         if not true_answer.has(sp.Integral) and model_answer.has(sp.Integral):
@@ -195,7 +198,7 @@ def check_symbolic_comparison(df, print_debug=False, timeout=None):
         )
         try:
             diff = sp.powsimp(
-                simplifyer(raw_diff, timeout), 
+                simplifyer(raw_diff), 
                 force=True)
         except TimeoutError:
             print('Timeout error on row', i)
@@ -235,11 +238,32 @@ def check_answer_numeric(df, print_debug=False):
     return pd.Series(numer_correct, index=df.index)
 
 
-def check_answers(df, output_file, timeout=None):
+def check_answers(df, output_file):
     print(output_file)
     df = clean_df(df, save_discarded=True)
     try:
-        df['symbolic_comparison'] = check_symbolic_comparison(df, timeout=timeout)
+        # trying to run the entire chunk with a large timeout. If it fails, 
+        # it usually means that inside the chunk there are a small number 
+        # of row that take too much time. 
+        # In that case, we run every row with a smaller timeout. It is 
+        # implemented through the `timeout` parameter in 
+        # the `check_symbolic_comparison` function.
+        # This is a workaround for the fact that sympy doesn't have a timeout
+        # for the simplify function. 
+        try:
+            # Chunk-wise timeout
+            df['symbolic_comparison'] = apply_with_timeout(
+                func=check_symbolic_comparison,
+                timeout=CHUNK_TIMEOUT,
+                df = df
+            )
+        except TimeoutError:
+            # row-wise timeout
+            print('Chunk-wise timeout error. Running row-wise.')
+            df['symbolic_comparison'] = check_symbolic_comparison(
+                df, 
+                timeout=ROW_TIMEOUT
+            )
         df['numeric_comparison'] = check_answer_numeric(df)
 
         # Convert sympys to strings for pickling on process exit
