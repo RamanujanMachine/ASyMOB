@@ -125,7 +125,6 @@ def latex_to_sympy_llm(latex_str):
                 "operator (e.g. /). \n\n" + latex_str
         )
     
-    print(function_def)
     function_def = function_def.strip("`\n")
     if function_def.startswith('python\n'):
         function_def = function_def[6:]
