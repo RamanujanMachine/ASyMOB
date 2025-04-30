@@ -15,8 +15,8 @@ OUTPUT_FILE = 'checked_results.xlsx'
 DISCARDED_FILE = 'discarded.xlsx'
 OUTPUT_FOLDER = Path('checked_results_chunks')
 NUMER_SUBS_FILE = 'numerical_subs.json'
-CHUNK_TIMEOUT = 1 * 60  # 10 minutes
-ROW_TIMEOUT = 10  # 60 seconds
+CHUNK_TIMEOUT = 10 * 60  # 10 minutes
+ROW_TIMEOUT = 30  # 30 seconds
 
 # TODO - generate automatically.
 VAR_SUBSTITUTIONS = {
