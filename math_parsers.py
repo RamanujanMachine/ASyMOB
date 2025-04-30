@@ -33,7 +33,7 @@ def parse_sympy_str(expr_str):
     try:
         if pd.isna(expr_str):
             return None
-        return remove_equality(fix_expr(sp.parse_expr(
+        return fix_expr(remove_equality(sp.parse_expr(
             expr_str, 
             local_dict=var_mapping, 
             transformations=(
@@ -80,7 +80,7 @@ def latex_to_sympy_deter(latex_str):
             latex_str)
         
         # use constants for e and pi
-        sp_expr = remove_equality(fix_expr(parse_latex(latex_str)))
+        sp_expr = fix_expr(remove_equality(parse_latex(latex_str)))
         return sp_expr.subs({
             sp.var('e'): sp.exp(1),
             sp.var('pi'): sp.pi
