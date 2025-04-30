@@ -3,6 +3,10 @@ import multiprocessing as mp
 import pandas as pd
 from collect_llm_answers import load_questions, ask_model
 import time
+from pathlib import Path
+
+CHUNKS_DIR = Path('LLM_survey_chunks')
+
 
 def llm_survey_wrapper(q_id, question_text, true_answer, model_name, code_execution):
     """
@@ -25,22 +29,33 @@ def llm_survey_wrapper(q_id, question_text, true_answer, model_name, code_execut
 
 
 def collect_single_question(q_id, question_text, true_answer):
+    results = []
     for model_name, model in MODELS.items():
         if not model.support_code():
-            llm_survey_wrapper(
+            results.append(llm_survey_wrapper(
                 q_id, 
                 question_text, 
                 true_answer, 
                 model_name, 
-                None)
+                None))
         else:
             for code_execution in [True, False]:
-                llm_survey_wrapper(
+                results.append(llm_survey_wrapper(
                     q_id, 
                     question_text, 
                     true_answer, 
                     model_name, 
-                    code_execution)
+                    code_execution))
+    
+    df = pd.DataFrame.from_records(results)
+    df.to_excel(
+        CHUNKS_DIR / f'results_chunk_q_{q_id}.xlsx', 
+        index=False, 
+        sheet_name='results'
+    )
+
+    return results
+    
 
 def main():
     """
@@ -60,7 +75,7 @@ def main():
         results = pool.starmap(collect_single_question, args)
 
     # Process the results
-    df = pd.DataFrame.from_records(results)
+    df = pd.DataFrame.from_records(sum(results))
     df.to_excel(
         'results_mp.xlsx', 
         index=False, 
