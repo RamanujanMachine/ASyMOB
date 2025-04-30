@@ -95,38 +95,42 @@ def compare_numeric(true_answer, model_answer, subs_vals, allowed_diff=1e-5,
             diffs.append(0)
             continue
         
-        try:
-            diffs.append(abs(
-                (true_answer_numer - model_answer_numer) / 
-                (true_answer_numer + model_answer_numer)
-            ))
-        except ZeroDivisionError:
-            # If the sum is 0, but the terms themselves are not, we can
-            # assume that the model is wrong by a sign
-            return False
-
-        if debug:
-            print('subs: ', subs)
-            print('diff: ', diffs[-1])
         
-    try:
-        if any([diff == sp.nan for diff in diffs]):
-                return False
+        diff = (true_answer_numer - model_answer_numer)
         if strict:
             # In strict mode, we check if the model and true answers are
             # numerically equal within the allowed difference.
-            return all([diff < allowed_diff for diff in diffs])
-        else:
+            try:
+                diffs.append(abs(
+                    diff / 
+                    (true_answer_numer + model_answer_numer)
+                ))
+            except ZeroDivisionError:
+                # If the sum is 0, but the terms themselves are not, we can
+                # assume that the model is wrong by a sign
+                return False
+        else: 
             # In non-strict mode, we check if the model and true answers are
             # equal up to a constant factor.
             # It's meant to address integral answers, where the model might have
             # a constant factor in front of the answer.
-            return pd.NA
-        return (max(diffs) - min(diffs)) < allowed_diff
-    except Exception as e:
-        print(e)
-        print(expr_a, expr_b)
-        return pd.NA
+            diffs.append(diff)
+        
+        if debug:
+            print('subs: ', subs)
+            print('diff: ', diffs[-1])
+        
+
+    if any([diff == sp.nan for diff in diffs]):
+            return False
+
+    if strict:
+        return all([diff < allowed_diff for diff in diffs])
+    else:
+        mean_diff = np.mean(diffs)
+        return all([
+            abs((diff - mean_diff) / mean_diff) < allowed_diff for diff in diffs
+        ])
 
 
 def clean_df(df, save_discarded=False):
@@ -216,19 +220,21 @@ def check_symbolic_comparison(df, print_debug=False, timeout=None):
     return pd.Series(symb_equal, index=df.index)
 
 
-def check_answer_numeric(df, print_debug=False):
+def check_answer_numeric(df, print_debug=False, strict=True):
     with open(NUMER_SUBS_FILE, 'r') as f:
         numer_subs = json.load(f)
     numer_correct = []
     errors = []
     for i, row in df.iterrows():
         try:
-            print(i)
+            if print_debug:
+                print(i)
             numer_correct.append(
                 compare_numeric(
                     row.true_answer, 
                     row.model_answer, 
-                    numer_subs[str(row.question_id)]
+                    numer_subs[str(row.question_id)],
+                    strict=strict
                 ))
         except Exception as e:
             print(f'Error on row {i}:', e)
