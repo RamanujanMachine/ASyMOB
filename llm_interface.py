@@ -50,7 +50,7 @@ class GenericLLMInterface:
         else:
             return NO_CODE_PREFIX + message
     
-    def send_message(self, message, code_execution=None):
+    def send_message(self, message, code_execution=None, return_tokens=False):
         """
         Send a message to the LLM and receive a response.
         
@@ -69,6 +69,7 @@ class GenericLLMInterface:
             model=self.model, 
             api_key=self.api_key, 
             messages=messages)
+        
         return response.choices[0].message.content
 
     @abstractmethod

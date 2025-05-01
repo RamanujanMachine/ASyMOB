@@ -14,11 +14,9 @@ class GroqInterface(GenericLLMInterface):
         self.client = Groq(api_key=self.api_key)
 
     def send_message(self, message, code_execution=False, 
-                     max_completion_tokens=100_000):
+                     max_completion_tokens=100_000, return_tokens=False):
         message = self._incentivize_code_execution(
             message, use_code=code_execution)
-        print(f"Sending message to Groq model: {self.model}")
-        print(f"Message: {message}")
 
         # Some models have a max token limit.
         if self.model == 'meta-llama/llama-4-scout-17b-16e-instruct':
@@ -41,11 +39,23 @@ class GroqInterface(GenericLLMInterface):
         )
 
         response = ''
+        usage_info = None
         for chunk in completion:
-            if chunk.choices[0].delta.content is None:
-                continue
-            response += chunk.choices[0].delta.content
+            if chunk.choices[0].delta.content is not None:
+                response += chunk.choices[0].delta.content
+            if hasattr(chunk, 'x_groq') and chunk.x_groq and hasattr(chunk.x_groq, 'usage') and chunk.x_groq.usage:
+                usage_info = chunk.x_groq.usage
+        
+        if usage_info:
+            total_tokens = (getattr(usage_info, 'prompt_tokens', 0) + 
+                            getattr(usage_info, 'completion_tokens', 0)
+            )
 
+        if return_tokens:
+            return (
+                response,
+                total_tokens
+            )
         return response
     
     def support_code(self):

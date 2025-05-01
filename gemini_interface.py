@@ -22,7 +22,7 @@ class GeminiInterface(GenericLLMInterface):
         self._load_api_key(provider='gemini')
         self.client = genai.Client(api_key=self.api_key)
 
-    def send_message(self, message, code_execution=False):
+    def send_message(self, message, code_execution=False, return_tokens=False):
         message = self._incentivize_code_execution(message, use_code=code_execution)
         tools = []
         if code_execution and self.model in CODE_RUNNING_MODELS:
@@ -70,7 +70,16 @@ class GeminiInterface(GenericLLMInterface):
                     print("Code execution is not enabled.")
                     raise ValueError("Code execution is not enabled.")
                 # print(chunk.candidates[0].content.parts[0].code_execution_result)
+        
+        if return_tokens:
+            # looks like the last chunk contains all of the token count
+            return (
+                response,
+                chunk.usage_metadata.total_token_count 
+            )
         return response
 
     def support_code(self):
+        if 'gemma' in self.model:
+            return False
         return True

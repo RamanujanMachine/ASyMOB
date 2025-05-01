@@ -84,17 +84,19 @@ def ask_model(model, question_text, code_execution):
     expression as a string and the textual answer itself.
     """
     try:
-        textual_answer = model.send_message(
+        textual_answer, tokens = model.send_message(
             message=MATH_INSTRUCTIONS + question_text,
             code_execution=code_execution,
+            return_tokens=True
         )
     except Exception as e:
         print(f"Error sending message to model: {e}")
         print('message:', MATH_INSTRUCTIONS + question_text)
-        return {}
+        return {'error': str(e)}
     
     result = {
         'full_answer': textual_answer,
+        'tokens_used': tokens
     }
     try:
         # extract the final answer from the textual answer
@@ -113,6 +115,7 @@ def ask_model(model, question_text, code_execution):
         print(f"Error processing the answer: {e}")
         print(f"Textual answer: {textual_answer}")
         result['final_answer_latex'] = None
+        result['error'] = str(e)
         # result['sp_deter'] = None if 'sp_deter' not in result else result['sp_deter']
         # result['sp_llm'] = None if 'sp_llm' not in result else result['sp_llm']
     

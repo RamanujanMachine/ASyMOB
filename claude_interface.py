@@ -11,7 +11,7 @@ class ClaudeInterface(GenericLLMInterface):
         self._load_api_key(provider='anthropic')
         self.client = anthropic.Anthropic(api_key=self.api_key)
         
-    def send_message(self, message, code_execution=False):
+    def send_message(self, message, code_execution=False, return_tokens=False):
         """
         Send a message to Anthropic's Claude API, optionally encouraging code execution.
         
@@ -35,6 +35,11 @@ class ClaudeInterface(GenericLLMInterface):
             ]
         )
 
+        if return_tokens:
+            return (
+                response.content[0].text,
+                response.usage.output_tokens
+            )
         return response.content[0].text
     
     def support_code(self):
