@@ -22,10 +22,25 @@ def llm_survey_wrapper(q_id, question_text, true_answer, model_name, code_execut
         result['question_text'] = question_text
         result['code_execution'] = code_execution
 
-        return result
     except Exception as e:
         print(f"Error processing question {q_id} with model {model_name}: {e}")
-        return {}
+        result = {
+            'question_id': q_id,
+            'model': model_name,
+            'true_answer': true_answer,
+            'question_text': question_text,
+            'code_execution': code_execution,
+            'error': str(e)
+        }
+
+    df = pd.DataFrame.from_records([result])
+    df.to_excel(
+        CHUNKS_DIR / f'{q_id}_{model_name.replace('/', '-')}_{code_execution}.xlsx', 
+        index=False, 
+        sheet_name='results'
+    )
+
+    return result
 
 
 def collect_single_question(q_id, question_text, true_answer):
@@ -63,8 +78,29 @@ def main():
     """
     questions = load_questions()
     args = []
-    for q_id, question_text, true_answer in questions:
-        args.append((q_id, question_text, true_answer))
+    for q_id, question_text, true_answer in questions[:2]:
+        # args.append((q_id, question_text, true_answer))
+        # The loops order is important. 
+        # We might hit rate limits if we ask the same model too many things
+        # in parallel. Setting the fast changing item to be the model, leads
+        # to multiple different models running together, which reduces the 
+        # per-model load.
+        for model_name, model in MODELS.items():
+            if not model.support_code():
+                args.append((
+                    q_id, 
+                    question_text, 
+                    true_answer, 
+                    model_name, 
+                    None))
+            else:
+                for code_execution in [True, False]:
+                    args.append((
+                        q_id, 
+                        question_text, 
+                        true_answer, 
+                        model_name, 
+                        code_execution))
 
     print(f"Number of tasks: {len(args)}")
 
@@ -72,10 +108,11 @@ def main():
     # Create a pool of workers
     with mp.Pool(processes=10) as pool:
         # Map the function to the pool
-        results = pool.starmap(collect_single_question, args)
+        # results = pool.starmap(collect_single_question, args)
+        results = pool.starmap(llm_survey_wrapper, args)
 
     # Process the results
-    df = pd.DataFrame.from_records(sum(results))
+    df = pd.DataFrame.from_records(results)
     df.to_excel(
         'results_mp.xlsx', 
         index=False, 
