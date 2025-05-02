@@ -5,7 +5,7 @@ class HuggingFaceInterface(GenericLLMInterface):
     """
     A class to interact with Hugging Face's Inference API with optional code interpreter (tools) support.
     """
-    def __init__(self, model, inference_provider="fireworks-ai"):
+    def __init__(self, model, inference_provider="novita"):
         self.model = model
         self._load_api_key(provider='huggingface')
         self.client = InferenceClient(
