@@ -8,8 +8,8 @@ import json
 
 N_SUBS = 5
 N_TRIES = 200
-QUESTIONS_FILE = 'questions.json'
-OUTPUT_FILE = 'numerical_subs.json'
+QUESTIONS_FILE = '11_5K_questions.json'
+OUTPUT_FILE = '11_5K_questions_subs.json'
 VAR_SUBSTITUTIONS = {
     A: lambda: np.random.randint(1, 10),
     B: lambda: np.random.randint(1, 10),
@@ -30,6 +30,7 @@ VAR_SUBSTITUTIONS = {
 
 if __name__ == '__main__':
     questions = load_questions(QUESTIONS_FILE)
+    print(f'Total questions: {len(questions)}')
     all_questions_subs = {}
 
     for q_id, _, true_answer in questions:
@@ -69,5 +70,6 @@ if __name__ == '__main__':
             continue
         all_questions_subs[int(q_id)] = question_subs
         
+    print(f'Subs generated: {len(all_questions_subs)}')
     with open(OUTPUT_FILE, 'w') as f:
         json.dump(all_questions_subs, f, indent=2)
