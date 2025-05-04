@@ -139,7 +139,8 @@ def symbolic_comparison(A, B):
         return None
 
 
-def enumerate_tasks_configurations():
+def enumerate_tasks_configurations(
+        retry_attempt=RETRY_ATTEMPT, prev_res_file='results_mp.xlsx'):
     questions = load_questions(parse_sympy=False)
     tasks = []
 
@@ -174,12 +175,13 @@ def enumerate_tasks_configurations():
                     'code_execution': False
                 })
 
-    if not RETRY_ATTEMPT:
+    if not retry_attempt:
         return tasks
     
     # removing already succeeded tasks
+    print(f'filtering {len(tasks)} tasks...')
     filtered_tasks = []
-    prev_results = pd.read_excel('OUT')
+    prev_results = pd.read_excel(prev_res_file)
     already_succeeded_code_runners = prev_results[
         ~prev_results.full_answer.isna() & ~prev_results.code_execution.isna()
         ][['question_id', 'model', 'code_execution']].values.tolist()
@@ -188,9 +190,9 @@ def enumerate_tasks_configurations():
         ][['question_id', 'model', 'code_execution']].values.tolist()
 
     for task in tasks:
-        q_id = tasks['question_id']
-        model_name = tasks['model']
-        code_execution = tasks['code_execution']
+        q_id = task['question_id']
+        model_name = task['model']
+        code_execution = task['code_execution']
 
         if (pd.isna(code_execution) and 
             [q_id, model_name] in already_succeeded_not_code_runners):
@@ -201,9 +203,9 @@ def enumerate_tasks_configurations():
             continue 
 
         filtered_tasks.append(task)
+    print(f'Resulted in {len(filtered_tasks)} tasks!')
+    return filtered_tasks
 
-    return filtered_tasks       
-        
 
 def main():
     results = []
