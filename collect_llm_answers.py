@@ -10,7 +10,7 @@ from sp_vars import *
 import re
 
 
-QUESTIONS_PATH = 'questions-183.json'
+QUESTIONS_PATH = '11_5K_questions.json_filtered.json'
 # SYMPY_CONVERTER_MODEL = 'openai/gpt-4o'# 'gemini/gemini-2.5-pro-exp-03-25'
 # SYMPY_CONVERTER = GeminiInterface("gemini-2.5-pro-exp-03-25") # ge(SYMPY_CONVERTER_MODEL)
 SYMPY_CONVERTER = OpenAIInterface("gpt-4o")
@@ -29,8 +29,8 @@ def load_questions(path=QUESTIONS_PATH, parse_sympy=True):
         questions = json.load(f)
     # Convert answers to sympy objects
     parsed_questions = []
-    for question in questions:
-        q_id = question['Index']
+    for question in questions[:1000]:
+        q_id = int(question['Index'])
         question_text = question['Challenge']
         sympy_str_answer = question['Answer in Sympy']
         try:
@@ -180,26 +180,28 @@ def enumerate_tasks_configurations(
     
     # removing already succeeded tasks
     print(f'filtering {len(tasks)} tasks...')
-    filtered_tasks = []
     prev_results = pd.read_excel(prev_res_file)
     already_succeeded_code_runners = prev_results[
         ~prev_results.full_answer.isna() & ~prev_results.code_execution.isna()
         ][['question_id', 'model', 'code_execution']].values.tolist()
     already_succeeded_not_code_runners = prev_results[
         ~prev_results.full_answer.isna() & prev_results.code_execution.isna()
-        ][['question_id', 'model', 'code_execution']].values.tolist()
+        ][['question_id', 'model']].values.tolist()
 
+    filtered_tasks = []
     for task in tasks:
-        q_id = task['question_id']
+        q_id = int(task['question_id'])
         model_name = task['model']
         code_execution = task['code_execution']
 
-        if (pd.isna(code_execution) and 
-            [q_id, model_name] in already_succeeded_not_code_runners):
+        # Code runners
+        if ((not pd.isna(code_execution)) and 
+            [q_id, model_name, float(code_execution)] in already_succeeded_code_runners):
             continue 
 
-        if (not pd.isna(code_execution) and 
-            [q_id, model_name, code_execution] in already_succeeded_code_runners):
+        # Not code runners
+        if (pd.isna(code_execution) and 
+            [q_id, model_name] in already_succeeded_not_code_runners):
             continue 
 
         filtered_tasks.append(task)
