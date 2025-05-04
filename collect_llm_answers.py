@@ -10,7 +10,7 @@ from sp_vars import *
 import re
 
 
-QUESTIONS_PATH = '11_5K_questions.json_filtered.json'
+QUESTIONS_PATH = '11_5K_questions.json'
 # SYMPY_CONVERTER_MODEL = 'openai/gpt-4o'# 'gemini/gemini-2.5-pro-exp-03-25'
 # SYMPY_CONVERTER = GeminiInterface("gemini-2.5-pro-exp-03-25") # ge(SYMPY_CONVERTER_MODEL)
 SYMPY_CONVERTER = OpenAIInterface("gpt-4o")
