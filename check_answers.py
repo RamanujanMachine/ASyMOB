@@ -4,7 +4,7 @@ import sympy as sp
 import json
 import math_parsers
 from sp_vars import *
-import multiprocessing as mp
+from pebble import ProcessPool
 from pathlib import Path
 from timeout_utils import apply_with_timeout
 
@@ -15,8 +15,11 @@ OUTPUT_FILE = 'checked_results.xlsx'
 DISCARDED_FILE = 'discarded.xlsx'
 OUTPUT_FOLDER = Path('checked_results_chunks')
 NUMER_SUBS_FILE = 'numerical_subs.json'
+
+POOL_SIZE = 10
 CHUNK_TIMEOUT = 10 * 60  # 10 minutes
 ROW_TIMEOUT = 30  # 30 seconds
+
 
 # TODO - generate automatically.
 VAR_SUBSTITUTIONS = {
@@ -247,29 +250,9 @@ def check_answer_numeric(df, print_debug=False, strict=True):
 def check_answers(df, output_file):
     print(output_file)
     df = clean_df(df, save_discarded=True)
+    
     try:
-        # trying to run the entire chunk with a large timeout. If it fails, 
-        # it usually means that inside the chunk there are a small number 
-        # of row that take too much time. 
-        # In that case, we run every row with a smaller timeout. It is 
-        # implemented through the `timeout` parameter in 
-        # the `check_symbolic_comparison` function.
-        # This is a workaround for the fact that sympy doesn't have a timeout
-        # for the simplify function. 
-        try:
-            # Chunk-wise timeout
-            df['symbolic_comparison'] = apply_with_timeout(
-                func=check_symbolic_comparison,
-                timeout=CHUNK_TIMEOUT,
-                df = df
-            )
-        except TimeoutError:
-            # row-wise timeout
-            print('Chunk-wise timeout error. Running row-wise.')
-            df['symbolic_comparison'] = check_symbolic_comparison(
-                df, 
-                timeout=ROW_TIMEOUT
-            )
+        df['symbolic_comparison'] = check_symbolic_comparison(df)
         df['numeric_comparison'] = check_answer_numeric(df)
 
         # Convert sympys to strings for pickling on process exit
@@ -284,22 +267,75 @@ def check_answers(df, output_file):
     return df
 
 
+def check_answers_chunks(df, pool):
+    # Sending chunks, with chunk-wise timeouts
+    futures = []
+    results = []
+    for i in range(0, len(df), CHUNK_SIZE):
+        target_df = df.iloc[i:i+CHUNK_SIZE].copy()
+        args = (
+            target_df, 
+            f'checked_{i}-{i+CHUNK_SIZE-1}.xlsx')
+        future = pool.schedule(
+            check_answers, 
+            args=args, 
+            timeout=CHUNK_TIMEOUT
+        )
+        futures.append((future, i))
+        
+    timed_out_chunks = []
+    for future, i in futures:
+        try:
+            results.append(future.result())
+            print(f"Chunk {i}:{i+CHUNK_SIZE} completed")
+        except TimeoutError as e:
+            print(f"Chunk {i}:{i+CHUNK_SIZE} timed out. "
+                    "Adding to retry list")
+            timed_out_chunks.append(i)
+
+    return results, timed_out_chunks
+
+
+def check_answers_rows(df, idxes_to_check, pool):
+    # retry timed out chunk row-wise
+    futures = []
+    results = []
+    for chunk_start in idxes_to_check:
+        for i in range(chunk_start, chunk_start+CHUNK_SIZE):
+            target_df = df.iloc[i:i+1].copy()
+            args = (
+                target_df, 
+                f'checked_{i}.xlsx')
+            future = pool.schedule(
+                check_answers, 
+                args=args, 
+                timeout=ROW_TIMEOUT
+            )
+            futures.append((future, i))
+
+    for future, i in futures:
+        try:
+            results.append(future.result())
+            print(f"Row {i} completed")
+        except TimeoutError as e:
+            print(f"Row {i} timed out.")
+            errored_line = df[i:i+1].copy()
+            errored_line['error'] = 'timeout'
+            results.append(errored_line)
+    return results
+
+    
 def main():
     df = pd.read_excel(RESULTS_FILE, sheet_name='results')
     # df = clean_df(df, save_discarded=True)
 
-    args = []
-    for i in range(0, len(df), CHUNK_SIZE):
-        args.append((df.iloc[i:i+CHUNK_SIZE].copy(), 
-                     f'checked_{i}-{i+CHUNK_SIZE-1}.xlsx'))
-        # args.append((RESULTS_FILE, i, f'checked_{i}-{i+200-1}.xlsx'))
-
-    with mp.Pool(processes=10) as pool:
-        # Map the function to the pool
-        results = pool.starmap(check_answers, args)
-
+    results = []
+    with ProcessPool(max_workers=POOL_SIZE) as pool:
+        chunk_results, timed_out_chunks = check_answers_chunks()
+        row_results = check_answers_rows(df, timed_out_chunks, pool)
+    
     # Combine the results into a single DataFrame
-    combined_df = pd.concat(results, ignore_index=True)
+    combined_df = pd.concat(chunk_results + row_results, ignore_index=True)
     combined_df.to_excel(OUTPUT_FILE, index=False)
 
 if __name__ == '__main__':
