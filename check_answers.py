@@ -10,7 +10,7 @@ from timeout_utils import apply_with_timeout
 
 
 # RESULTS_FILE = 'results_mp - 122 questions.xlsx'
-RESULTS_FILE = 'results_mp_180_q.xlsx'
+RESULTS_FILE = 'results_mp.xlsx'
 OUTPUT_FILE = 'checked_results.xlsx'
 DISCARDED_FILE = 'discarded.xlsx'
 OUTPUT_FOLDER = Path('checked_results_chunks')
