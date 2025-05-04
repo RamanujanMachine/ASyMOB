@@ -29,7 +29,7 @@ def load_questions(path=QUESTIONS_PATH, parse_sympy=True):
         questions = json.load(f)
     # Convert answers to sympy objects
     parsed_questions = []
-    for question in questions[:1000]:
+    for question in questions:
         q_id = int(question['Index'])
         question_text = question['Challenge']
         sympy_str_answer = question['Answer in Sympy']
