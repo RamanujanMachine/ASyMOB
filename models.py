@@ -10,6 +10,7 @@ MODELS_GENERATORS = {
     "openai/o3": lambda: OpenAIInterface("o3"),
     "openai/gpt-4o": lambda: OpenAIInterface("gpt-4o"), 
     "openai/gpt-4.1": lambda: OpenAIInterface("gpt-4.1"),
+    "openai/gpt-4o-mini": lambda: OpenAIInterface("gpt-4o-mini"),
 
     # Google Gemini models
     "gemini/gemini-2.0-flash": lambda: GeminiInterface("gemini-2.0-flash"),
@@ -20,10 +21,11 @@ MODELS_GENERATORS = {
     # 'claude': lambda: ClaudeInterface(),
 
     # HuggingFace models
-    'Qwen/Qwen3-235B-A22B': lambda: HuggingFaceInterface('Qwen/Qwen3-235B-A22B'),
+    # 'Qwen/Qwen3-235B-A22B': lambda: HuggingFaceInterface('Qwen/Qwen3-235B-A22B'),
+    'Qwen/Qwen2.5-72B-Instruct': lambda: HuggingFaceInterface('Qwen/Qwen2.5-72B-Instruct'),
     'DeepSeek-Prover-V2-671B': lambda: HuggingFaceInterface("deepseek-ai/DeepSeek-Prover-V2-671B"),
-    'DeepSeek-R1': lambda: HuggingFaceInterface('deepseek-ai/DeepSeek-R1'),
-    'DeepSeek-V3': lambda: HuggingFaceInterface('deepseek-ai/DeepSeek-V3'),
+    'DeepSeek-R1': lambda: HuggingFaceInterface('deepseek-ai/DeepSeek-R1', inference_provider='together'),
+    'DeepSeek-V3': lambda: HuggingFaceInterface('deepseek-ai/DeepSeek-V3', inference_provider='together'),
     'meta-llama/Llama-4-Scout-17B-16E-Instruct': lambda: HuggingFaceInterface("meta-llama/Llama-4-Scout-17B-16E-Instruct"),
 
     # Groq models
