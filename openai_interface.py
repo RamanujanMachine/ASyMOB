@@ -33,7 +33,7 @@ class OpenAIInterface(GenericLLMInterface):
         else:
             response = self.client.with_options(timeout=900.0).responses.create(
                 model=self.model,
-                   input=message,
+                input=message,
                 service_tier="flex",
             )
 
