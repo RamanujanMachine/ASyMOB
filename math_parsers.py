@@ -5,8 +5,9 @@ import sympy as sp
 import pandas as pd
 from sympy.parsing.latex import parse_latex
 from sympy.parsing.sympy_parser import parse_expr, standard_transformations, implicit_multiplication_application
-from openai_interface import OpenAIInterface
 from gemini_interface import GeminiInterface
+import sys
+sys.set_int_max_str_digits(10_000_000)
 
 SYMPY_CONVERTER = GeminiInterface("gemini-2.0-flash")
 KNOWN_FUNCTIONS = {
@@ -53,9 +54,7 @@ def parse_sympy_str(expr_str):
         return clean_sp_object(sp.parse_expr(
             expr_str, 
             local_dict=var_mapping, 
-            transformations=(
-                standard_transformations + (implicit_multiplication_application,)
-            )
+            evaluate=False
         ))
     except Exception as e:
         print(expr_str)
