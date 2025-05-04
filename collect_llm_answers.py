@@ -21,9 +21,10 @@ MATH_INSTRUCTIONS = (
     'latex text. Do not write anything after the latex answer.\n'
 )
 C = sp.symbols('C')
+RETRY_ATTEMPT = True
 
 
-def load_questions(path=QUESTIONS_PATH):
+def load_questions(path=QUESTIONS_PATH, parse_sympy=True):
     with open(path, 'r') as f:
         questions = json.load(f)
     # Convert answers to sympy objects
@@ -33,7 +34,10 @@ def load_questions(path=QUESTIONS_PATH):
         question_text = question['Challenge']
         sympy_str_answer = question['Answer in Sympy']
         try:
-            true_answer = math_parsers.parse_sympy_str(sympy_str_answer)
+            if parse_sympy:
+                true_answer = math_parsers.parse_sympy_str(sympy_str_answer)
+            else:
+                true_answer = sympy_str_answer
         except Exception as e:
             print(f"Error parsing sympy string: {sympy_str_answer}")
         parsed_questions.append((q_id, question_text, true_answer))
@@ -135,53 +139,93 @@ def symbolic_comparison(A, B):
         return None
 
 
-def main():
-    questions = load_questions()
-    results = []
+def enumerate_tasks_configurations():
+    questions = load_questions(parse_sympy=False)
+    tasks = []
+
+    # The loops order is important. 
+    # We might hit rate limits if we ask the same model too many things
+    # in parallel. Setting the fast changing item to be the model, leads
+    # to multiple different models running together, which reduces the 
+    # per-model load.
     for q_id, question_text, true_answer in questions:
         for model_name, model in MODELS.items():
-            print(f"Model: {model_name}, Question: {question_text}")
-
             if not model.support_code():
-                # Check if the model supports code execution
-                results.append(
-                    {
-                        'question_id': q_id,
-                        'model': model_name,
-                        'question_text': question_text,
-                        'code_execution': code_execution,
-                        'true_answer': true_answer,
-                        **ask_model(
-                            model, 
-                            question_text, 
-                            code_execution=None)
-                    })
-            else: 
-                for code_execution in [True, False]:
-                    print(f"Code execution: {code_execution}")
-                    results.append(
-                        {
-                            'question_id': q_id,
-                            'model': model_name,
-                            'question_text': question_text,
-                            'code_execution': code_execution,
-                            'true_answer': true_answer,
-                            **ask_model(
-                                model, 
-                                question_text, 
-                                code_execution=code_execution)
-                        })
+                tasks.append({
+                    'question_id': q_id,
+                    'model': model_name,
+                    'question_text': question_text,
+                    'true_answer': true_answer,
+                    'code_execution':None
+                })
+            else:
+                tasks.append({
+                    'question_id': q_id,
+                    'model': model_name,
+                    'question_text': question_text,
+                    'true_answer': true_answer,
+                    'code_execution': True
+                })
+                tasks.append({
+                    'question_id': q_id,
+                    'model': model_name,
+                    'question_text': question_text,
+                    'true_answer': true_answer,
+                    'code_execution': False
+                })
 
-        df = pd.DataFrame.from_records(results)
-        df.to_excel(
-            'results.xlsx', 
-            index=False, 
-            sheet_name='results'
-        )
-        df.to_pickle(
-            'results.pkl', 
-            index=False, 
-        )
+    if not RETRY_ATTEMPT:
+        return tasks
+    
+    # removing already succeeded tasks
+    filtered_tasks = []
+    prev_results = pd.read_excel('OUT')
+    already_succeeded_code_runners = prev_results[
+        ~prev_results.full_answer.isna() & ~prev_results.code_execution.isna()
+        ][['question_id', 'model', 'code_execution']].values.tolist()
+    already_succeeded_not_code_runners = prev_results[
+        ~prev_results.full_answer.isna() & prev_results.code_execution.isna()
+        ][['question_id', 'model', 'code_execution']].values.tolist()
+
+    for task in tasks:
+        q_id = tasks['question_id']
+        model_name = tasks['model']
+        code_execution = tasks['code_execution']
+
+        if (pd.isna(code_execution) and 
+            [q_id, model_name] in already_succeeded_not_code_runners):
+            continue 
+
+        if (not pd.isna(code_execution) and 
+            [q_id, model_name, code_execution] in already_succeeded_code_runners):
+            continue 
+
+        filtered_tasks.append(task)
+
+    return filtered_tasks       
+        
+
+def main():
+    results = []
+    for task in enumerate_tasks_configurations():
+        results.append({
+            **task,
+            **ask_model(
+                task['model'], 
+                task['question_text'], 
+                task['code_execution'])
+        })
+
+    df = pd.DataFrame.from_records(results)
+    df.to_excel(
+        'results.xlsx', 
+        index=False, 
+        sheet_name='results'
+    )
+    df.to_pickle(
+        'results.pkl', 
+        index=False, 
+    )
 
 
 if __name__ == "__main__":

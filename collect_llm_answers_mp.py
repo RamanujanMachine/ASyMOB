@@ -1,7 +1,7 @@
 from models import MODELS, get_model
 import multiprocessing as mp
 import pandas as pd
-from collect_llm_answers import load_questions, ask_model
+from collect_llm_answers import ask_model, enumerate_tasks_configurations
 import time
 from pathlib import Path
 
@@ -73,34 +73,20 @@ def collect_single_question(q_id, question_text, true_answer):
     
 
 def main():
-    """
-    Main function to run the multiprocessing.
-    """
-    questions = load_questions()
     args = []
-    for q_id, question_text, true_answer in questions[:2]:
-        # args.append((q_id, question_text, true_answer))
-        # The loops order is important. 
-        # We might hit rate limits if we ask the same model too many things
-        # in parallel. Setting the fast changing item to be the model, leads
-        # to multiple different models running together, which reduces the 
-        # per-model load.
-        for model_name, model in MODELS.items():
-            if not model.support_code():
-                args.append((
-                    q_id, 
-                    question_text, 
-                    true_answer, 
-                    model_name, 
-                    None))
-            else:
-                for code_execution in [True, False]:
-                    args.append((
-                        q_id, 
-                        question_text, 
-                        true_answer, 
-                        model_name, 
-                        code_execution))
+    for task in enumerate_tasks_configurations():
+        q_id = task['question_id']
+        question_text = task['question_text']
+        true_answer = task['true_answer']
+        model_name = task['model']
+        code_execution = task['code_execution']
+
+        args.append((
+            q_id, 
+            question_text, 
+            true_answer, 
+            model_name, 
+            code_execution))
 
     print(f"Number of tasks: {len(args)}")
 
