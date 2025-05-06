@@ -9,6 +9,7 @@ from gemini_interface import GeminiInterface
 import sys
 sys.set_int_max_str_digits(10_000_000)
 
+
 SYMPY_CONVERTER = GeminiInterface("gemini-2.0-flash")
 KNOWN_FUNCTIONS = {
     'atan': sp.atan,
@@ -51,6 +52,7 @@ def parse_sympy_str(expr_str):
     try:
         if pd.isna(expr_str):
             return None
+        expr_str = str(expr_str)
         return clean_sp_object(sp.parse_expr(
             expr_str, 
             local_dict=var_mapping, 
@@ -123,7 +125,7 @@ def latex_to_sympy_llm(latex_str):
                 "(e.g. sp.hyper). Do not use sp.Rational, use the division "
                 "operator (e.g. /). \n\n" + latex_str
         )
-    
+    print(function_def)
     function_def = function_def.strip("`\n")
     if function_def.startswith('python\n'):
         function_def = function_def[6:]
@@ -147,6 +149,7 @@ def latex_to_sympy(latex_str, return_type=True):
     if pd.isna(latex_str):
         return pd.NA, 'na'
     try:
+        latex_str = str(latex_str)
         sp_expr = latex_to_sympy_deter(latex_str)
         if (not pd.isna(sp_expr) and 
             sp_expr.free_symbols.issubset(set(var_mapping.values()))): 
@@ -182,9 +185,9 @@ def format_final_answer_to_sympy(textual_answer):
 
 def fix_expr(expr,):
     if not expr.args:  # Leaf node
-        if str(expr) == 'E':
-            # If not, it will often return the constant e
-            return E
+        # if str(expr) == 'E':
+        #     # If not, it will often return the constant e
+        #     return E
         if expr == sp.E:
             return e
         return expr
