@@ -24,12 +24,14 @@ C = sp.symbols('C')
 RETRY_ATTEMPT = True
 
 
-def load_questions(path=QUESTIONS_PATH, parse_sympy=True):
+def load_questions(path=QUESTIONS_PATH, parse_sympy=True, filter_func=lambda x: True):
     with open(path, 'r') as f:
         questions = json.load(f)
     # Convert answers to sympy objects
     parsed_questions = []
     for question in questions:
+        if not filter_func(question):
+            continue
         q_id = int(question['Index'])
         question_text = question['Challenge']
         sympy_str_answer = question['Answer in Sympy']
@@ -53,7 +55,7 @@ def extract_latex_answer(textual_answer):
     # The reges will not consume the parentheses, but will consume the text 
     # inside.
     matches = re.findall(
-        r'[Tt]he final answer is:?\s*'
+        r'\**[Tt]he final answer is:?\**\s*'
         r'(?:(?:\\\()|(?:\\\[)|(?:\$+))'
         r'(.*?)'
         r'(?:(?:\\\))|(?:\\\])|(?:\$+))',

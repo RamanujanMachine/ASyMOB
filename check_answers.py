@@ -7,16 +7,19 @@ from sp_vars import *
 from pebble import ProcessPool
 from pathlib import Path
 from timeout_utils import apply_with_timeout
-
+from collect_llm_answers import load_questions
 
 # RESULTS_FILE = 'results_mp - 122 questions.xlsx'
 RESULTS_FILE = 'results_mp.xlsx'
 OUTPUT_FILE = 'checked_results.xlsx'
 DISCARDED_FILE = 'discarded.xlsx'
 OUTPUT_FOLDER = Path('checked_results_chunks')
-NUMER_SUBS_FILE = 'numerical_subs.json'
+DISCARDED_FOLDER = Path('discarded_results')
+NUMER_SUBS_FILE = '11_5K_questions_subs.json'
+QUESTIONS_FILE = '11_5K_questions.json'
 
-POOL_SIZE = 10
+
+POOL_SIZE = 20
 CHUNK_TIMEOUT = 10 * 60  # 10 minutes
 ROW_TIMEOUT = 30  # 30 seconds
 
@@ -84,6 +87,7 @@ def compare_numeric(true_answer, model_answer, subs_vals, allowed_diff=1e-5,
 
     diffs = []
     for subs, true_answer_numer in subs_vals:
+        true_answer_numer = sp.Float(true_answer_numer)
         if C in model_answer.free_symbols:
             subs[C] = 0
         model_answer_numer = model_answer.subs(subs).doit()
@@ -97,7 +101,6 @@ def compare_numeric(true_answer, model_answer, subs_vals, allowed_diff=1e-5,
         if true_answer_numer == 0 and model_answer_numer == 0:
             diffs.append(0)
             continue
-        
         
         diff = (true_answer_numer - model_answer_numer)
         if strict:
@@ -136,7 +139,7 @@ def compare_numeric(true_answer, model_answer, subs_vals, allowed_diff=1e-5,
         ])
 
 
-def clean_df(df, save_discarded=False):
+def clean_df(df, save_discarded=False, discarded_file=DISCARDED_FILE):
     df.true_answer = df.true_answer.map(math_parsers.parse_sympy_str)
     model_answer = df.final_answer_latex.map(
         math_parsers.latex_to_sympy)
@@ -174,7 +177,7 @@ def clean_df(df, save_discarded=False):
         invalid_sp_bool['discard_reason'] = 'Invalid sympy boolean'
 
         discarded = pd.concat([invalid_latex, invalid_sp, invalid_sp_bool])
-        discarded.to_excel(DISCARDED_FILE, index=False)
+        discarded.to_excel(discarded_file, index=False)
         print(f'Discarded {len(discarded)} entries.')
     
     return clean_df
@@ -249,7 +252,10 @@ def check_answer_numeric(df, print_debug=False, strict=True):
 
 def check_answers(df, output_file):
     print(output_file)
-    df = clean_df(df, save_discarded=True)
+    df = clean_df(
+        df, 
+        save_discarded=True, 
+        discarded_file=DISCARDED_FOLDER / output_file)
     
     try:
         df['symbolic_comparison'] = check_symbolic_comparison(df)
@@ -324,14 +330,24 @@ def check_answers_rows(df, idxes_to_check, pool):
             results.append(errored_line)
     return results
 
-    
-def main():
-    df = pd.read_excel(RESULTS_FILE, sheet_name='results')
-    # df = clean_df(df, save_discarded=True)
 
+def main():
+    df = pd.read_excel(RESULTS_FILE) #, sheet_name='results')
+    df = df[~df.full_answer.isna()]
+
+    # The conversion to string of the true answer often breaks the sympy's 
+    # constants. In particular, it converts e to the constant E, which is not
+    # what we want. Reloading the original expressions here.
+    questions = load_questions(parse_sympy=False)
+    questions_df = pd.DataFrame.from_records(
+        questions,
+        columns=['q_id', 'question', 'true_answer'],
+        index='q_id')
+    df.true_answer = questions_df.loc[df.question_id].true_answer.values
+    
     results = []
     with ProcessPool(max_workers=POOL_SIZE) as pool:
-        chunk_results, timed_out_chunks = check_answers_chunks()
+        chunk_results, timed_out_chunks = check_answers_chunks(df, pool)
         row_results = check_answers_rows(df, timed_out_chunks, pool)
     
     # Combine the results into a single DataFrame

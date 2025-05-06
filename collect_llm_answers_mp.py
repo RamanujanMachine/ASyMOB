@@ -101,8 +101,7 @@ def main():
     df = pd.DataFrame.from_records(results)
     df.to_excel(
         'results_mp.xlsx', 
-        index=False, 
-        sheet_name='results'
+        index=False
     )
     print(f'that took {time.time() - start}')
     df.to_pickle(

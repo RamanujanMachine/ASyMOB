@@ -5,6 +5,8 @@ import sympy as sp
 from collect_llm_answers import load_questions
 from check_answers import replace_infinite_sums
 import json
+import sys
+sys.set_int_max_str_digits(10_000_000)
 
 N_SUBS = 5
 N_TRIES = 200
@@ -28,12 +30,51 @@ VAR_SUBSTITUTIONS = {
     C: lambda: 0, # C is the integration constant, so we can set it to 0
 }
 
+def _filter_large_numeric_noise(question):
+    if 'Numeric' not in question['Variation']:
+        return True
+    noise_deg = int(question['Variation'].split('-')[-1])
+    if noise_deg < 7:
+        return True
+    return False
+
+def _filter_large_powers(question):
+    """
+    Large powers are not parsed in a decent time by sympy.
+    We load the questions without evaluating the answer, so we can filter them
+    out.
+    """
+    # Michael be healthy
+    if int(question['Index']) in [
+        5387, 5388, 5389, 5390, 5436, 5437, 5438, 5439, 5440, 6528, 6529, 6530,
+        6531, 6532, 7104, 7105, 7106, 7107, 7108, 10427, 10428, 10429, 10430,
+        10431, 10432, 10422, 9121, 9122, 9123, 9124, 9125, 9126, 9151, 9152, 
+        9153, 9154, 9155, 9156]: 
+        return False
+    if 'Numeric' not in question['Variation']:
+        return True
+    unevaluated = sp.parse_expr(question['Answer in Sympy'], evaluate=False)
+    try:
+        if unevaluated.has(sp.Pow):
+            # check if the power is large
+            for base, exp in unevaluated.as_powers_dict().items():
+                if abs(exp) > 1_000:
+                    return False
+    except Exception as e:
+        return True
+    return True
+    
+    
 if __name__ == '__main__':
-    questions = load_questions(QUESTIONS_FILE)
+    questions = load_questions(
+        QUESTIONS_FILE,
+        filter_func=_filter_large_powers,
+        )
     print(f'Total questions: {len(questions)}')
     all_questions_subs = {}
 
     for q_id, _, true_answer in questions:
+        print(q_id)
         true_answer = true_answer.removeO()
         if true_answer.has(sp.Sum):
             true_answer = replace_infinite_sums(true_answer)
@@ -45,7 +86,7 @@ if __name__ == '__main__':
                 for var in true_answer.free_symbols
             }
             try:
-                numer_answer = float(true_answer.subs(sub_vals).evalf())
+                numer_answer = true_answer.subs(sub_vals).evalf()
             except Exception as e:
                 # bad substitution, try again
                 continue
@@ -53,14 +94,14 @@ if __name__ == '__main__':
                 # bad substitution, try again
                 continue
             # check if the answer is finite
-            if not np.isfinite(numer_answer):
+            if numer_answer.is_infinite:
                 # bad substitution, try again
                 continue
             
             subs_vals_strs = {
                 str(var): val for var, val in sub_vals.items()
             }
-            question_subs.append((subs_vals_strs, numer_answer))
+            question_subs.append((subs_vals_strs, str(numer_answer)))
             
             if len(question_subs) >= N_SUBS:
                 break
