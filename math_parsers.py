@@ -135,6 +135,18 @@ def latex_to_sympy_llm(latex_str):
     # Dynamically extract the function's arguments and pass what is needed
     sig = inspect.signature(solution)
     accepted_params = sig.parameters
+    
+    for param in accepted_params:
+        # Check if the model requested a variable that is not in the standard 
+        # var_mapping. This which usually means that the model invented a new 
+        # variable, which means it was wrong. We mark those cases as `sp.nan`.
+        # This workaround lets us use the rest of the pipeline without
+        # modification.
+        if param in [sp.var('e'), sp.var('pi')]:
+            continue
+        if param not in used_vars:
+            print(f"Unknown variable {param} in function definition")
+            return sp.nan
     filtered_args = {k: v for k, v in var_mapping.items() if k in accepted_params}
 
     # Function solution defined dynamically

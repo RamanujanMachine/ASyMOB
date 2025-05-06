@@ -71,6 +71,11 @@ def replace_infinite_sums(expr, new_upper=UPPER_LIMIT_FINITE):
 
 def compare_numeric(true_answer, model_answer, subs_vals, allowed_diff=1e-5, 
                     strict=True, debug=DEBUG):
+    if model_answer == sp.nan:
+        # If the model answer is NaN, we can assume that the model is wrong.
+        # See math_parsers.latex_to_sympy_llm for more details.
+        return False
+    
     model_answer = model_answer.removeO()
     if model_answer.has(sp.Sum):
         model_answer = replace_infinite_sums(model_answer)
@@ -196,6 +201,11 @@ def check_symbolic_comparison(df, print_debug=False, timeout=None):
             print('Starting', i)
         true_answer = row.true_answer
         model_answer = row.model_answer
+        if model_answer == sp.nan:
+            # If the model answer is NaN, we can assume that the model is wrong.
+            # See math_parsers.latex_to_sympy_llm for more details.
+            symb_equal.append(False)
+            continue
         if not true_answer.has(sp.Integral) and model_answer.has(sp.Integral):
             # If the model answer has an integral, but the true answer does not,
             # we can assume that the model is wrong.
