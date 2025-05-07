@@ -43,7 +43,8 @@ def clean_sp_object(sp_expr):
     sp_expr = fix_expr(remove_equality(sp_expr))
     sp_expr =  sp_expr.subs({
         sp.var('e'): sp.exp(1),
-        sp.var('pi'): sp.pi
+        sp.var('pi'): sp.pi,
+        sp.var('i'): sp.I,
     })
     return sp_expr
 
@@ -97,13 +98,13 @@ def latex_to_sympy_deter(latex_str):
         # use constants for e and pi
         return clean_sp_object(parse_latex(latex_str))
     except Exception as e:
-        print('Error parsing latex string:')
-        print(latex_str)
-        print(e)
+        # print('Error parsing latex string:')
+        # print(latex_str)
+        # print(e)
         return pd.NA
 
 
-def latex_to_sympy_llm(latex_str):
+def latex_to_sympy_llm(latex_str, debug=False):
     """
     Convert a LaTeX string to a sympy expression, using the LLM parser.
     """
@@ -117,15 +118,13 @@ def latex_to_sympy_llm(latex_str):
                 "will return the expression as a sympy object. The "
                 "implementation will be identical to the expression given. "
                 "You will not use any form of simplification or modification "
-                "for the mathematical expression. If the answer is not "
-                "dependent on one or more of the parameters accepted it may "
-                "not use them. Only print the function, without additional "
-                "text. Assume all necessary parameters and symbols already "
-                "exists. Access sympy functions through the sp module "
-                "(e.g. sp.hyper). Do not use sp.Rational, use the division "
-                "operator (e.g. /). \n\n" + latex_str
+                "for the mathematical expression. Only print the function, "
+                "without additional text. Access sympy functions through the " 
+                "sp module (e.g. sp.hyper). Do not use sp.Rational, use the " 
+                f"division operator (e.g. /). \n\n $${latex_str}$$" 
         )
-    print(function_def)
+    if debug:
+        print(function_def)
     function_def = function_def.strip("`\n")
     if function_def.startswith('python\n'):
         function_def = function_def[6:]
@@ -142,8 +141,6 @@ def latex_to_sympy_llm(latex_str):
         # variable, which means it was wrong. We mark those cases as `sp.nan`.
         # This workaround lets us use the rest of the pipeline without
         # modification.
-        if param in [sp.var('e'), sp.var('pi')]:
-            continue
         if param not in used_vars:
             print(f"Unknown variable {param} in function definition")
             return sp.nan
@@ -154,7 +151,7 @@ def latex_to_sympy_llm(latex_str):
         **filtered_args
     ))
 
-def latex_to_sympy(latex_str, return_type=True):
+def latex_to_sympy(latex_str, debug=False):
     """
     Convert a LaTeX string to a sympy expression, using the LLM parser.
     """
@@ -167,11 +164,11 @@ def latex_to_sympy(latex_str, return_type=True):
             sp_expr.free_symbols.issubset(set(var_mapping.values()))): 
             return sp_expr, 'deterministic'
         else:
-            return latex_to_sympy_llm(latex_str), 'llm'
+            return latex_to_sympy_llm(latex_str, debug=debug), 'llm'
     except Exception as e:
-        print('Error parsing latex string:')
-        print(latex_str)
-        print(e)
+        # print('Error parsing latex string:')
+        # print(latex_str)
+        # print(e)
         return pd.NA, 'error'
 
 
