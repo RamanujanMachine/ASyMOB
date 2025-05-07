@@ -15,8 +15,8 @@ OUTPUT_FILE = 'checked_results.xlsx'
 DISCARDED_FILE = 'discarded.json'
 OUTPUT_FOLDER = Path('checked_results_chunks')
 DISCARDED_FOLDER = Path('discarded_results')
-NUMER_SUBS_FILE = '11_5K_questions_subs.json'
-QUESTIONS_FILE = '11_5K_questions.json'
+NUMER_SUBS_FILE = 'numer_subs.json'
+QUESTIONS_FILE = 'questions.json'
 
 
 POOL_SIZE = 10
