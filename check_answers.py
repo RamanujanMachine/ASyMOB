@@ -9,10 +9,10 @@ from pathlib import Path
 from timeout_utils import apply_with_timeout
 from collect_llm_answers import load_questions, extract_latex_answer
 
-# RESULTS_FILE = 'results_mp - 122 questions.xlsx'
+# RESULTS_FILE = 'results_mp - 122 questions.json'
 RESULTS_FILE = 'joined_results.xlsx'
 OUTPUT_FILE = 'checked_results.xlsx'
-DISCARDED_FILE = 'discarded.xlsx'
+DISCARDED_FILE = 'discarded.json'
 OUTPUT_FOLDER = Path('checked_results_chunks')
 DISCARDED_FOLDER = Path('discarded_results')
 NUMER_SUBS_FILE = '11_5K_questions_subs.json'
@@ -197,7 +197,7 @@ def clean_df(df, save_discarded=False, discarded_file=DISCARDED_FILE):
 
         discarded = pd.concat([invalid_latex, invalid_sp, invalid_sp_bool])
         if len(discarded) > 0:
-            discarded.to_excel(discarded_file, index=False)
+            discarded.to_json(discarded_file, index=False)
         # print(f'Discarded {len(discarded)} entries.')
     
     return clean_df
@@ -290,13 +290,13 @@ def check_answers(df, output_file):
 
         # Convert sympys to strings for pickling on process exit
         df['model_answer'] = df.model_answer.astype('str')
-        df.to_excel(OUTPUT_FOLDER / output_file)
+        df.to_json(OUTPUT_FOLDER / output_file)
     except Exception as e:
         print(f'Error processing file {output_file} :', e)
         df = pd.DataFrame(columns=['question_id', 'model', 'true_answer', 
                                    'model_answer', 'final_answer_latex'])
         df['error'] = str(e)
-        df.to_excel(output_file, index=False)
+        df.to_json(output_file, index=False)
     return df
 
 
@@ -308,7 +308,7 @@ def check_answers_chunks(df, pool):
         target_df = df.iloc[i:i+CHUNK_SIZE].copy()
         args = (
             target_df, 
-            f'checked_{i}-{i+CHUNK_SIZE-1}.xlsx')
+            f'checked_{i}-{i+CHUNK_SIZE-1}.json')
         future = pool.schedule(
             check_answers, 
             args=args, 
@@ -338,7 +338,7 @@ def check_answers_rows(df, idxes_to_check, pool):
             target_df = df.iloc[i:i+1].copy()
             args = (
                 target_df, 
-                f'checked_{i}.xlsx')
+                f'checked_{i}.json')
             future = pool.schedule(
                 check_answers, 
                 args=args, 
@@ -382,7 +382,7 @@ def main():
             target_df = df.iloc[i:i+1].copy()
             args = (
                 target_df, 
-                f'checked_{i}.xlsx')
+                f'checked_{i}.json')
             future = pool.schedule(
                 check_answers, 
                 args=args, 
@@ -403,15 +403,15 @@ def main():
                 timeouts += 1
                 errored_line = df[i:i+1].copy()
                 errored_line['error'] = 'timeout'
-                errored_line.to_excel(
-                    DISCARDED_FOLDER / f'errored_{i}.xlsx', index=False)
+                errored_line.to_json(
+                    DISCARDED_FOLDER / f'errored_{i}.json', index=False)
 
             if (completed + timeouts) % 50 == 0:
                 print(f"Completed {completed} rows, {timeouts} timeouts")
     
     # Combine the results into a single DataFrame
     # combined_df = pd.concat(chunk_results + row_results, ignore_index=True)
-    # combined_df.to_excel(OUTPUT_FILE, index=False)
+    # combined_df.to_json(OUTPUT_FILE, index=False)
 
 if __name__ == '__main__':
     main()
