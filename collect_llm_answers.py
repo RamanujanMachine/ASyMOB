@@ -127,19 +127,6 @@ def ask_model(model, question_text, code_execution):
     
     return result
 
-def symbolic_comparison(A, B):
-    """
-    Compare two sympy expressions A and B.
-
-    Returns True if they are equal, False otherwise.
-    """
-    try:
-        return sp.simplify(A - B) == 0 or sp.simplify(A - B) == C or \
-                sp.simplify(B - A) == C
-    except Exception as e:
-        print(f"Error comparing expressions: {A}, {B}")
-        return None
-
 
 def enumerate_tasks_configurations(
         retry_attempt=RETRY_ATTEMPT, prev_res_file='results_mp.xlsx'):
