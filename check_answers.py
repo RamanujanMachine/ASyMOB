@@ -7,10 +7,10 @@ from sp_vars import *
 from pebble import ProcessPool
 from pathlib import Path
 from timeout_utils import apply_with_timeout
-from collect_llm_answers import load_questions
+from collect_llm_answers import load_questions, extract_latex_answer
 
 # RESULTS_FILE = 'results_mp - 122 questions.xlsx'
-RESULTS_FILE = 'results_mp.xlsx'
+RESULTS_FILE = 'joined_results.xlsx'
 OUTPUT_FILE = 'checked_results.xlsx'
 DISCARDED_FILE = 'discarded.xlsx'
 OUTPUT_FOLDER = Path('checked_results_chunks')
@@ -19,9 +19,12 @@ NUMER_SUBS_FILE = '11_5K_questions_subs.json'
 QUESTIONS_FILE = '11_5K_questions.json'
 
 
-POOL_SIZE = 20
-CHUNK_TIMEOUT = 10 * 60  # 10 minutes
+POOL_SIZE = 10
+CHUNK_TIMEOUT = 5 * 60  # 10 minutes
 ROW_TIMEOUT = 30  # 30 seconds
+UPPER_LIMIT_FINITE = 10
+CHUNK_SIZE = 50
+DEBUG = False
 
 
 # TODO - generate automatically.
@@ -41,9 +44,6 @@ VAR_SUBSTITUTIONS = {
 
     C: lambda: 0, # C is the integration constant, so we can set it to 0
 }
-UPPER_LIMIT_FINITE = 10
-CHUNK_SIZE = 100
-DEBUG = False
 
 
 def replace_infinite_sums(expr, new_upper=UPPER_LIMIT_FINITE):
@@ -76,7 +76,7 @@ def compare_numeric(true_answer, model_answer, subs_vals, allowed_diff=1e-5,
         # See math_parsers.latex_to_sympy_llm for more details.
         return False
     
-    model_answer = model_answer.removeO()
+    model_answer = model_answer.expand().removeO()
     if model_answer.has(sp.Sum):
         model_answer = replace_infinite_sums(model_answer)
 
@@ -84,7 +84,17 @@ def compare_numeric(true_answer, model_answer, subs_vals, allowed_diff=1e-5,
         # If the model answer has an integral, but the true answer does not,
         # we can assume that the model is wrong.
         return False
-    
+
+    # If the model answer has different free symbols than the true answer,
+    # we can assume that the model is wrong.
+    model_answer_symbols = set(model_answer.free_symbols)
+    true_answer_symbols = set(true_answer.free_symbols)
+    # We only allow for C, the integration constant, to be different.
+    model_answer_symbols.add(C)
+    true_answer_symbols.add(C)
+    if model_answer_symbols != true_answer_symbols:
+        return False
+
     if debug:
         print('true_answer: ', true_answer)
         print('model_answer: ', model_answer)
@@ -92,16 +102,13 @@ def compare_numeric(true_answer, model_answer, subs_vals, allowed_diff=1e-5,
 
     diffs = []
     for subs, true_answer_numer in subs_vals:
-        true_answer_numer = sp.Float(true_answer_numer)
+        # This should be a number, but it might have I (complex number) in it.
+        true_answer_numer = sp.parse_expr(true_answer_numer)
         if C in model_answer.free_symbols:
             subs[C] = 0
-        model_answer_numer = model_answer.subs(subs).doit()
+        model_answer_numer = model_answer.subs(subs).evalf()
         
-        try:
-            model_answer_numer = float(model_answer_numer.evalf())
-        except Exception as e:
-            # Couldn't cast to float -> invalid answer
-            return False
+        # model_answer_numer = float(model_answer_numer.evalf())
         
         if true_answer_numer == 0 and model_answer_numer == 0:
             diffs.append(0)
@@ -145,7 +152,14 @@ def compare_numeric(true_answer, model_answer, subs_vals, allowed_diff=1e-5,
 
 
 def clean_df(df, save_discarded=False, discarded_file=DISCARDED_FILE):
+    def _extract_latex_answer_wrapper(full_answer):
+        try:
+            return extract_latex_answer(full_answer)
+        except Exception as e:
+            print(f"Error extracting latex answer: {e}")
+            return None
     df.true_answer = df.true_answer.map(math_parsers.parse_sympy_str)
+    df.final_answer_latex = df.full_answer.apply(_extract_latex_answer_wrapper)
     model_answer = df.final_answer_latex.map(
         math_parsers.latex_to_sympy)
     df['model_answer'] = model_answer.apply(lambda x: x[0])
@@ -153,17 +167,17 @@ def clean_df(df, save_discarded=False, discarded_file=DISCARDED_FILE):
 
     # Filter out invalid answers
     n_entries = len(df)
-    print(f'Total number of entries: {n_entries}')
+    # print(f'Total number of entries: {n_entries}')
 
     succ_latex = df[~df.final_answer_latex.isna()]
     n_succ_latex = len(succ_latex)
-    print(f'Successfully extracted latex: {n_succ_latex}.'
-          f'Drop of {n_entries-n_succ_latex}')
+    # print(f'Successfully extracted latex: {n_succ_latex}.'
+    #       f'Drop of {n_entries-n_succ_latex}')
 
     succ_sp = succ_latex[~succ_latex.model_answer.isna()]
     n_succ_sp = len(succ_sp)
-    print(f'Successfully extracted sympy: {n_succ_sp}.'
-          f'Drop of {n_succ_latex-n_succ_sp}')
+    # print(f'Successfully extracted sympy: {n_succ_sp}.'
+    #       f'Drop of {n_succ_latex-n_succ_sp}')
     
     # Funny edge case - sometimes the model spits a wrong, numeric answer
     # like 1=0, which is translated to `False` in sympy. This later breaks the
@@ -182,8 +196,9 @@ def clean_df(df, save_discarded=False, discarded_file=DISCARDED_FILE):
         invalid_sp_bool['discard_reason'] = 'Invalid sympy boolean'
 
         discarded = pd.concat([invalid_latex, invalid_sp, invalid_sp_bool])
-        discarded.to_excel(discarded_file, index=False)
-        print(f'Discarded {len(discarded)} entries.')
+        if len(discarded) > 0:
+            discarded.to_excel(discarded_file, index=False)
+        # print(f'Discarded {len(discarded)} entries.')
     
     return clean_df
 
@@ -212,7 +227,10 @@ def check_symbolic_comparison(df, print_debug=False, timeout=None):
             symb_equal.append(False)
             continue
 
-        raw_diff = (true_answer.removeO() - model_answer.removeO())
+        raw_diff = (
+            true_answer.expand().removeO() - 
+            model_answer.expand().removeO()
+        )
         raw_diff = raw_diff.subs(
             {sp.var('pi'): sp.pi, sp.var('e'): sp.exp(1)}
         )
@@ -261,7 +279,6 @@ def check_answer_numeric(df, print_debug=False, strict=True):
 
 
 def check_answers(df, output_file):
-    print(output_file)
     df = clean_df(
         df, 
         save_discarded=True, 
@@ -344,6 +361,7 @@ def check_answers_rows(df, idxes_to_check, pool):
 def main():
     df = pd.read_excel(RESULTS_FILE) #, sheet_name='results')
     df = df[~df.full_answer.isna()]
+    df = df.sample(frac=1).reset_index(drop=True)
 
     # The conversion to string of the true answer often breaks the sympy's 
     # constants. In particular, it converts e to the constant E, which is not
@@ -357,12 +375,43 @@ def main():
     
     results = []
     with ProcessPool(max_workers=POOL_SIZE) as pool:
-        chunk_results, timed_out_chunks = check_answers_chunks(df, pool)
-        row_results = check_answers_rows(df, timed_out_chunks, pool)
+        # chunk_results, timed_out_chunks = check_answers_chunks(df, pool)
+        # row_results = check_answers_rows(df, timed_out_chunks, pool)
+        futures = []
+        for i in range(0, len(df)):
+            target_df = df.iloc[i:i+1].copy()
+            args = (
+                target_df, 
+                f'checked_{i}.xlsx')
+            future = pool.schedule(
+                check_answers, 
+                args=args, 
+                timeout=ROW_TIMEOUT
+            )
+            futures.append((future, i))
+        print(f"Scheduled {len(futures)} rows")
+
+        completed = 0
+        timeouts = 0
+        for future, i in futures:
+            try:
+                results.append(future.result())
+                # print(f"Row {i} completed")
+                completed += 1
+            except TimeoutError as e:
+                print(f"Row {i} timed out.")
+                timeouts += 1
+                errored_line = df[i:i+1].copy()
+                errored_line['error'] = 'timeout'
+                errored_line.to_excel(
+                    DISCARDED_FOLDER / f'errored_{i}.xlsx', index=False)
+
+            if (completed + timeouts) % 50 == 0:
+                print(f"Completed {completed} rows, {timeouts} timeouts")
     
     # Combine the results into a single DataFrame
-    combined_df = pd.concat(chunk_results + row_results, ignore_index=True)
-    combined_df.to_excel(OUTPUT_FILE, index=False)
+    # combined_df = pd.concat(chunk_results + row_results, ignore_index=True)
+    # combined_df.to_excel(OUTPUT_FILE, index=False)
 
 if __name__ == '__main__':
     main()
