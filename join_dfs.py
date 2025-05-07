@@ -25,7 +25,7 @@ if __name__ == '__main__':
             except Exception as e:
                 print('wtf', fn, e)
         if i % 100 == 0:
-            print(f'Processed {i} files')
+            print(f'Processed {i} files')   
     result = pd.concat(dfs, ignore_index=True)
     print('Dataframes joined successfully')
 
