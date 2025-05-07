@@ -34,8 +34,8 @@ def llm_survey_wrapper(q_id, question_text, true_answer, model_name, code_execut
         }
 
     df = pd.DataFrame.from_records([result])
-    df.to_excel(
-        CHUNKS_DIR / f'{q_id}_{model_name.replace('/', '-')}_{code_execution}.xlsx', 
+    df.to_json(
+        CHUNKS_DIR / f'{q_id}_{model_name.replace('/', '-')}_{code_execution}.json', 
         index=False, 
         sheet_name='results'
     )
