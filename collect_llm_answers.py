@@ -11,9 +11,6 @@ import re
 
 
 QUESTIONS_PATH = 'questions.json'
-# SYMPY_CONVERTER_MODEL = 'openai/gpt-4o'# 'gemini/gemini-2.5-pro-exp-03-25'
-# SYMPY_CONVERTER = GeminiInterface("gemini-2.5-pro-exp-03-25") # ge(SYMPY_CONVERTER_MODEL)
-SYMPY_CONVERTER = OpenAIInterface("gpt-4o")
 MATH_INSTRUCTIONS = (
     'Finish your answer by writing "The final answer is:" and then the '
     'answer in latex in a new line. Write the answer as a single expression. '
