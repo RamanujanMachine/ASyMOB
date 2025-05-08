@@ -11,7 +11,7 @@ from collect_llm_answers import load_questions, extract_latex_answer
 import traceback
 
 # RESULTS_FILE = 'results_mp - 122 questions.json'
-RESULTS_FILE = 'joined_results.xlsx'
+RESULTS_FILE = 'all_not_checked_0805_1330.xlsx'
 OUTPUT_FILE = 'checked_results.xlsx'
 DISCARDED_FILE = 'discarded.json'
 OUTPUT_FOLDER = Path('checked_results_chunks')
@@ -20,7 +20,7 @@ NUMER_SUBS_FILE = 'numer_subs.json'
 QUESTIONS_FILE = 'questions.json'
 
 
-POOL_SIZE = 10
+POOL_SIZE = 5
 CHUNK_TIMEOUT = 5 * 60  # 10 minutes
 ROW_TIMEOUT = 30  # 30 seconds
 UPPER_LIMIT_FINITE = 10
@@ -216,22 +216,36 @@ def check_answers(question_data, numeric_subs, output_file):
             question_data['model_answer']
         )
 
-        question_data['numeric_comparison'] = compare_numeric(
-            question_data['true_answer'], 
-            question_data['model_answer'], 
-            numeric_subs
-        )
+        if numeric_subs is None:
+            question_data['numeric_comparison'] = None
+        else:
+            question_data['numeric_comparison'] = compare_numeric(
+                question_data['true_answer'], 
+                question_data['model_answer'], 
+                numeric_subs
+            )
 
     except Exception as e:
         ex = traceback.format_exc()
         print(f'Error parsing {_get_distinct_identifier(question_data)}')
         print(f'Error: {ex}')
         question_data['error'] = str(ex)
+
+    # Sympy objects are often not JSON serializable, convert them to strings.
+    if 'model_answer' in question_data:
+        question_data['model_answer'] = str(question_data['model_answer'])
+    if 'true_answer' in question_data:
+        question_data['true_answer'] = str(question_data['true_answer'])
     
-    return question_data
-    with open(OUTPUT_FOLDER / output_file, 'w') as f:
-        json.dump(question_data, f, indent=2)
-    return question_data
+    # Write to output file
+    df = pd.DataFrame.from_records([question_data])
+    df.to_excel(
+        OUTPUT_FOLDER / output_file, 
+        index=False
+    )
+
+    return question_data    
+
 
 
 def iter_tasks(tasks_df, already_done_df):
@@ -271,12 +285,20 @@ def main():
         # chunk_results, timed_out_chunks = check_answers_chunks(df, pool)
         # row_results = check_answers_rows(df, timed_out_chunks, pool)
         futures = []
-        for question_data in iter_tasks(df, already_done_df):
-            args = (
-                question_data, 
-                numer_subs[str(question_data['question_id'])],
-                f'checked_{i}.json'
-            )
+        for i, question_data in enumerate(iter_tasks(df, already_done_df)):
+            if str(question_data['question_id']) not in numer_subs:
+                print(f"Question {question_data['question_id']} has no subs")
+                args = (
+                    question_data, 
+                    None,
+                    f'checked_{i}.xlsx'
+                )
+            else:
+                args = (
+                    question_data, 
+                    numer_subs[str(question_data['question_id'])],
+                    f'checked_{i}.xlsx'
+                )
             future = pool.schedule(
                 check_answers, 
                 args=args, 
@@ -297,8 +319,8 @@ def main():
                 timeouts += 1
                 errored_line = df[i:i+1].copy()
                 errored_line['error'] = 'timeout'
-                errored_line.to_json(
-                    OUTPUT_FOLDER / f'timeout_{i}.json')
+                errored_line.to_excel(
+                    OUTPUT_FOLDER / f'timeout_{i}.xlsx')
 
             if (completed + timeouts) % 50 == 0:
                 print(f"Completed {completed} rows, {timeouts} timeouts")
@@ -306,7 +328,7 @@ def main():
     # Combine the results into a single DataFrame
     results = pd.DataFrame.from_records(results)
     combined_df = pd.concat([already_done_df, results], axis=1)
-    combined_df.to_json(OUTPUT_FILE, index=False)
+    combined_df.to_excel(OUTPUT_FILE, index=False)
 
 if __name__ == '__main__':
     main()
