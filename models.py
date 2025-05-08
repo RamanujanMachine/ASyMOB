@@ -14,7 +14,7 @@ MODELS_GENERATORS = {
 
     # Google Gemini models
     "gemini/gemini-2.0-flash": lambda: GeminiInterface("gemini-2.0-flash"),
-    "gemini/gemini-2.5-pro-preview-03-25": lambda: GeminiInterface("gemini-2.5-pro-preview-03-25"),
+    "gemini/gemini-2.5-flash-preview-04-17": lambda: GeminiInterface("gemini-2.5-flash-preview-04-17"),
     "gemini/gemma-3-27b-it": lambda: GeminiInterface("gemma-3-27b-it"),
 
     # Claude
