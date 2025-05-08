@@ -8,9 +8,9 @@ from hugging_face_interface import HuggingFaceInterface
 MODELS_GENERATORS = {
     # OpenAI models
     # "openai/o3": lambda: OpenAIInterface("o3"),
-    "openai/gpt-4o": lambda: OpenAIInterface("gpt-4o"), 
-    "openai/gpt-4.1": lambda: OpenAIInterface("gpt-4.1"),
-    "openai/gpt-4o-mini": lambda: OpenAIInterface("gpt-4o-mini"),
+    "gpt-4o": lambda: OpenAIInterface("gpt-4o"), 
+    "gpt-4.1": lambda: OpenAIInterface("gpt-4.1"),
+    "gpt-4o-mini": lambda: OpenAIInterface("gpt-4o-mini"),
 
     # Google Gemini models
     "gemini/gemini-2.0-flash": lambda: GeminiInterface("gemini-2.0-flash"),
