@@ -58,13 +58,21 @@ def extract_latex_answer(textual_answer):
         r'(?:(?:\\\))|(?:\\\])|(?:\$+))',
         textual_answer, 
         re.DOTALL)
+    
     if not matches:
         # escalate - just look for the last boxed{.*}
         matches = re.findall(
             r'\\boxed\{(.*?)\}' + '(?:\n|$)',
             textual_answer, 
             re.DOTALL)
-    
+        
+    if not matches:
+        # escalate harder - just look for the last $$(.*?)$$
+        matches = re.findall(
+            r'\$\$(.*?)\$\$',
+            textual_answer, 
+            re.DOTALL)
+        
     if not matches:
         raise ValueError("No latex answer found in the textual answer.")
     
