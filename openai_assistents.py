@@ -5,11 +5,17 @@ import traceback
 from pathlib import Path
 import pandas as pd
 import multiprocessing as mp
+import time
+import re
 
-MODELS = ['gpt-4o', 'gpt-4.1', 'gpt-4o-mini']
+MODELS = ['gpt-4o'] # ], 'gpt-4.1', 'gpt-4o-mini']
 OUTPUT_FOLDER = Path('assistant_outputs')
-BATCH_SIZE = 10
+BATCH_SIZE = 1000
 N_WORKERS = 5
+
+
+class TerminalException(Exception):
+    pass
 
 # We only need the iface to get the client with the api key.
 def send_message(client, assistant, message):
@@ -52,10 +58,13 @@ def send_message_in_thread(thread, client, assistant, message):
     response = messages.data[0].content[0].text.value
 
     # Delete the thread messages
-#     client.beta.threads.delete(thread.id)
-    for message in messages.data:
-        client.beta.threads.messages.delete(
-            thread_id=thread.id, message_id=message.id)
+    # prev_messages = messages.data
+    # if len(prev_messages) != 3:
+    #     raise TerminalException(
+    #         f"Expected 3 messages, got {len(prev_messages)}")
+    # for message in messages.data[:2]:
+    #     client.beta.threads.messages.delete(
+    #         thread_id=thread.id, message_id=message.id)
     
     if run.status != 'completed':
         raise Exception(
@@ -112,19 +121,73 @@ def test_models():
             client.beta.assistants.delete(assistant.id)
 
 
-def handle_batch(questions_data, model_name):
+def handle_batch(questions_data, model_name, question_timeout=60):
     print(f"Processing batch with model {model_name}...")
     iface = OpenAIInterface(model=model_name)
+    # format message
+    joined_question = (
+        'Here is a list of questions. You will answer them one-by-one without '
+        'mixing them. Write "Answer %d:" before answering every questions.\n\n'
+    )
+    results = []
+    for q_id, question_text, true_answer in questions_data:
+        question = iface._incentivize_code_execution(
+            MATH_INSTRUCTIONS + question_text,
+            use_code=True
+        )
+        joined_question += f"Question {q_id}: {question}\n\n"
+    
+    # Interact with the model
     client = iface.client
     assistant = client.beta.assistants.create(
         model=model_name,
         tools=[{"type": "code_interpreter"}]
     )
     thread = client.beta.threads.create()
+    client.beta.threads.messages.create(
+        thread_id=thread.id,
+        role="user",
+        content=joined_question.strip()
+    )
+    run = client.beta.threads.runs.create(
+        thread_id=thread.id,
+        assistant_id=assistant.id
+    )
 
-
+    # One message for each question plus our message
+    desired_messages_count = len(questions_data) + 1
+    start = time.time()
+    while True:
+        messages = client.beta.threads.messages.list(
+            thread_id=thread.id
+        )
+        if len(messages.data) >= desired_messages_count:
+            break
+        if time.time() - start > question_timeout * len(questions_data):
+            print("Timeout waiting for model response.")
+            break
+        time.sleep(1)
+    run = client.beta.threads.runs.retrieve(
+        thread_id=thread.id,
+        run_id=run.id
+    )
+    total_tokens = run.usage.total_tokens
+    
+    # Parse the results
+    q_id_to_data = {int(data[0]): data for data in questions_data}
     results = []
-    for q_id, question_text, true_answer in questions_data:
+    for message in messages.data:
+        if message.role != 'assistant':
+            continue
+        message_text = message.content[0].text.value
+        if not message_text.startswith('Answer'):
+            print(f"Unexpected message format: {message_text}")
+            continue
+
+        # Extract the question number from the message
+        q_id = int(message_text[7:message_text.index(':')])
+        _, question_text, true_answer = q_id_to_data[q_id]
+
         result = {
             'model': model_name,
             'question_id': q_id,
@@ -134,17 +197,9 @@ def handle_batch(questions_data, model_name):
         }
 
         try:
-            message = iface._incentivize_code_execution(
-                MATH_INSTRUCTIONS + question_text,
-                use_code=True
-            )
-
-            response, tokens_used = send_message_in_thread(
-                thread, client, assistant, message
-            )
-
+            response = message_text.split('\n', 1)[1].strip()
             result['full_answer'] = response
-            result['tokens_used'] = tokens_used
+            result['tokens_used'] = total_tokens / len(questions_data)
 
             latex_answer = extract_latex_answer(response)
             result['final_answer_latex'] = latex_answer
