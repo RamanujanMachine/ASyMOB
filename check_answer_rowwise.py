@@ -376,7 +376,7 @@ def main():
                 args = (
                     question_data, 
                     numer_subs[str(question_data['question_id'])],
-                    f'checked_{i}.xlsx'
+                    f'checked_{_get_distinct_identifier(question_data)}.xlsx'
                 )
             future = pool.schedule(
                 check_answer, 
