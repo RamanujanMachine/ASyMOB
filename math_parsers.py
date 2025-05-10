@@ -21,6 +21,9 @@ KNOWN_FUNCTIONS = {
     'exp': sp.exp,
 }
 
+class LatexFuncCallError(Exception):
+    pass
+
 def remove_equality(sp_expr):
     try:
         if isinstance(sp_expr, sp.Equality):
@@ -165,6 +168,8 @@ def latex_to_sympy(latex_str, debug=False):
             return sp_expr, 'deterministic'
         else:
             return latex_to_sympy_llm(latex_str, debug=debug), 'llm'
+    except LatexFuncCallError as e:
+        return latex_to_sympy_llm(latex_str, debug=debug), 'llm (val func call)'
     except Exception as e:
         # print('Error parsing latex string:')
         # print(latex_str)
@@ -209,7 +214,7 @@ def fix_expr(expr, swap_funcs=True):
                 fix_expr(expr.args[0], swap_funcs)
                 )
         else:
-            raise Exception(
+            raise LatexFuncCallError(
                 'Sympy identified a variable as a function, '
                 'leaving it for LLM to fix')
     if str(expr.func) in KNOWN_FUNCTIONS:
