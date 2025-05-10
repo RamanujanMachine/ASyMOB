@@ -99,10 +99,6 @@ def _meta_compare(model_answer, true_answer):
         # See math_parsers.latex_to_sympy_llm for more details.
         return False
     
-    model_answer = model_answer.expand().removeO()
-    if model_answer.has(sp.Sum):
-        model_answer = replace_infinite_sums(model_answer)
-
     if true_answer.has(sp.Integral) != model_answer.has(sp.Integral):
         # If the model answer has an integral, but the true answer does not,
         # we can assume that the model is wrong.
@@ -259,11 +255,16 @@ def check_answer(question_data, numeric_subs, output_file):
         question_data['final_answer_latex'] = extract_latex_answer(
             question_data['full_answer'])
         
-        model_ans = math_parsers.latex_to_sympy(
+        model_answer, answer_type = math_parsers.latex_to_sympy(
             question_data['final_answer_latex']
         )
-        question_data['model_answer'] = model_ans[0]
-        question_data['model_answer_type'] = model_ans[1]
+        model_answer = model_answer.expand().removeO()
+        if model_answer.has(sp.Sum):
+            model_answer = replace_infinite_sums(model_answer)
+
+
+        question_data['model_answer'] = model_answer
+        question_data['model_answer_type'] = answer_type
         
         should_check = _meta_compare(
             question_data['model_answer'], 
