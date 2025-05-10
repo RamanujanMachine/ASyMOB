@@ -9,6 +9,7 @@ MODELS_GENERATORS = {
     # OpenAI models
     # "openai/o3": lambda: OpenAIInterface("o3"),
     "gpt-4o": lambda: OpenAIInterface("gpt-4o"), 
+    "o4-mini": lambda: OpenAIInterface("o4-mini"), 
     "gpt-4.1": lambda: OpenAIInterface("gpt-4.1"),
     "gpt-4o-mini": lambda: OpenAIInterface("gpt-4o-mini"),
 
