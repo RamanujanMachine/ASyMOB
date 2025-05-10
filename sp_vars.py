@@ -36,6 +36,7 @@ var_mapping = {
     'x': x,
     'k': k,
     'n': n,
+    'e': sp.exp(1),  # e is not a variable, but a constant
     'pi': pi,
     'i': i
 }
