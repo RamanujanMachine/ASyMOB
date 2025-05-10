@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import sympy as sp
 from collect_llm_answers import load_questions
-from check_answers import replace_infinite_sums
+from check_answer_rowwise import replace_infinite_sums
 import json
 import sys
 sys.set_int_max_str_digits(10_000_000)
@@ -11,7 +11,7 @@ sys.set_int_max_str_digits(10_000_000)
 N_SUBS = 5
 N_TRIES = 200
 QUESTIONS_FILE = 'questions.json'
-OUTPUT_FILE = 'SymQLst-Eq-Num-Sym-07_05_subs.json'
+OUTPUT_FILE = 'numer_subs_x_positive.json'
 VAR_SUBSTITUTIONS = {
     A: lambda: np.random.randint(1, 10),
     B: lambda: np.random.randint(1, 10),
