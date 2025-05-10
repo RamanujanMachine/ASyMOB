@@ -31,7 +31,7 @@ def remove_equality(sp_expr):
         raise e
 
 
-def clean_sp_object(sp_expr):
+def clean_sp_object(sp_expr, swap_funcs=True):
     # Sometimes, the answer is a number, and the parsing might result in a 
     # pythonic-number, which is not compatible with sympy the rest of the 
     # pipeline. We need to convert it to a sympy object.
@@ -40,7 +40,7 @@ def clean_sp_object(sp_expr):
     elif isinstance(sp_expr, int):
         return sp.Integer(sp_expr)
     
-    sp_expr = fix_expr(remove_equality(sp_expr))
+    sp_expr = fix_expr(remove_equality(sp_expr), swap_funcs)
     sp_expr =  sp_expr.subs({
         sp.var('e'): sp.exp(1),
         sp.var('pi'): sp.pi,
@@ -96,7 +96,7 @@ def latex_to_sympy_deter(latex_str):
             latex_str)
         
         # use constants for e and pi
-        return clean_sp_object(parse_latex(latex_str))
+        return clean_sp_object(parse_latex(latex_str), swap_funcs=False)
     except Exception as e:
         # print('Error parsing latex string:')
         # print(latex_str)
@@ -192,27 +192,29 @@ def format_final_answer_to_sympy(textual_answer):
     return sp_expr
 
 
-def fix_expr(expr,):
+def fix_expr(expr, swap_funcs=True):
     if not expr.args:  # Leaf node
-        # if str(expr) == 'E':
-        #     # If not, it will often return the constant e
-        #     return E
-        if expr == sp.E:
-            return e
+        if str(expr) == 'E':
+            # E is always e
+            return sp.E
         return expr
     
     # False identification of var as string
     if str(expr.func) in used_vars:
-        if len(expr.args) != 1:
-            raise Exception('WTF')
-        return sp.core.mul.Mul(
-            var_mapping[str(expr.func)],
-            fix_expr(expr.args[0])
-            )
-    
+        if swap_funcs:
+            if len(expr.args) != 1:
+                raise Exception('WTF')
+            return sp.core.mul.Mul(
+                var_mapping[str(expr.func)],
+                fix_expr(expr.args[0], swap_funcs)
+                )
+        else:
+            raise Exception(
+                'Sympy identified a variable as a function, '
+                'leaving it for LLM to fix')
     if str(expr.func) in KNOWN_FUNCTIONS:
         return KNOWN_FUNCTIONS[str(expr.func)](
-            *[fix_expr(arg) for arg in expr.args]
+            *[fix_expr(arg, swap_funcs) for arg in expr.args]
         )
 
-    return expr.func(*[fix_expr(arg) for arg in expr.args])
+    return expr.func(*[fix_expr(arg, swap_funcs) for arg in expr.args])
