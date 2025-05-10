@@ -11,12 +11,12 @@ import traceback
 import numpy as np
 
 # RESULTS_FILE = 'results_mp - 122 questions.json'
-RESULTS_FILE = 'full_answers_not_checked_joined.xlsx'
-OUTPUT_FILE = 'checked_numer_only_some_holes_removed_integrals.xlsx'
+RESULTS_FILE = 'working copy of things\\unchecked.xlsx'
+OUTPUT_FILE = 'checked_originals.xlsx'
 DISCARDED_FILE = 'discarded.json'
 OUTPUT_FOLDER = Path('checked_results_chunks')
 DISCARDED_FOLDER = Path('discarded_results')
-NUMER_SUBS_FILE = 'numer_subs.json'
+NUMER_SUBS_FILE = 'numer_subs_x_positive.json'
 QUESTIONS_FILE = 'questions.json'
 SKIP_SYMB_CHECK_SOURCES = [
     'U-Math\nintegral_calc\n\n4c1292e1-d4b3-4acf-afaf-eaac62f2662d',
@@ -26,8 +26,7 @@ SKIP_SYMB_CHECK_SOURCES = [
 ]
 
 POOL_SIZE = 10
-CHUNK_TIMEOUT = 5 * 60  # 10 minutes
-ROW_TIMEOUT = 10  # 30 seconds
+ROW_TIMEOUT = 30 
 UPPER_LIMIT_FINITE = 10
 CHUNK_SIZE = 50
 DEBUG = False
@@ -209,32 +208,39 @@ def compare_symbolic(true_answer, model_answer):
 
 
 def _compare_symbolic_wrapper(question_data):
-    if question_data['Source'] in SKIP_SYMB_CHECK_SOURCES:
-        return None
-    
-    return compare_symbolic(
-        question_data['true_answer'], 
-        question_data['model_answer']
-    )
+    try:
+        if question_data['Source'] in SKIP_SYMB_CHECK_SOURCES:
+            return None, 'In skip list'
+        
+        return compare_symbolic(
+            question_data['true_answer'], 
+            question_data['model_answer']
+        ), None
+    except Exception as e:
+        ex = traceback.format_exc()
+        return None, str(ex)
 
 
 def _compare_numeric_wrapper(question_data, numeric_subs):
-    if numeric_subs is None:
-        # This should lead to None in the output file.
-        raise Exception('missing data for numeric comparison')
+    try:
+        if numeric_subs is None:
+            # This should lead to None in the output file.
+            return None, 'missing substitution for numeric comparison'
 
-    if '\\int' in question_data['question_text']:
-        strict = False
-    else:
-        strict = True
-    
-    return compare_numeric(
-        question_data['true_answer'], 
-        question_data['model_answer'], 
-        numeric_subs,
-        strict=strict
-    )
-
+        if '\\int' in question_data['question_text']:
+            strict = False
+        else:
+            strict = True
+        
+        return compare_numeric(
+            question_data['true_answer'], 
+            question_data['model_answer'], 
+            numeric_subs,
+            strict=strict
+        ), None
+    except Exception as e:
+        ex = traceback.format_exc()
+        return None, str(ex)
 
 
 def check_answer(question_data, numeric_subs, output_file):
@@ -269,11 +275,13 @@ def check_answer(question_data, numeric_subs, output_file):
             question_data['numeric_comparison'] = False
         
         else:
-            question_data['symbolic_comparison'] = _compare_symbolic_wrapper(
-                question_data)
+            res, error = _compare_symbolic_wrapper(question_data)
+            question_data['symbolic_comparison'] = res
+            question_data['symbolic_comparison_error'] = error
             
-            question_data['numeric_comparison'] = _compare_numeric_wrapper(
-                question_data, numeric_subs)
+            res, error = _compare_numeric_wrapper(question_data, numeric_subs)
+            question_data['numeric_comparison'] = res
+            question_data['numeric_comparison_error'] = error
 
     except Exception as e:
         ex = traceback.format_exc()
@@ -294,6 +302,7 @@ def check_answer(question_data, numeric_subs, output_file):
         index=False
     )
     return question_data    
+
 
 def iter_tasks(tasks_df, already_done_df=None):
     """
@@ -324,6 +333,9 @@ def iter_tasks(tasks_df, already_done_df=None):
             continue
         
         row_dict = row.to_dict()
+
+        if row['Variation'] != 'Original':
+            continue
         yield row_dict
 
 
@@ -358,7 +370,7 @@ def main():
                 args = (
                     question_data, 
                     None,
-                    f'checked_{i}.xlsx'
+                    f'checked_{_get_distinct_identifier(question_data)}.xlsx'
                 )
             else:
                 args = (
