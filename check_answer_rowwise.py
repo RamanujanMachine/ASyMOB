@@ -8,6 +8,7 @@ from pebble import ProcessPool
 from pathlib import Path
 from collect_llm_answers import load_questions, extract_latex_answer
 import traceback
+import numpy as np
 
 # RESULTS_FILE = 'results_mp - 122 questions.json'
 RESULTS_FILE = 'full_answers_not_checked_joined.xlsx'
@@ -17,7 +18,12 @@ OUTPUT_FOLDER = Path('checked_results_chunks')
 DISCARDED_FOLDER = Path('discarded_results')
 NUMER_SUBS_FILE = 'numer_subs.json'
 QUESTIONS_FILE = 'questions.json'
-
+SKIP_SYMB_CHECK_SOURCES = [
+    'U-Math\nintegral_calc\n\n4c1292e1-d4b3-4acf-afaf-eaac62f2662d',
+    'UGMathBench\nCalculus_-_single_variable_0624',
+    'MathOdyssey\nProblem 328 from Calculus and Analysis - College Math',
+    'GHOSTS\nSymbolic Integration\nQ7'
+]
 
 POOL_SIZE = 10
 CHUNK_TIMEOUT = 5 * 60  # 10 minutes
@@ -77,10 +83,20 @@ def replace_infinite_sums(expr, new_upper=UPPER_LIMIT_FINITE):
     return expr.xreplace(replacements)
 
 
-def compare_numeric(true_answer, model_answer, subs_vals, allowed_diff=1e-5, 
-                    strict=True, debug=DEBUG):
+def _meta_compare(model_answer, true_answer):
+    """
+    Compare the true answer and the model answer, by general metrics:
+    - If the model answer is NaN, we can assume that the model gave an answer
+      with unknown variables, and we can assume that the model is wrong.
+      (see math_parsers.latex_to_sympy_llm for more details)
+    - If the model answer has an integral, but the true answer does not,
+      we can assume that the model is wrong, or that the model did not answer
+      all the way through.
+    - If the model answer has different free symbols than the true answer,
+      we can assume that the model is wrong.
+    """
+
     if model_answer == sp.nan:
-        # If the model answer is NaN, we can assume that the model is wrong.
         # See math_parsers.latex_to_sympy_llm for more details.
         return False
     
@@ -103,6 +119,10 @@ def compare_numeric(true_answer, model_answer, subs_vals, allowed_diff=1e-5,
     if model_answer_symbols != true_answer_symbols:
         return False
 
+    return True
+
+def compare_numeric(true_answer, model_answer, subs_vals, allowed_diff=1e-5, 
+                    strict=True, debug=DEBUG):
     if debug:
         print('true_answer: ', true_answer)
         print('model_answer: ', model_answer)
@@ -188,7 +208,36 @@ def compare_symbolic(true_answer, model_answer):
     return (diff == 0) or (diff == C) or (diff == -C)
 
 
-def check_answers(question_data, numeric_subs, output_file):
+def _compare_symbolic_wrapper(question_data):
+    if question_data['Source'] in SKIP_SYMB_CHECK_SOURCES:
+        return None
+    
+    return compare_symbolic(
+        question_data['true_answer'], 
+        question_data['model_answer']
+    )
+
+
+def _compare_numeric_wrapper(question_data, numeric_subs):
+    if numeric_subs is None:
+        # This should lead to None in the output file.
+        raise Exception('missing data for numeric comparison')
+
+    if '\\int' in question_data['question_text']:
+        strict = False
+    else:
+        strict = True
+    
+    return compare_numeric(
+        question_data['true_answer'], 
+        question_data['model_answer'], 
+        numeric_subs,
+        strict=strict
+    )
+
+
+
+def check_answer(question_data, numeric_subs, output_file):
     """
     Question data - a json containing the dataframe's row. 
     in includes thw following entries:
@@ -210,25 +259,21 @@ def check_answers(question_data, numeric_subs, output_file):
         question_data['model_answer'] = model_ans[0]
         question_data['model_answer_type'] = model_ans[1]
         
-        # question_data['symbolic_comparison'] = compare_symbolic(
-        #    question_data['true_answer'], 
-        #    question_data['model_answer']
-        # )
+        should_check = _meta_compare(
+            question_data['model_answer'], 
+            question_data['true_answer']
+        )
 
-        if numeric_subs is None:
-            question_data['numeric_comparison'] = None
-            question_data['numeric_subs_error'] = 'missing data'
+        if not should_check:
+            question_data['symbolic_comparison'] = False
+            question_data['numeric_comparison'] = False
+        
         else:
-            if '\\int' in question_data['question_text']:
-                strict = False
-            else:
-                strict = True
-            question_data['numeric_comparison'] = compare_numeric(
-                question_data['true_answer'], 
-                question_data['model_answer'], 
-                numeric_subs,
-                strict=strict
-            )
+            question_data['symbolic_comparison'] = _compare_symbolic_wrapper(
+                question_data)
+            
+            question_data['numeric_comparison'] = _compare_numeric_wrapper(
+                question_data, numeric_subs)
 
     except Exception as e:
         ex = traceback.format_exc()
@@ -248,15 +293,24 @@ def check_answers(question_data, numeric_subs, output_file):
         OUTPUT_FOLDER / output_file, 
         index=False
     )
-
     return question_data    
-
-
 
 def iter_tasks(tasks_df, already_done_df=None):
     """
     Returns a dataframe with the tasks needed to be done.
     """
+    with open(QUESTIONS_FILE, 'r') as f:
+        questions = json.load(f)
+    questions_df = pd.DataFrame.from_records(questions)
+    questions_df['question_id'] = questions_df['Index'].astype(np.int64)
+
+    tasks_df = tasks_df.merge(
+        questions_df[['question_id', 'Source', 'Variation']],
+        left_on='question_id',
+        right_on='question_id',
+        how='left'
+    )
+
     if already_done_df is None:
         already_done_df = pd.DataFrame(columns=tasks_df.columns)
 
@@ -265,8 +319,12 @@ def iter_tasks(tasks_df, already_done_df=None):
     
     for _, row in tasks_df.iterrows():
         identifier = _get_distinct_identifier(row.to_dict())
-        if identifier not in already_done_identifiers:
-            yield row.to_dict()
+
+        if identifier in already_done_identifiers:
+            continue
+        
+        row_dict = row.to_dict()
+        yield row_dict
 
 
 def main():
@@ -286,8 +344,8 @@ def main():
     
     with open(NUMER_SUBS_FILE, 'r') as f:
         numer_subs = json.load(f)
-    already_done_df = pd.read_excel(OUTPUT_FILE)
-    bad_questions = list(numer_subs.keys())
+    already_done_df = None # pd.read_excel(OUTPUT_FILE)
+    subs_available = list(numer_subs.keys())
     
     results = []
     with ProcessPool(max_workers=POOL_SIZE) as pool:
@@ -295,7 +353,7 @@ def main():
         # row_results = check_answers_rows(df, timed_out_chunks, pool)
         futures = []
         for i, question_data in enumerate(iter_tasks(df, already_done_df)):
-            if str(question_data['question_id']) not in bad_questions:
+            if str(question_data['question_id']) not in subs_available:
                 # print(f"Question {question_data['question_id']} has no subs")
                 args = (
                     question_data, 
@@ -309,7 +367,7 @@ def main():
                     f'checked_{i}.xlsx'
                 )
             future = pool.schedule(
-                check_answers, 
+                check_answer, 
                 args=args, 
                 timeout=ROW_TIMEOUT
             )
