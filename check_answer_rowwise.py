@@ -6,13 +6,12 @@ import math_parsers
 from sp_vars import *
 from pebble import ProcessPool
 from pathlib import Path
-from timeout_utils import apply_with_timeout
 from collect_llm_answers import load_questions, extract_latex_answer
 import traceback
 
 # RESULTS_FILE = 'results_mp - 122 questions.json'
-RESULTS_FILE = 'all_not_checked_0805_1330.xlsx'
-OUTPUT_FILE = 'checked_results.xlsx'
+RESULTS_FILE = 'full_answers_not_checked_joined.xlsx'
+OUTPUT_FILE = 'checked_numer_only_some_holes_removed_integrals.xlsx'
 DISCARDED_FILE = 'discarded.json'
 OUTPUT_FOLDER = Path('checked_results_chunks')
 DISCARDED_FOLDER = Path('discarded_results')
@@ -20,9 +19,9 @@ NUMER_SUBS_FILE = 'numer_subs.json'
 QUESTIONS_FILE = 'questions.json'
 
 
-POOL_SIZE = 5
+POOL_SIZE = 10
 CHUNK_TIMEOUT = 5 * 60  # 10 minutes
-ROW_TIMEOUT = 30  # 30 seconds
+ROW_TIMEOUT = 10  # 30 seconds
 UPPER_LIMIT_FINITE = 10
 CHUNK_SIZE = 50
 DEBUG = False
@@ -141,7 +140,7 @@ def compare_numeric(true_answer, model_answer, subs_vals, allowed_diff=1e-5,
             # equal up to a constant factor.
             # It's meant to address integral answers, where the model might have
             # a constant factor in front of the answer.
-            diffs.append(diff)
+            diffs.append(abs(diff))
         
         if debug:
             print('subs: ', subs)
@@ -156,7 +155,7 @@ def compare_numeric(true_answer, model_answer, subs_vals, allowed_diff=1e-5,
     else:
         mean_diff = np.mean(diffs)
         return all([
-            abs((diff - mean_diff) / mean_diff) < allowed_diff for diff in diffs
+            abs(diff - mean_diff) < allowed_diff for diff in diffs
         ])
 
 
@@ -211,18 +210,24 @@ def check_answers(question_data, numeric_subs, output_file):
         question_data['model_answer'] = model_ans[0]
         question_data['model_answer_type'] = model_ans[1]
         
-        question_data['symbolic_comparison'] = compare_symbolic(
-            question_data['true_answer'], 
-            question_data['model_answer']
-        )
+        # question_data['symbolic_comparison'] = compare_symbolic(
+        #    question_data['true_answer'], 
+        #    question_data['model_answer']
+        # )
 
         if numeric_subs is None:
             question_data['numeric_comparison'] = None
+            question_data['numeric_subs_error'] = 'missing data'
         else:
+            if '\\int' in question_data['question_text']:
+                strict = False
+            else:
+                strict = True
             question_data['numeric_comparison'] = compare_numeric(
                 question_data['true_answer'], 
                 question_data['model_answer'], 
-                numeric_subs
+                numeric_subs,
+                strict=strict
             )
 
     except Exception as e:
@@ -248,10 +253,13 @@ def check_answers(question_data, numeric_subs, output_file):
 
 
 
-def iter_tasks(tasks_df, already_done_df):
+def iter_tasks(tasks_df, already_done_df=None):
     """
     Returns a dataframe with the tasks needed to be done.
     """
+    if already_done_df is None:
+        already_done_df = pd.DataFrame(columns=tasks_df.columns)
+
     already_done_identifiers = [_get_distinct_identifier(row.to_dict())
         for _, row in already_done_df.iterrows()]
     
@@ -279,6 +287,7 @@ def main():
     with open(NUMER_SUBS_FILE, 'r') as f:
         numer_subs = json.load(f)
     already_done_df = pd.read_excel(OUTPUT_FILE)
+    bad_questions = list(numer_subs.keys())
     
     results = []
     with ProcessPool(max_workers=POOL_SIZE) as pool:
@@ -286,8 +295,8 @@ def main():
         # row_results = check_answers_rows(df, timed_out_chunks, pool)
         futures = []
         for i, question_data in enumerate(iter_tasks(df, already_done_df)):
-            if str(question_data['question_id']) not in numer_subs:
-                print(f"Question {question_data['question_id']} has no subs")
+            if str(question_data['question_id']) not in bad_questions:
+                # print(f"Question {question_data['question_id']} has no subs")
                 args = (
                     question_data, 
                     None,
