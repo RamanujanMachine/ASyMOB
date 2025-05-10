@@ -18,7 +18,6 @@ k = sp.symbols('k')
 
 # This is a constant, not a variable. It is used since sympy identifies 
 # it as `E`, which causes ambiguity in the code.
-e = sp.var('e')
 pi = sp.var('pi')
 i = sp.var('i')
 
@@ -37,7 +36,6 @@ var_mapping = {
     'x': x,
     'k': k,
     'n': n,
-    'e': e,
     'pi': pi,
     'i': i
 }
