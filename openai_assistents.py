@@ -8,8 +8,8 @@ import multiprocessing as mp
 
 MODELS = ['gpt-4o', 'gpt-4.1', 'gpt-4o-mini']
 OUTPUT_FOLDER = Path('assistant_outputs')
-BATCH_SIZE = 3
-N_WORKERS = 4
+BATCH_SIZE = 10
+N_WORKERS = 5
 
 # We only need the iface to get the client with the api key.
 def send_message(client, assistant, message):
@@ -28,6 +28,39 @@ def send_message(client, assistant, message):
         thread_id=thread.id
     )
     response = messages.data[0].content[0].text.value
+    if run.status != 'completed':
+        raise Exception(
+            f"Run failed: {run.status}- {run.last_error.message}")
+
+    return response, run.usage.total_tokens
+
+
+def send_message_in_thread(thread, client, assistant, message):
+    message = client.beta.threads.messages.create(
+        thread_id=thread.id,
+        role="user",
+        content=message
+    )
+    run = client.beta.threads.runs.create_and_poll(
+        thread_id=thread.id,
+        assistant_id=assistant.id,
+        # instructions=''
+    )
+    messages = client.beta.threads.messages.list(
+        thread_id=thread.id
+    )
+    response = messages.data[0].content[0].text.value
+
+    # Delete the thread messages
+#     client.beta.threads.delete(thread.id)
+    for message in messages.data:
+        client.beta.threads.messages.delete(
+            thread_id=thread.id, message_id=message.id)
+    
+    if run.status != 'completed':
+        raise Exception(
+            f"Run failed: {run.status}- {run.last_error.message}")
+
     return response, run.usage.total_tokens
 
 
@@ -87,6 +120,8 @@ def handle_batch(questions_data, model_name):
         model=model_name,
         tools=[{"type": "code_interpreter"}]
     )
+    thread = client.beta.threads.create()
+
 
     results = []
     for q_id, question_text, true_answer in questions_data:
@@ -104,7 +139,10 @@ def handle_batch(questions_data, model_name):
                 use_code=True
             )
 
-            response, tokens_used = send_message(client, assistant, message)
+            response, tokens_used = send_message_in_thread(
+                thread, client, assistant, message
+            )
+
             result['full_answer'] = response
             result['tokens_used'] = tokens_used
 
