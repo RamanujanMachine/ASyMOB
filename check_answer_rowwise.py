@@ -32,25 +32,6 @@ CHUNK_SIZE = 50
 DEBUG = False
 
 
-# TODO - generate automatically.
-VAR_SUBSTITUTIONS = {
-    A: lambda: np.random.randint(1, 10),
-    B: lambda: np.random.randint(1, 10),
-    D: lambda: np.random.randint(1, 10),
-    E: lambda: np.random.randint(1, 10),
-    F: lambda: np.random.randint(1, 10),
-    G: lambda: np.random.randint(1, 10),
-    H: lambda: np.random.randint(1, 10),
-    J: lambda: np.random.randint(1, 10),
-    K: lambda: np.random.randint(1, 10),
-    x: lambda: np.random.randn()*10,
-    # sp.var('e'): lambda: sp.exp(1), # e is not a variable, but a constant
-    # sp.var('pi'): lambda: sp.pi, # pi is not a variable, but a constant
-
-    C: lambda: 0, # C is the integration constant, so we can set it to 0
-}
-
-
 def _get_distinct_identifier(question_data):
     return (
         f"{question_data['question_id']}_"
