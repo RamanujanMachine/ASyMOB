@@ -16,10 +16,11 @@ n = sp.symbols('n')
 m = sp.symbols('m')
 k = sp.symbols('k')
 
-# This is a constant, not a variable. It is used since sympy identifies 
-# it as `E`, which causes ambiguity in the code.
-pi = sp.var('pi')
-i = sp.var('i')
+# Sometimes, functions (llm generated) ask for the constants in their arguments
+# list. We provide them here, even through they are not variables.
+pi = sp.pi
+i = sp.I
+e = sp.exp(1)
 
 
 var_mapping = {
@@ -36,7 +37,7 @@ var_mapping = {
     'x': x,
     'k': k,
     'n': n,
-    'e': sp.exp(1),  # e is not a variable, but a constant
+    'e': e,  # e is not a variable, but a constant
     'pi': pi,
     'i': i
 }
