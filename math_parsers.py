@@ -27,7 +27,7 @@ class LatexFuncCallError(Exception):
 def remove_equality(sp_expr):
     try:
         if isinstance(sp_expr, sp.Equality):
-            return sp_expr.rhs
+            return remove_equality(sp_expr.rhs)
         return sp_expr
     except Exception as e:
         print(sp_expr)
