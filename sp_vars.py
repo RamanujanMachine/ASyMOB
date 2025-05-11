@@ -37,6 +37,7 @@ var_mapping = {
     'x': x,
     'k': k,
     'n': n,
+    'm': m,
     'e': e,  # e is not a variable, but a constant
     'pi': pi,
     'i': i
