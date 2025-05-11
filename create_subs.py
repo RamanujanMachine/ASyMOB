@@ -102,6 +102,9 @@ if __name__ == '__main__':
             if pd.isna(numer_answer):
                 # bad substitution, try again
                 continue
+            if numer_answer is sp.nan:
+                # bad substitution, try again
+                continue
             # check if the answer is finite
             if numer_answer.is_infinite:
                 # bad substitution, try again
