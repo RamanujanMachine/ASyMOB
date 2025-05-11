@@ -18,12 +18,13 @@ OUTPUT_FOLDER = Path('checked_results_chunks')
 DISCARDED_FOLDER = Path('discarded_results')
 NUMER_SUBS_FILE = 'numer_subs_x_positive.json'
 QUESTIONS_FILE = 'questions.json'
-SKIP_SYMB_CHECK_SOURCES = [
-    'U-Math\nintegral_calc\n\n4c1292e1-d4b3-4acf-afaf-eaac62f2662d',
-    'UGMathBench\nCalculus_-_single_variable_0624',
-    'MathOdyssey\nProblem 328 from Calculus and Analysis - College Math',
-    'GHOSTS\nSymbolic Integration\nQ7'
-]
+SKIP_SYMB_CHECK_SOURCES = []
+
+#[    'U-Math\nintegral_calc\n4c1292e1-d4b3-4acf-afaf-eaac62f2662d',
+#     'UGMathBench\nCalculus_-_single_variable_0624',
+#    'MathOdyssey\nProblem 328 from Calculus and Analysis - College Math',
+#    'GHOSTS\nSymbolic IntegrationQ7'
+#]
 
 POOL_SIZE = 10
 ROW_TIMEOUT = 30 
@@ -110,7 +111,7 @@ def compare_numeric(true_answer, model_answer, subs_vals, allowed_diff=1e-5,
         true_answer_numer = sp.parse_expr(true_answer_numer)
         if C in model_answer.free_symbols:
             subs[C] = 0
-        model_answer_numer = model_answer.subs(subs).evalf()
+        model_answer_numer = model_answer.subs(subs).evalf().doit()
         
         # model_answer_numer = float(model_answer_numer.evalf())
         
@@ -347,19 +348,13 @@ def main():
         # row_results = check_answers_rows(df, timed_out_chunks, pool)
         futures = []
         for i, question_data in enumerate(iter_tasks(df, already_done_df)):
+            identifier = _get_distinct_identifier(question_data).replace('/', '-')
+            output_file = f'checked_{identifier}.xlsx'
             if str(question_data['question_id']) not in subs_available:
-                # print(f"Question {question_data['question_id']} has no subs")
-                args = (
-                    question_data, 
-                    None,
-                    f'checked_{_get_distinct_identifier(question_data)}.xlsx'
-                )
+                subs = None
             else:
-                args = (
-                    question_data, 
-                    numer_subs[str(question_data['question_id'])],
-                    f'checked_{_get_distinct_identifier(question_data)}.xlsx'
-                )
+                subs = numer_subs[str(question_data['question_id'])]
+            args = (question_data, subs, output_file)
             future = pool.schedule(
                 check_answer, 
                 args=args, 
