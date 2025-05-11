@@ -206,7 +206,8 @@ def _compare_numeric_wrapper(question_data, numeric_subs):
 
         if (
             '\\int' in question_data['question_text'] or 
-            'integral' in question_data['question_text']
+            'integral' in question_data['question_text'] or 
+            'Integral' in question_data['question_text']
             ):
             strict = False
         else:
