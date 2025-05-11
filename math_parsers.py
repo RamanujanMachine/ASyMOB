@@ -14,6 +14,7 @@ SYMPY_CONVERTER = GeminiInterface("gemini-2.0-flash")
 KNOWN_FUNCTIONS = {
     'atan': sp.atan,
     'atan2': sp.atan2,
+    'asin': sp.asin,
     'arctan': sp.atan,
     'O': sp.O,
     'gamma': sp.gamma,
@@ -100,6 +101,8 @@ def latex_to_sympy_deter(latex_str):
         
         # use constants for e and pi
         return clean_sp_object(parse_latex(latex_str), swap_funcs=False)
+    except LatexFuncCallError as e:
+        raise e 
     except Exception as e:
         # print('Error parsing latex string:')
         # print(latex_str)
@@ -123,7 +126,8 @@ def latex_to_sympy_llm(latex_str, debug=False):
                 "You will not use any form of simplification or modification "
                 "for the mathematical expression. Only print the function, "
                 "without additional text. Access sympy functions through the " 
-                "sp module (e.g. sp.hyper). Do not use sp.Rational, use the " 
+                "sp module (e.g. sp.hyper). There are no custom functions, "
+                "only elementary functions. Do not use sp.Rational, use the " 
                 f"division operator (e.g. /). \n\n $${latex_str}$$" 
         )
     if debug:
@@ -212,14 +216,19 @@ def fix_expr(expr, swap_funcs=True):
             return sp.core.mul.Mul(
                 var_mapping[str(expr.func)],
                 fix_expr(expr.args[0], swap_funcs)
-                )
+            )
         else:
             raise LatexFuncCallError(
                 'Sympy identified a variable as a function, '
-                'leaving it for LLM to fix')
+                'leaving it for LLM to fix'
+            )
     if str(expr.func) in KNOWN_FUNCTIONS:
         return KNOWN_FUNCTIONS[str(expr.func)](
             *[fix_expr(arg, swap_funcs) for arg in expr.args]
         )
+    if isinstance(expr.func, sp.core.function.UndefinedFunction):
+        raise LatexFuncCallError(
+            'Sympy identified a function as an undefined function, '
+            'leaving it for LLM to fix')
 
     return expr.func(*[fix_expr(arg, swap_funcs) for arg in expr.args])
