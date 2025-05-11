@@ -108,13 +108,12 @@ def compare_numeric(true_answer, model_answer, subs_vals, allowed_diff=1e-5,
     diffs = []
     for subs, true_answer_numer in subs_vals:
         # This should be a number, but it might have I (complex number) in it.
+        # So, we parse it as a sympy expression, which will convert it well.
         true_answer_numer = sp.parse_expr(true_answer_numer)
         if C in model_answer.free_symbols:
             subs[C] = 0
         model_answer_numer = model_answer.subs(subs).evalf().doit()
-        
-        # model_answer_numer = float(model_answer_numer.evalf())
-        
+                
         if true_answer_numer == 0 and model_answer_numer == 0:
             diffs.append(0)
             continue
@@ -205,7 +204,10 @@ def _compare_numeric_wrapper(question_data, numeric_subs):
             # This should lead to None in the output file.
             return None, 'missing substitution for numeric comparison'
 
-        if '\\int' in question_data['question_text']:
+        if (
+            '\\int' in question_data['question_text'] or 
+            'integral' in question_data['question_text']
+            ):
             strict = False
         else:
             strict = True
