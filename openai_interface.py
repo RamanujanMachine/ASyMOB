@@ -23,8 +23,6 @@ class OpenAIInterface(GenericLLMInterface):
         Returns:
             str: The assistant's reply.
         """
-        message = self._incentivize_code_execution(message, use_code=code_execution)
-
         if not flex:
             response = self.client.responses.create(
                 model=self.model,

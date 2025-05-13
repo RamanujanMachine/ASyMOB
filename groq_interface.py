@@ -15,9 +15,6 @@ class GroqInterface(GenericLLMInterface):
 
     def send_message(self, message, code_execution=False, 
                      max_completion_tokens=100_000, return_tokens=False):
-        message = self._incentivize_code_execution(
-            message, use_code=code_execution)
-
         # Some models have a max token limit.
         if self.model == 'meta-llama/llama-4-scout-17b-16e-instruct':
             if max_completion_tokens > 8192:

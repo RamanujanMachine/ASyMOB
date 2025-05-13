@@ -2,15 +2,6 @@ from abc import ABC, abstractmethod
 from litellm import completion
 import json
 
-NO_CODE_PREFIX = (
-    "Assume you don't have access to a computer: do not use "
-    "code, solve this manually - using your internal reasoning.\n"
-)
-USE_CODE_PREFIX = (
-    "Please use Python to solve the following question. Don't show it, "
-    "just run it internally.\n"
-)
-
 class GenericLLMInterface:
     """
     A class to interact with different LLMs.
@@ -33,23 +24,6 @@ class GenericLLMInterface:
         
         self.api_key = keys[provider]
 
-    def _incentivize_code_execution(self, message, use_code=True):
-        """
-        Modify the message to incentivize code execution.
-        
-        Args:
-            message (str): The original message.
-        
-        Returns:
-            str: The modified message.
-        """
-        if use_code is None:
-            return message
-        if use_code:
-            return USE_CODE_PREFIX + message
-        else:
-            return NO_CODE_PREFIX + message
-    
     def send_message(self, message, code_execution=None, return_tokens=False):
         """
         Send a message to the LLM and receive a response.
@@ -60,8 +34,6 @@ class GenericLLMInterface:
         Returns:
             str: The response from the LLM.
         """
-        message = self._incentivize_code_execution(message, use_code=code_execution)
-
         messages = [
             {"role": "user", "content": message}
         ]

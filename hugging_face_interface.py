@@ -26,9 +26,6 @@ class HuggingFaceInterface(GenericLLMInterface):
         Returns:
             str: The assistant's reply.
         """
-        message = self._incentivize_code_execution(message, use_code=code_execution)
-
-
         response = self.client.chat.completions.create(
             model=self.model,
             messages=[{

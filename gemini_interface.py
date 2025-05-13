@@ -23,7 +23,6 @@ class GeminiInterface(GenericLLMInterface):
         self.client = genai.Client(api_key=self.api_key)
 
     def send_message(self, message, code_execution=False, return_tokens=False):
-        message = self._incentivize_code_execution(message, use_code=code_execution)
         tools = []
         if code_execution and self.model in CODE_RUNNING_MODELS:
             tools.append(
