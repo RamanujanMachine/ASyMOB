@@ -8,40 +8,45 @@ import sympy as sp
 import pandas as pd
 from sp_vars import *
 import re
+from db_utils import load_questions
 
 
-QUESTIONS_PATH = 'questions.json'
+RETRY_ATTEMPT = True
+
 MATH_INSTRUCTIONS = (
     'Finish your answer by writing "The final answer is:" and then the '
     'answer in latex in a new line. Write the answer as a single expression. '
     'Do not split your answer to different terms. Use $$ to wrap over the '
     'latex text. Do not write anything after the latex answer.\n'
 )
-C = sp.symbols('C')
-RETRY_ATTEMPT = True
+NO_CODE_PREFIX = (
+    "Assume you don't have access to a computer: do not use "
+    "code, solve this manually - using your internal reasoning.\n"
+)
+USE_CODE_PREFIX = (
+    "Please use Python to solve the following question. Don't show it, "
+    "just run it internally.\n"
+)
 
 
-def load_questions(path=QUESTIONS_PATH, parse_sympy=True, filter_func=lambda x: True):
-    with open(path, 'r') as f:
-        questions = json.load(f)
-    # Convert answers to sympy objects
-    parsed_questions = []
-    for question in questions:
-        if not filter_func(question):
-            continue
-        q_id = int(question['Index'])
-        question_text = question['Challenge']
-        sympy_str_answer = question['Answer in Sympy']
-        try:
-            if parse_sympy:
-                true_answer = math_parsers.parse_sympy_str(sympy_str_answer)
-            else:
-                true_answer = sympy_str_answer
-        except Exception as e:
-            print(f"Error parsing sympy string: {sympy_str_answer}")
-        parsed_questions.append((q_id, question_text, true_answer))
-    return parsed_questions
+
+def _incentivize_code_execution(message, use_code=True):
+    """
+    Modify the message to incentivize code execution.
     
+    Args:
+        message (str): The original message.
+    
+    Returns:
+        str: The modified message.
+    """
+    if use_code is None:
+        return message
+    if use_code:
+        return USE_CODE_PREFIX + message
+    else:
+        return NO_CODE_PREFIX + message
+
 
 def extract_latex_answer(textual_answer):
     """
@@ -94,18 +99,23 @@ def ask_model(model, question_text, code_execution):
     Returns a sympy object extracted from the textual answer, the sympy 
     expression as a string and the textual answer itself.
     """
+    prompt = _incentivize_code_execution(
+        MATH_INSTRUCTIONS + question_text, 
+        use_code=code_execution
+    )
     try:
         textual_answer, tokens = model.send_message(
-            message=MATH_INSTRUCTIONS + question_text,
+            message=prompt,
             code_execution=code_execution,
             return_tokens=True
         )
     except Exception as e:
         print(f"Error sending message to model: {e}")
         print('message:', MATH_INSTRUCTIONS + question_text)
-        return {'error': str(e)}
+        return {'prompt': prompt, 'error': str(e)}
     
     result = {
+        'prompt': prompt,
         'full_answer': textual_answer,
         'tokens_used': tokens
     }
@@ -113,15 +123,7 @@ def ask_model(model, question_text, code_execution):
         # extract the final answer from the textual answer
         latex_answer = extract_latex_answer(textual_answer)
         result['final_answer_latex'] = latex_answer
-        
-        # not doing this for now - it is not working well and might 
-        # crash the pickling later. Just use the latex answer as is.
-        # result['sp_deter'] = None
-        # result['sp_llm'] = None
-        # convert the latex answer to a sympy expression
-        # result['sp_deter'] = math_parsers.latex_to_sympy_deter(latex_answer)
-        # result['sp_llm'] = math_parsers.latex_to_sympy_llm(latex_answer)
-        
+                
     except Exception as e:
         print(f"Error processing the answer: {e}")
         print(f"Textual answer: {textual_answer}")
@@ -135,7 +137,7 @@ def ask_model(model, question_text, code_execution):
 
 def enumerate_tasks_configurations(
         retry_attempt=RETRY_ATTEMPT, prev_res_file='results_mp.xlsx'):
-    questions = load_questions(parse_sympy=False)
+    questions_df = load_questions()
     tasks = []
 
     # The loops order is important. 
@@ -143,6 +145,7 @@ def enumerate_tasks_configurations(
     # in parallel. Setting the fast changing item to be the model, leads
     # to multiple different models running together, which reduces the 
     # per-model load.
+    questions_df.sort_values(['challenge_id', 'model'], inplace=True)
     for q_id, question_text, true_answer in questions:
         for model_name, model in MODELS.items():
             if not model.support_code():
