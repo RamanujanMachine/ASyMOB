@@ -159,13 +159,13 @@ def ask_model(model_name, question_text, code_execution):
 
 def upload_result_to_db(conn, task, result, acquisition_time):
     added_row = {
-        'challenge_id': task['challenge_id'],
-        'model': task['model'],
-        'code_execution': task['code_execution'],
-        'prompt': result['prompt'],
-        'full_answer': result['full_answer'],
-        'tokens_used': result['tokens_used'],
-        'final_answer_latex': result['final_answer_latex'],
+        'challenge_id': task.get('challenge_id'),
+        'model': task.get('model'),
+        'code_execution': task.get('code_execution'),
+        'prompt': result.get('prompt'),
+        'full_answer': result.get('full_answer'),
+        'tokens_used': result.get('tokens_used'),
+        'final_answer_latex': result.get('final_answer_latex'),
         'error': result.get('error', None),
         'acquisition_time': acquisition_time,
         'acquisition_method': 'Responses/completion API'
