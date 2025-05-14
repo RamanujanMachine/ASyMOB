@@ -1,15 +1,10 @@
-from llm_interface import GenericLLMInterface
-from gemini_interface import GeminiInterface
-from openai_interface import OpenAIInterface
-import math_parsers
-from models import MODELS
-import json
-import sympy as sp
+from models import MODELS_GENERATORS
 import pandas as pd
 from sp_vars import *
 import re
-from db_utils import load_questions
-
+from db_utils import load_tasks, insert_row, get_connection
+import traceback
+import multiprocessing as mp
 
 RETRY_ATTEMPT = True
 
@@ -27,7 +22,27 @@ USE_CODE_PREFIX = (
     "Please use Python to solve the following question. Don't show it, "
     "just run it internally.\n"
 )
-
+# All models that support responses API
+MODELS_LIST = [
+    ('DeepSeek-Prover-V2-671B', None),
+    ('DeepSeek-R1', None),
+    ('DeepSeek-V3', None),
+    ('gemini/gemini-2.0-flash', False),
+    ('gemini/gemini-2.0-flash', True),
+    ('gemini/gemini-2.5-flash-preview-04-17', False),
+    ('gemini/gemini-2.5-flash-preview-04-17', True),
+    ('gemini/gemma-3-27b-it', None),
+    # ('gpt-4.1', False),
+    # ('gpt-4.1', True),
+    # ('gpt-4o', False),
+    # ('gpt-4o-mini', False),
+    ('meta-llama/Llama-4-Scout-17B-16E-Instruct', None),
+    ('nvidia/Llama-3_3-Nemotron-Super-49B-v1', None),
+    ('o4-mini', False),
+    ('o4-mini', True),
+    ('Qwen/Qwen2.5-72B-Instruct', None)
+]
+# CHUNKS_DIR = Path('LLM_survey_chunks_QWEN3')
 
 
 def _incentivize_code_execution(message, use_code=True):
@@ -64,10 +79,13 @@ def extract_latex_answer(textual_answer):
         textual_answer, 
         re.DOTALL)
     
+    if '' in matches:
+        matches.remove('')
+
     if not matches:
         # escalate - just look for the last boxed{.*}
         matches = re.findall(
-            r'\\boxed\{(.*?)\}' + '(?:\n|$)',
+            r'\\boxed\{(.*?)\}' + '(?:\n|$|")',
             textual_answer, 
             re.DOTALL)
         
@@ -77,7 +95,7 @@ def extract_latex_answer(textual_answer):
             r'\$\$(.*?)\$\$',
             textual_answer, 
             re.DOTALL)
-        
+
     if not matches:
         raise ValueError("No latex answer found in the textual answer.")
     
@@ -92,7 +110,7 @@ def extract_latex_answer(textual_answer):
     return latex_answer
 
 
-def ask_model(model, question_text, code_execution):
+def ask_model(model_name, question_text, code_execution):
     """
     Ask the model a question and get the answer as a sympy expression.
 
@@ -103,6 +121,12 @@ def ask_model(model, question_text, code_execution):
         MATH_INSTRUCTIONS + question_text, 
         use_code=code_execution
     )
+    if model_name not in MODELS_GENERATORS:
+        return {
+            'prompt': prompt,
+            'error': f"Model {model_name} not found."
+        }
+    model = MODELS_GENERATORS[model_name]()
     try:
         textual_answer, tokens = model.send_message(
             message=prompt,
@@ -129,104 +153,70 @@ def ask_model(model, question_text, code_execution):
         print(f"Textual answer: {textual_answer}")
         result['final_answer_latex'] = None
         result['error'] = str(e)
-        # result['sp_deter'] = None if 'sp_deter' not in result else result['sp_deter']
-        # result['sp_llm'] = None if 'sp_llm' not in result else result['sp_llm']
     
     return result
 
 
-def enumerate_tasks_configurations(
-        retry_attempt=RETRY_ATTEMPT, prev_res_file='results_mp.xlsx'):
-    questions_df = load_questions()
-    tasks = []
+def upload_result_to_db(conn, task, result, acquisition_time):
+    added_row = {
+        'challenge_id': task['challenge_id'],
+        'model': task['model'],
+        'code_execution': task['code_execution'],
+        'prompt': result['prompt'],
+        'full_answer': result['full_answer'],
+        'tokens_used': result['tokens_used'],
+        'final_answer_latex': result['final_answer_latex'],
+        'error': result.get('error', None),
+        'acquisition_time': acquisition_time,
+        'acquisition_method': 'Responses/completion API'
+    }
+    insert_row(
+        conn=conn,  # Assuming you have a connection object
+        table_name='model_responses',
+        data_dict=added_row
+    )
 
-    # The loops order is important. 
-    # We might hit rate limits if we ask the same model too many things
-    # in parallel. Setting the fast changing item to be the model, leads
-    # to multiple different models running together, which reduces the 
-    # per-model load.
-    questions_df.sort_values(['challenge_id', 'model'], inplace=True)
-    for q_id, question_text, true_answer in questions:
-        for model_name, model in MODELS.items():
-            if not model.support_code():
-                tasks.append({
-                    'question_id': q_id,
-                    'model': model_name,
-                    'question_text': question_text,
-                    'true_answer': true_answer,
-                    'code_execution':None
-                })
-            else:
-                tasks.append({
-                    'question_id': q_id,
-                    'model': model_name,
-                    'question_text': question_text,
-                    'true_answer': true_answer,
-                    'code_execution': True
-                })
-                tasks.append({
-                    'question_id': q_id,
-                    'model': model_name,
-                    'question_text': question_text,
-                    'true_answer': true_answer,
-                    'code_execution': False
-                })
 
-    if not retry_attempt:
-        return tasks
-    
-    # removing already succeeded tasks
-    print(f'filtering {len(tasks)} tasks...')
-    prev_results = pd.read_excel(prev_res_file)
-    already_succeeded_code_runners = prev_results[
-        ~prev_results.full_answer.isna() & ~prev_results.code_execution.isna()
-        ][['question_id', 'model', 'code_execution']].values.tolist()
-    already_succeeded_not_code_runners = prev_results[
-        ~prev_results.full_answer.isna() & prev_results.code_execution.isna()
-        ][['question_id', 'model']].values.tolist()
+def llm_survey_wrapper(task, acquisition_time):
+    """
+    Wrapper function to call the LLM and process the result.
+    """
+    q_id = task['challenge_id']
+    model = task['model']
+    code_execution=task['code_execution']
+    try:
+        print(f"Processing question {q_id} "
+              f"with model {model}...")
+        result = ask_model(
+            model, 
+            task['challenge'], 
+            code_execution)
+        
+    except Exception as e:
+        print(f"Error processing question {q_id} "
+              f"with model {model}: {e}")
+        result = {'error': traceback.format_exc()}
 
-    filtered_tasks = []
-    for task in tasks:
-        q_id = int(task['question_id'])
-        model_name = task['model']
-        code_execution = task['code_execution']
-
-        # Code runners
-        if ((not pd.isna(code_execution)) and 
-            [q_id, model_name, float(code_execution)] in already_succeeded_code_runners):
-            continue 
-
-        # Not code runners
-        if (pd.isna(code_execution) and 
-            [q_id, model_name] in already_succeeded_not_code_runners):
-            continue 
-
-        filtered_tasks.append(task)
-    print(f'Resulted in {len(filtered_tasks)} tasks!')
-    return filtered_tasks
+    with get_connection() as conn:
+        upload_result_to_db(
+            conn, 
+            task, 
+            result, 
+            acquisition_time
+        )
 
 
 def main():
-    results = []
-    for task in enumerate_tasks_configurations():
-        results.append({
-            **task,
-            **ask_model(
-                task['model'], 
-                task['question_text'], 
-                task['code_execution'])
-        })
-
-    df = pd.DataFrame.from_records(results)
-    df.to_excel(
-        'results.xlsx', 
-        index=False, 
-        sheet_name='results'
-    )
-    df.to_pickle(
-        'results.pkl', 
-        index=False, 
-    )
+    acquisition_time = '2025-05-14 18:00:00.000000'
+    args = [
+        (task.to_dict(), acquisition_time) 
+        for _, task in load_tasks(models=MODELS_LIST).iterrows()
+    ]
+    print(f"Number of tasks: {len(args)}")
+    with mp.Pool(processes=2) as pool:
+        # Map the function to the pool
+        # results = pool.starmap(collect_single_question, args)
+        pool.starmap(llm_survey_wrapper, args)
 
 
 if __name__ == "__main__":
