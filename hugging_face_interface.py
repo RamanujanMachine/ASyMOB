@@ -1,4 +1,4 @@
-from llm_interface import GenericLLMInterface, USE_CODE_PREFIX, NO_CODE_PREFIX
+from llm_interface import GenericLLMInterface
 from huggingface_hub import InferenceClient
 
 class HuggingFaceInterface(GenericLLMInterface):
