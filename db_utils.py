@@ -44,7 +44,7 @@ def load_tasks(models=MODELS_LIST, retry_errors=True, sql_filter=None,
                    parse_sympy=False):
     queries = []
     for model, code in _expand_models_list(models):
-        queries.append(f"""
+        queries.append((f"""
         with desired_model_responses as (
             select * from asymob.model_responses
             where {_get_model_filter(model, code)}
@@ -55,7 +55,7 @@ def load_tasks(models=MODELS_LIST, retry_errors=True, sql_filter=None,
             left join desired_model_responses using (challenge_id)
         where full_answer is null 
         {'and ' + sql_filter if sql_filter else ''}
-        """)
+        """, model, code))
     
     query_columns = [
         'challenge_id', 'challenge', 'answer_sympy', 'variation', 'source', 
@@ -64,7 +64,7 @@ def load_tasks(models=MODELS_LIST, retry_errors=True, sql_filter=None,
     df = pd.DataFrame(columns=query_columns + ['model', 'code_execution'])
     with psycopg2.connect(**CONN_PARAMETERS) as conn:
         with conn.cursor() as cursor:
-            for query in queries:
+            for query, model, code in queries:
                 cursor.execute(query)
                 model_tasks = cursor.fetchall()
                 model_tasks = pd.DataFrame(model_tasks, columns=query_columns)
