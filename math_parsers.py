@@ -26,6 +26,12 @@ KNOWN_FUNCTIONS = {
 class LatexFuncCallError(Exception):
     pass
 
+
+@cache
+def cached_parsing(sp_str):
+    return sp.parse_expr(sp_str, evaluate=False, local_dict=var_mapping)
+
+
 def remove_equality(sp_expr):
     try:
         if isinstance(sp_expr, sp.Equality):
