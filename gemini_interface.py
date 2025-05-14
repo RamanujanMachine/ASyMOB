@@ -1,7 +1,7 @@
 from google import genai
 from google.genai import types
 import os
-from llm_interface import GenericLLMInterface, USE_CODE_PREFIX, NO_CODE_PREFIX
+from llm_interface import GenericLLMInterface
 
 CODE_RUNNING_MODELS = [
     'gemini-2.0-flash',

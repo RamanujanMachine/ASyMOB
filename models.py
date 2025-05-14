@@ -22,15 +22,16 @@ MODELS_GENERATORS = {
     # 'claude': lambda: ClaudeInterface(),
 
     # HuggingFace models
-    # 'Qwen/Qwen3-235B-A22B': lambda: HuggingFaceInterface('Qwen/Qwen3-235B-A22B'),
+    # 'Qwen/Qwen3-235B-A22B': lambda: HuggingFaceInterface('Qwen/Qwen3-235B-A22B', inference_provider='nebius'),
     'Qwen/Qwen2.5-72B-Instruct': lambda: HuggingFaceInterface('Qwen/Qwen2.5-72B-Instruct'),
     'DeepSeek-Prover-V2-671B': lambda: HuggingFaceInterface("deepseek-ai/DeepSeek-Prover-V2-671B"),
     'DeepSeek-R1': lambda: HuggingFaceInterface('deepseek-ai/DeepSeek-R1', inference_provider='together'),
     'DeepSeek-V3': lambda: HuggingFaceInterface('deepseek-ai/DeepSeek-V3', inference_provider='together'),
     'meta-llama/Llama-4-Scout-17B-16E-Instruct': lambda: HuggingFaceInterface("meta-llama/Llama-4-Scout-17B-16E-Instruct"),
+    'nvidia/Llama-3_3-Nemotron-Super-49B-v1': lambda: HuggingFaceInterface('nvidia/Llama-3_3-Nemotron-Super-49B-v1', inference_provider='nebius'),
 
     # Groq models
-    'meta-llama/llama-4-maverick-17b-128e-instruct': lambda: GroqInterface("meta-llama/llama-4-maverick-17b-128e-instruct"),
+    # 'meta-llama/llama-4-maverick-17b-128e-instruct': lambda: GroqInterface("meta-llama/llama-4-maverick-17b-128e-instruct"),
 
     # Missing models:
     # OpenMath2-LLaMA3.1-70B-Nemo

@@ -1,4 +1,4 @@
-from llm_interface import GenericLLMInterface, USE_CODE_PREFIX, NO_CODE_PREFIX
+from llm_interface import GenericLLMInterface
 import openai
 from openai import OpenAI
 
