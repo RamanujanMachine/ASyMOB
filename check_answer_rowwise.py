@@ -2,17 +2,20 @@ import pandas as pd
 import numpy as np
 import sympy as sp
 import json
-import math_parsers
+from math_parsers import cached_parsing, latex_to_sympy
 from sp_vars import *
 from pebble import ProcessPool
 from pathlib import Path
-from collect_llm_answers import load_questions, extract_latex_answer
+from collect_llm_answers import extract_latex_answer
 import traceback
 import numpy as np
+from db_utils import get_connection
+from functools import cache
 
 # RESULTS_FILE = 'results_mp - 122 questions.json'
-RESULTS_FILE = 'working copy of things\\unchecked.xlsx'
-OUTPUT_FILE = 'checked_originals.xlsx'
+# RESULTS_FILE = 'working copy of things\\unchecked.xlsx'
+RESULTS_FILE = r'results_4.1_only_assistants\joined.xlsx'
+OUTPUT_FILE = r'results_4.1_only_assistants\4.1_assistant_checked.xlsx'
 DISCARDED_FILE = 'discarded.json'
 OUTPUT_FOLDER = Path('checked_results_chunks')
 DISCARDED_FOLDER = Path('discarded_results')
@@ -31,14 +34,125 @@ ROW_TIMEOUT = 30
 UPPER_LIMIT_FINITE = 10
 CHUNK_SIZE = 50
 DEBUG = False
+CHECK_TIME = pd.Timestamp.now()
+print(f"Check time: {CHECK_TIME}")
 
 
-def _get_distinct_identifier(question_data):
-    return (
-        f"{question_data['question_id']}_"
-        f"{question_data['model']}_"
-        f"{question_data['code_execution']}"
+def load_tasks(sql_filter=None, parse_sympy=False, include_full_answer=True):
+    query = f"""
+    select
+        response_id,
+        challenge_id,
+        challenge,
+        final_answer_latex,
+        {'full_answer' if include_full_answer else 'null as full_answer'},
+        answer_sympy as true_answer,
+        numeric_correct,
+        symbolic_correct,
+        numeric_comparison_error,
+        symbolic_comparison_error
+    from asymob.model_responses resp
+        left join asymob.challenges chal
+            using (challenge_id)
+        left join asymob.symbolic_verification sym_ver
+            using (response_id)
+        left join asymob.numeric_verification numer_ver
+            using (response_id)
+    -- only query unchecked items
+    where (numeric_correct is null or symbolic_correct is null)
+    and full_answer is not null
+    {'and ' + sql_filter if sql_filter else ''}
+    """ 
+    with get_connection() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(query)
+            rows = cursor.fetchall()
+            columns = [desc[0] for desc in cursor.description]
+            df = pd.DataFrame(rows, columns=columns)
+    df = df.sample(frac=1).reset_index(drop=True)
+
+    if parse_sympy:
+        df['true_answer'] = df['true_answer'].apply(cached_parsing)
+    return df
+
+
+def load_subs():
+    query = 'select * from asymob.numerical_substitutions'
+    with get_connection() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(query)
+            rows = cursor.fetchall()
+            columns = [desc[0] for desc in cursor.description]
+            df = pd.DataFrame(rows, columns=columns)
+    df['subs_vals'] = df['subs_json'].apply(lambda x: json.loads(x))
+    df.drop('subs_json', axis=1, inplace=True)
+    df.set_index('challenge_id', inplace=True)
+    return df
+
+
+def update_db(question_data):
+    """
+    Update the database with the results of the comparison.
+    """
+    numeric_insert = r"""
+    INSERT INTO asymob.numeric_verification (
+        response_id,
+        numeric_correct,
+        strict_mode,
+        numeric_comparison_error,
+        check_time,
+        latex_parsing_method,
+        model_answer_sympy
+    ) VALUES (
+        %(response_id)s,
+        %(numeric_correct)s,
+        %(strict_mode)s,
+        %(numeric_comparison_error)s,
+        %(check_time)s,
+        %(latex_parsing_method)s,
+        %(model_answer_sympy)s
     )
+    ON CONFLICT (response_id) DO UPDATE SET
+        numeric_correct = EXCLUDED.numeric_correct,
+        strict_mode = EXCLUDED.strict_mode,
+        numeric_comparison_error = EXCLUDED.numeric_comparison_error,
+        check_time = EXCLUDED.check_time,
+        latex_parsing_method = EXCLUDED.latex_parsing_method,
+        model_answer_sympy = EXCLUDED.model_answer_sympy;    
+    """
+
+    symbolic_insert = r"""
+        INSERT INTO asymob.symbolic_verification (
+            response_id,
+            symbolic_correct,
+            symbolic_comparison_error,
+            check_time,
+            latex_parsing_method,
+            model_answer_sympy
+        ) VALUES (
+            %(response_id)s,
+            %(symbolic_correct)s,
+            %(symbolic_comparison_error)s,
+            %(check_time)s,
+            %(latex_parsing_method)s,
+            %(model_answer_sympy)s
+        )
+        ON CONFLICT (response_id) DO UPDATE SET
+            symbolic_correct = EXCLUDED.symbolic_correct,
+            symbolic_comparison_error = EXCLUDED.symbolic_comparison_error,
+            check_time = EXCLUDED.check_time,
+            latex_parsing_method = EXCLUDED.latex_parsing_method,
+            model_answer_sympy = EXCLUDED.model_answer_sympy;
+    """
+
+    question_data['check_time'] = CHECK_TIME
+    question_data['model_answer_sympy'] = str(question_data['model_answer_sympy'])
+    with get_connection() as conn:
+        with conn.cursor() as cursor:
+            # Insert the data into the database
+            cursor.execute(numeric_insert, question_data)
+            cursor.execute(symbolic_insert, question_data)
+            conn.commit()
 
 
 def replace_infinite_sums(expr, new_upper=UPPER_LIMIT_FINITE):
@@ -98,6 +212,7 @@ def _meta_compare(model_answer, true_answer):
 
     return True
 
+
 def compare_numeric(true_answer, model_answer, subs_vals, allowed_diff=1e-5, 
                     strict=True, debug=DEBUG):
     if debug:
@@ -106,10 +221,15 @@ def compare_numeric(true_answer, model_answer, subs_vals, allowed_diff=1e-5,
         print('subs_vals:', subs_vals)
 
     diffs = []
-    for subs, true_answer_numer in subs_vals:
+    for true_answer_numer, subs in subs_vals:
         # This should be a number, but it might have I (complex number) in it.
         # So, we parse it as a sympy expression, which will convert it well.
         true_answer_numer = sp.parse_expr(true_answer_numer)
+        if sp.var('e') in true_answer_numer.free_symbols:
+            true_answer_numer = true_answer_numer.subs(
+                {sp.var('e'): sp.exp(1)}
+            )
+            
         if C in model_answer.free_symbols:
             subs[C] = 0
         model_answer_numer = model_answer.subs(subs).evalf().doit()
@@ -184,63 +304,86 @@ def compare_symbolic(true_answer, model_answer):
     return (diff == 0) or (diff == C) or (diff == -C)
 
 
-def _compare_symbolic_wrapper(question_data):
+def _compare_symbolic_wrapper(question_data, recheck_errors):
+    if not recheck_errors and question_data['symbolic_correct'] is not None:
+        # If we already have a result, we don't need to check again.
+        return question_data
+
     try:
-        if question_data['Source'] in SKIP_SYMB_CHECK_SOURCES:
-            return None, 'In skip list'
-        
-        return compare_symbolic(
+        question_data['symbolic_correct'] = compare_symbolic(
             question_data['true_answer'], 
-            question_data['model_answer']
-        ), None
+            question_data['model_answer_sympy']
+        )
+        question_data['symbolic_comparison_error'] = None
     except Exception as e:
         ex = traceback.format_exc()
-        return None, str(ex)
+        question_data['symbolic_correct'] = None
+        question_data['symbolic_comparison_error'] = str(ex)
+    
+    return question_data
 
 
-def _compare_numeric_wrapper(question_data, numeric_subs):
+def _compare_numeric_wrapper(question_data, numeric_subs, recheck_errors):
+    if not recheck_errors and question_data['numeric_correct'] is not None:
+        # If we already have a result, we don't need to check again.
+        return question_data
+
     try:
         if numeric_subs is None:
             # This should lead to None in the output file.
-            return None, 'missing substitution for numeric comparison'
+            question_data['numeric_correct'] = None
+            question_data['numeric_comparison_error'] = \
+                'missing substitution for numeric comparison'
+            question_data['strict_mode'] = None
+            return question_data
 
-        if (
-            '\\int' in question_data['question_text'] or 
-            'integral' in question_data['question_text'] or 
-            'Integral' in question_data['question_text']
-            ):
-            strict = False
-        else:
-            strict = True
-        
-        return compare_numeric(
+        question_data['strict_mode'] = True
+        result = compare_numeric(
             question_data['true_answer'], 
-            question_data['model_answer'], 
+            question_data['model_answer_sympy'], 
             numeric_subs,
-            strict=strict
-        ), None
+            strict=True
+        )
+        # If the answer is not correct in a strict manner, and there is an
+        # integral in the question, we can try to compare it in a non-strict 
+        # way.
+        if not result and (
+            '\\int' in question_data['challenge'] or 
+            'integral' in question_data['challenge'] or 
+            'Integral' in question_data['challenge']
+            ):
+            question_data['strict_mode'] = False
+            result = compare_numeric(
+                question_data['true_answer'], 
+                question_data['model_answer_sympy'], 
+                numeric_subs,
+                strict=False
+            )
+        question_data['numeric_correct'] = result
+        question_data['numeric_comparison_error'] = None
+    
     except Exception as e:
         ex = traceback.format_exc()
-        return None, str(ex)
+        question_data['numeric_correct'] = None
+        question_data['numeric_comparison_error'] = str(ex)
+    
+    return question_data
 
 
-def check_answer(question_data, numeric_subs, output_file):
+def check_answer(question_data, numeric_subs, recheck_errors=True):
     """
     Question data - a json containing the dataframe's row. 
-    in includes thw following entries:
-        question_id, model, code_execution, full_answer, tokens_used,
-        final_answer_latex, question_text, true_answer, error
-    Some of the fields are parsed as strings, and this function reconverts
-    them to sympy objects.
     """
     try:
-        question_data['true_answer'] = math_parsers.parse_sympy_str(
+        # the true answer is already in "clean" form, so we don't need to 
+        # work hard for it.
+        question_data['true_answer'] = cached_parsing(
             question_data['true_answer'])
         
         question_data['final_answer_latex'] = extract_latex_answer(
             question_data['full_answer'])
         
-        model_answer, answer_type = math_parsers.latex_to_sympy(
+        model_answer, answer_type = latex_to_sympy(
             question_data['final_answer_latex']
         )
         model_answer = model_answer.expand().removeO()
@@ -248,46 +391,33 @@ def check_answer(question_data, numeric_subs, output_file):
             model_answer = replace_infinite_sums(model_answer)
 
 
-        question_data['model_answer'] = model_answer
-        question_data['model_answer_type'] = answer_type
+        question_data['model_answer_sympy'] = model_answer
+        question_data['latex_parsing_method'] = answer_type
         
         should_check = _meta_compare(
-            question_data['model_answer'], 
+            question_data['model_answer_sympy'], 
             question_data['true_answer']
         )
 
         if not should_check:
-            question_data['symbolic_comparison'] = False
-            question_data['numeric_comparison'] = False
-        
+            question_data['symbolic_correct'] = False
+            question_data['numeric_correct'] = False
         else:
-            res, error = _compare_symbolic_wrapper(question_data)
-            question_data['symbolic_comparison'] = res
-            question_data['symbolic_comparison_error'] = error
+            question_data = _compare_symbolic_wrapper(
+                question_data, recheck_errors)
             
-            res, error = _compare_numeric_wrapper(question_data, numeric_subs)
-            question_data['numeric_comparison'] = res
-            question_data['numeric_comparison_error'] = error
+            question_data = _compare_numeric_wrapper(
+                question_data, numeric_subs, recheck_errors)
 
     except Exception as e:
         ex = traceback.format_exc()
-        print(f'Error parsing {_get_distinct_identifier(question_data)}')
+        print(f'Error parsing {(question_data)}')
         print(f'Error: {ex}')
-        question_data['error'] = str(ex)
+        question_data['symbolic_comparison_error'] = 'Joined error:\n' + str(ex)
+        question_data['numeric_comparison_error'] = 'Joined error:\n' + str(ex)
 
-    # Sympy objects are often not JSON serializable, convert them to strings.
-    if 'model_answer' in question_data:
-        question_data['model_answer'] = str(question_data['model_answer'])
-    if 'true_answer' in question_data:
-        question_data['true_answer'] = str(question_data['true_answer'])
-    
-    # Write to output file
-    df = pd.DataFrame.from_records([question_data])
-    df.to_excel(
-        OUTPUT_FOLDER / output_file, 
-        index=False
-    )
-    return question_data    
+    update_db(question_data)
+    return question_data
 
 
 def iter_tasks(tasks_df, already_done_df=None):
@@ -326,38 +456,23 @@ def iter_tasks(tasks_df, already_done_df=None):
 
 
 def main():
-    df = pd.read_excel(RESULTS_FILE) #, sheet_name='results')
-    df = df[~df.full_answer.isna()]
-    df = df.sample(frac=1).reset_index(drop=True)
+    tasks_df = load_tasks(parse_sympy=False)
+    all_subs = load_subs()
 
-    # The conversion to string of the true answer often breaks the sympy's 
-    # constants. In particular, it converts e to the constant E, which is not
-    # what we want. Reloading the original expressions here.
-    questions = load_questions(parse_sympy=False)
-    questions_df = pd.DataFrame.from_records(
-        questions,
-        columns=['q_id', 'question', 'true_answer'],
-        index='q_id')
-    df.true_answer = questions_df.loc[df.question_id].true_answer.values
-    
-    with open(NUMER_SUBS_FILE, 'r') as f:
-        numer_subs = json.load(f)
-    already_done_df = None # pd.read_excel(OUTPUT_FILE)
-    subs_available = list(numer_subs.keys())
-    
     results = []
     with ProcessPool(max_workers=POOL_SIZE) as pool:
         # chunk_results, timed_out_chunks = check_answers_chunks(df, pool)
         # row_results = check_answers_rows(df, timed_out_chunks, pool)
         futures = []
-        for i, question_data in enumerate(iter_tasks(df, already_done_df)):
-            identifier = _get_distinct_identifier(question_data).replace('/', '-')
-            output_file = f'checked_{identifier}.xlsx'
-            if str(question_data['question_id']) not in subs_available:
+        for i, question_data in tasks_df.iterrows():
+            question_data = question_data.to_dict()
+            q_id = question_data['challenge_id']
+            
+            if q_id not in all_subs.index:
                 subs = None
             else:
-                subs = numer_subs[str(question_data['question_id'])]
-            args = (question_data, subs, output_file)
+                subs = all_subs.loc[q_id].values.tolist()
+            args = (question_data, subs)
             future = pool.schedule(
                 check_answer, 
                 args=args, 
@@ -376,18 +491,23 @@ def main():
             except TimeoutError as e:
                 print(f"Row {i} timed out.")
                 timeouts += 1
-                errored_line = df[i:i+1].copy()
-                errored_line['error'] = 'timeout'
-                errored_line.to_excel(
-                    OUTPUT_FOLDER / f'timeout_{i}.xlsx')
+                errored_line = tasks_df.iloc[i].copy().to_dict()
+                for key in [
+                    'numeric_correct', 'strict_mode', 
+                    'latex_parsing_method', 'model_answer_sympy', 
+                    'symbolic_correct']:
+                    errored_line[key] = None
+                errored_line['numeric_comparison_error'] = 'timeout'
+                errored_line['symbolic_comparison_error'] = 'timeout'
+                update_db(errored_line)
 
             if (completed + timeouts) % 50 == 0:
                 print(f"Completed {completed} rows, {timeouts} timeouts")
     
-    # Combine the results into a single DataFrame
-    results = pd.DataFrame.from_records(results)
-    combined_df = pd.concat([already_done_df, results], axis=1)
-    combined_df.to_excel(OUTPUT_FILE, index=False)
+    # # Combine the results into a single DataFrame
+    # results = pd.DataFrame.from_records(results)
+    # combined_df = pd.concat([already_done_df, results], axis=1)
+    # combined_df.to_excel(OUTPUT_FILE, index=False)
 
 if __name__ == '__main__':
     main()
