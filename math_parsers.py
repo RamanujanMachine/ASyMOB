@@ -3,6 +3,7 @@ import inspect
 from sp_vars import *
 import sympy as sp
 import pandas as pd
+from functools import cache
 from sympy.parsing.latex import parse_latex
 from sympy.parsing.sympy_parser import parse_expr, standard_transformations, implicit_multiplication_application
 from gemini_interface import GeminiInterface
@@ -53,6 +54,7 @@ def clean_sp_object(sp_expr, swap_funcs=True):
     return sp_expr
 
 
+@cache
 def parse_sympy_str(expr_str):
     try:
         if pd.isna(expr_str):
