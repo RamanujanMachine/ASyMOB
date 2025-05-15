@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import sympy as sp
 import json
+from concurrent.futures import as_completed
 from math_parsers import cached_parsing, latex_to_sympy
 from sp_vars import *
 from pebble import ProcessPool
@@ -29,7 +30,7 @@ SKIP_SYMB_CHECK_SOURCES = []
 #    'GHOSTS\nSymbolic IntegrationQ7'
 #]
 
-POOL_SIZE = 10
+POOL_SIZE = 6
 ROW_TIMEOUT = 30 
 UPPER_LIMIT_FINITE = 10
 CHUNK_SIZE = 50
@@ -370,7 +371,7 @@ def _compare_numeric_wrapper(question_data, numeric_subs, recheck_errors):
     return question_data
 
 
-def check_answer(question_data, numeric_subs, recheck_errors=True):
+def check_answer(question_data, numeric_subs, recheck_errors=False):
     """
     Question data - a json containing the dataframe's row. 
     """
@@ -456,14 +457,15 @@ def iter_tasks(tasks_df, already_done_df=None):
 
 
 def main():
-    tasks_df = load_tasks(parse_sympy=False)
+    tasks_df = load_tasks(parse_sympy=False, sql_filter='challenge_id <= 10000')
     all_subs = load_subs()
 
     results = []
     with ProcessPool(max_workers=POOL_SIZE) as pool:
         # chunk_results, timed_out_chunks = check_answers_chunks(df, pool)
         # row_results = check_answers_rows(df, timed_out_chunks, pool)
-        futures = []
+        future_to_index = {}
+
         for i, question_data in tasks_df.iterrows():
             question_data = question_data.to_dict()
             q_id = question_data['challenge_id']
@@ -478,12 +480,13 @@ def main():
                 args=args, 
                 timeout=ROW_TIMEOUT
             )
-            futures.append((future, i))
-        print(f"Scheduled {len(futures)} rows")
+        future_to_index[future] = i
+
+        print(f"Scheduled {len(tasks_df)} rows")
 
         completed = 0
         timeouts = 0
-        for future, i in futures:
+        for future in as_completed(future_to_index):
             try:
                 results.append(future.result())
                 # print(f"Row {i} completed")
