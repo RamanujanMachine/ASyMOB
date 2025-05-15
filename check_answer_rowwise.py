@@ -91,10 +91,14 @@ def load_subs():
     return df
 
 
-def update_db(question_data):
+def update_db(question_data, update_symbolic=True, update_numeric=True):
     """
     Update the database with the results of the comparison.
     """
+    if not update_numeric and not update_symbolic:
+        print('noting new to push')
+        return
+
     numeric_insert = r"""
     INSERT INTO asymob.numeric_verification (
         response_id,
@@ -151,8 +155,10 @@ def update_db(question_data):
     with get_connection() as conn:
         with conn.cursor() as cursor:
             # Insert the data into the database
-            cursor.execute(numeric_insert, question_data)
-            cursor.execute(symbolic_insert, question_data)
+            if update_symbolic:
+                cursor.execute(symbolic_insert, question_data)
+            if update_numeric:
+                cursor.execute(numeric_insert, question_data)
             conn.commit()
 
 
@@ -305,11 +311,7 @@ def compare_symbolic(true_answer, model_answer):
     return (diff == 0) or (diff == C) or (diff == -C)
 
 
-def _compare_symbolic_wrapper(question_data, recheck_errors):
-    if not recheck_errors and question_data['symbolic_correct'] is not None:
-        # If we already have a result, we don't need to check again.
-        return question_data
-
+def _compare_symbolic_wrapper(question_data):
     try:
         question_data['symbolic_correct'] = compare_symbolic(
             question_data['true_answer'], 
@@ -324,11 +326,7 @@ def _compare_symbolic_wrapper(question_data, recheck_errors):
     return question_data
 
 
-def _compare_numeric_wrapper(question_data, numeric_subs, recheck_errors):
-    if not recheck_errors and question_data['numeric_correct'] is not None:
-        # If we already have a result, we don't need to check again.
-        return question_data
-
+def _compare_numeric_wrapper(question_data, numeric_subs):
     try:
         if numeric_subs is None:
             # This should lead to None in the output file.
@@ -371,10 +369,12 @@ def _compare_numeric_wrapper(question_data, numeric_subs, recheck_errors):
     return question_data
 
 
-def check_answer(question_data, numeric_subs, recheck_errors=True):
+def check_answer(question_data, numeric_subs, recheck_errors=False):
     """
     Question data - a json containing the dataframe's row. 
     """
+    check_symbolic = True
+    check_numeric = True
     try:
         # the true answer is already in "clean" form, so we don't need to 
         # work hard for it.
@@ -399,16 +399,27 @@ def check_answer(question_data, numeric_subs, recheck_errors=True):
             question_data['model_answer_sympy'], 
             question_data['true_answer']
         )
-
+        
+        check_symbolic = (
+            question_data['symbolic_correct'] is None and 
+            (question_data['symbolic_comparison_error'] is None or recheck_errors)
+        )
+        check_numeric = (
+            question_data['numeric_correct'] is None and 
+            (question_data['numeric_comparison_error'] is None or recheck_errors)
+        )
+            
+            
         if not should_check:
             question_data['symbolic_correct'] = False
             question_data['numeric_correct'] = False
         else:
-            question_data = _compare_symbolic_wrapper(
-                question_data, recheck_errors)
+            if check_symbolic:
+                question_data = _compare_symbolic_wrapper(question_data)
             
-            question_data = _compare_numeric_wrapper(
-                question_data, numeric_subs, recheck_errors)
+            if check_numeric:
+                question_data = _compare_numeric_wrapper(
+                    question_data, numeric_subs)
 
     except Exception as e:
         ex = traceback.format_exc()
@@ -416,14 +427,14 @@ def check_answer(question_data, numeric_subs, recheck_errors=True):
         print(f'Error: {ex}')
         question_data['symbolic_comparison_error'] = 'Joined error:\n' + str(ex)
         question_data['numeric_comparison_error'] = 'Joined error:\n' + str(ex)
-        for key in [
-            'numeric_correct', 'strict_mode', 
-            'latex_parsing_method', 'model_answer_sympy', 
-            'symbolic_correct']:
-            if key not in question_data:
-                question_data[key] = None
-
-    update_db(question_data)
+    for key in [
+        'numeric_correct', 'strict_mode', 
+        'latex_parsing_method', 'model_answer_sympy', 
+        'symbolic_correct']:
+        if key not in question_data:
+            question_data[key] = None
+    
+    update_db(question_data, check_symbolic, check_numeric)
     return question_data
 
 
@@ -465,7 +476,7 @@ def iter_tasks(tasks_df, already_done_df=None):
 def main():
     tasks_df = load_tasks(parse_sympy=False, sql_filter="model = 'nvidia/Llama-3_3-Nemotron-Super-49B-v1'")
     all_subs = load_subs()
-    tasks_df.sort_values(by='challenge_id', inplace=True)
+    # tasks_df.sort_values(by='challenge_id', inplace=True)
 
     results = []
     with ProcessPool(max_workers=POOL_SIZE) as pool:
