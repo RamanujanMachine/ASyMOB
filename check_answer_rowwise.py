@@ -147,7 +147,7 @@ def update_db(question_data):
     """
 
     question_data['check_time'] = CHECK_TIME
-    question_data['model_answer_sympy'] = str(question_data['model_answer_sympy'])
+    question_data['model_answer_sympy'] = str(question_data.get('model_answer_sympy'))
     with get_connection() as conn:
         with conn.cursor() as cursor:
             # Insert the data into the database
@@ -371,7 +371,7 @@ def _compare_numeric_wrapper(question_data, numeric_subs, recheck_errors):
     return question_data
 
 
-def check_answer(question_data, numeric_subs, recheck_errors=False):
+def check_answer(question_data, numeric_subs, recheck_errors=True):
     """
     Question data - a json containing the dataframe's row. 
     """
@@ -416,6 +416,12 @@ def check_answer(question_data, numeric_subs, recheck_errors=False):
         print(f'Error: {ex}')
         question_data['symbolic_comparison_error'] = 'Joined error:\n' + str(ex)
         question_data['numeric_comparison_error'] = 'Joined error:\n' + str(ex)
+        for key in [
+            'numeric_correct', 'strict_mode', 
+            'latex_parsing_method', 'model_answer_sympy', 
+            'symbolic_correct']:
+            if key not in question_data:
+                question_data[key] = None
 
     update_db(question_data)
     return question_data
@@ -457,8 +463,9 @@ def iter_tasks(tasks_df, already_done_df=None):
 
 
 def main():
-    tasks_df = load_tasks(parse_sympy=False, sql_filter='challenge_id <= 10000')
+    tasks_df = load_tasks(parse_sympy=False, sql_filter="model = 'nvidia/Llama-3_3-Nemotron-Super-49B-v1'")
     all_subs = load_subs()
+    tasks_df.sort_values(by='challenge_id', inplace=True)
 
     results = []
     with ProcessPool(max_workers=POOL_SIZE) as pool:
