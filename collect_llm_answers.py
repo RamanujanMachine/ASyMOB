@@ -25,19 +25,19 @@ USE_CODE_PREFIX = (
 # All models that support responses API
 MODELS_LIST = [
     # ('DeepSeek-Prover-V2-671B', None),
-    ('DeepSeek-R1', None),
-    ('DeepSeek-V3', None),
+    #('DeepSeek-R1', None),
+    #('DeepSeek-V3', None),
     ('gemini/gemini-2.0-flash', False),
     ('gemini/gemini-2.0-flash', True),
     ('gemini/gemini-2.5-flash-preview-04-17', False),
     ('gemini/gemini-2.5-flash-preview-04-17', True),
-    ('gemini/gemma-3-27b-it', None),
+    # ('gemini/gemma-3-27b-it', None),
     ('gpt-4.1', False),
     ('gpt-4.1', True),
     ('gpt-4o', False),
     ('gpt-4o-mini', False),
-    ('meta-llama/Llama-4-Scout-17B-16E-Instruct', None),
-    ('nvidia/Llama-3_3-Nemotron-Super-49B-v1', None),
+    # ('meta-llama/Llama-4-Scout-17B-16E-Instruct', None),
+    # ('nvidia/Llama-3_3-Nemotron-Super-49B-v1', None),
     ('o4-mini', False),
     ('o4-mini', True),
     # ('Qwen/Qwen2.5-72B-Instruct', None)
@@ -146,7 +146,7 @@ def ask_model(model_name, question_text, code_execution):
             return_tokens=True
         )
     except Exception as e:
-        print(f"Error sending message to model: {e}")
+        print(f"Error sending message to {model_name}: {e}")
         print('message:', MATH_INSTRUCTIONS + question_text)
         return {'prompt': prompt, 'error': str(e)}
     
@@ -197,7 +197,7 @@ def llm_survey_wrapper(task, acquisition_time):
     model = task['model']
     code_execution=task['code_execution']
     try:
-        print(f"Processing question {q_id} "
+        print(f"Processing question {q_id} ({code_execution})"
               f"with model {model}...")
         result = ask_model(
             model, 
@@ -232,7 +232,7 @@ def main():
         for _, task in tasks_df.iterrows()
     ]
     print(f"Number of tasks: {len(args)}")
-    with mp.Pool(processes=25) as pool:
+    with mp.Pool(processes=50) as pool:
         # Map the function to the pool
         # results = pool.starmap(collect_single_question, args)
         pool.starmap(llm_survey_wrapper, args)
