@@ -30,8 +30,8 @@ SKIP_SYMB_CHECK_SOURCES = []
 #    'GHOSTS\nSymbolic IntegrationQ7'
 #]
 
-POOL_SIZE = 6
-ROW_TIMEOUT = 30 
+POOL_SIZE = 15
+ROW_TIMEOUT = 60 
 UPPER_LIMIT_FINITE = 10
 CHUNK_SIZE = 50
 DEBUG = False
@@ -39,7 +39,15 @@ CHECK_TIME = pd.Timestamp.now()
 print(f"Check time: {CHECK_TIME}")
 
 
-def load_tasks(sql_filter=None, parse_sympy=False, include_full_answer=True):
+def load_tasks(sql_filter=None, parse_sympy=False, include_full_answer=True, recheck_errors=False):
+    skip_retries_filter = '''
+    (
+    -- no answer and no error = not checked yet
+    (numeric_correct is null and numeric_comparison_error is null)
+               or
+    (symbolic_correct is null and symbolic_comparison_error is null)
+    )
+    '''
     query = f"""
     select
         response_id,
@@ -63,6 +71,7 @@ def load_tasks(sql_filter=None, parse_sympy=False, include_full_answer=True):
     where (numeric_correct is null or symbolic_correct is null)
     and full_answer is not null
     {'and ' + sql_filter if sql_filter else ''}
+    {'and ' + skip_retries_filter if not recheck_errors else ''}
     """ 
     with get_connection() as conn:
         with conn.cursor() as cursor:
@@ -350,6 +359,8 @@ def _compare_numeric_wrapper(question_data, numeric_subs):
             '\\int' in question_data['challenge'] or 
             'integral' in question_data['challenge'] or 
             'Integral' in question_data['challenge']
+            ) and (
+            '\\int_' not in question_data['challenge']
             ):
             question_data['strict_mode'] = False
             result = compare_numeric(
@@ -373,8 +384,17 @@ def check_answer(question_data, numeric_subs, recheck_errors=False):
     """
     Question data - a json containing the dataframe's row. 
     """
-    check_symbolic = True
-    check_numeric = True
+    check_symbolic = (
+        question_data['symbolic_correct'] is None and 
+        (question_data['symbolic_comparison_error'] is None or recheck_errors)
+    )
+    check_numeric = (
+        question_data['numeric_correct'] is None and 
+        (question_data['numeric_comparison_error'] is None or recheck_errors)
+    )
+    if not check_symbolic and not check_symbolic:
+        # Nothing to do here
+        return 
     try:
         # the true answer is already in "clean" form, so we don't need to 
         # work hard for it.
@@ -398,17 +418,7 @@ def check_answer(question_data, numeric_subs, recheck_errors=False):
         should_check = _meta_compare(
             question_data['model_answer_sympy'], 
             question_data['true_answer']
-        )
-        
-        check_symbolic = (
-            question_data['symbolic_correct'] is None and 
-            (question_data['symbolic_comparison_error'] is None or recheck_errors)
-        )
-        check_numeric = (
-            question_data['numeric_correct'] is None and 
-            (question_data['numeric_comparison_error'] is None or recheck_errors)
-        )
-            
+        )         
             
         if not should_check:
             question_data['symbolic_correct'] = False
@@ -474,9 +484,9 @@ def iter_tasks(tasks_df, already_done_df=None):
 
 
 def main():
-    tasks_df = load_tasks(parse_sympy=False, sql_filter="model = 'nvidia/Llama-3_3-Nemotron-Super-49B-v1'")
+    tasks_df = load_tasks(parse_sympy=False, sql_filter="challenge_id < 17092")
     all_subs = load_subs()
-    # tasks_df.sort_values(by='challenge_id', inplace=True)
+    tasks_df.sort_values(by='challenge_id', inplace=True)
 
     results = []
     with ProcessPool(max_workers=POOL_SIZE) as pool:
@@ -505,6 +515,7 @@ def main():
         completed = 0
         timeouts = 0
         for future in as_completed(future_to_index):
+            print('something is done!')
             try:
                 results.append(future.result())
                 # print(f"Row {i} completed")
