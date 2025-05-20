@@ -24,7 +24,7 @@ USE_CODE_PREFIX = (
 )
 # All models that support responses API
 MODELS_LIST = [
-    ('DeepSeek-Prover-V2-671B', None),
+    # ('DeepSeek-Prover-V2-671B', None),
     ('DeepSeek-R1', None),
     ('DeepSeek-V3', None),
     ('gemini/gemini-2.0-flash', False),
@@ -32,15 +32,15 @@ MODELS_LIST = [
     ('gemini/gemini-2.5-flash-preview-04-17', False),
     ('gemini/gemini-2.5-flash-preview-04-17', True),
     ('gemini/gemma-3-27b-it', None),
-    # ('gpt-4.1', False),
-    # ('gpt-4.1', True),
-    # ('gpt-4o', False),
-    # ('gpt-4o-mini', False),
+    ('gpt-4.1', False),
+    ('gpt-4.1', True),
+    ('gpt-4o', False),
+    ('gpt-4o-mini', False),
     ('meta-llama/Llama-4-Scout-17B-16E-Instruct', None),
     ('nvidia/Llama-3_3-Nemotron-Super-49B-v1', None),
     ('o4-mini', False),
     ('o4-mini', True),
-    ('Qwen/Qwen2.5-72B-Instruct', None)
+    # ('Qwen/Qwen2.5-72B-Instruct', None)
 ]
 # CHUNKS_DIR = Path('LLM_survey_chunks_QWEN3')
 
@@ -96,6 +96,18 @@ def extract_latex_answer(textual_answer):
             textual_answer, 
             re.DOTALL)
 
+    if not matches:
+        matches = re.findall(
+            r"output='(.*?)'",
+            textual_answer, 
+            re.DOTALL)
+
+    if not matches:
+        matches = re.findall(
+            r'output="(.*?)"',
+            textual_answer, 
+            re.DOTALL)
+        
     if not matches:
         raise ValueError("No latex answer found in the textual answer.")
     
@@ -207,13 +219,20 @@ def llm_survey_wrapper(task, acquisition_time):
 
 
 def main():
-    acquisition_time = '2025-05-14 18:00:00.000000'
+    acquisition_time = '2025-05-20 13:00:00.000000'
+    tasks_df = load_tasks(
+        models=MODELS_LIST, 
+        sql_filter="challenge_id <= 17092",
+        retry_errors=True
+    )
+    tasks_df = tasks_df.sample(frac=1).reset_index(drop=True)
+
     args = [
         (task.to_dict(), acquisition_time) 
-        for _, task in load_tasks(models=MODELS_LIST).iterrows()
+        for _, task in tasks_df.iterrows()
     ]
     print(f"Number of tasks: {len(args)}")
-    with mp.Pool(processes=2) as pool:
+    with mp.Pool(processes=25) as pool:
         # Map the function to the pool
         # results = pool.starmap(collect_single_question, args)
         pool.starmap(llm_survey_wrapper, args)
