@@ -12,6 +12,7 @@ import traceback
 import numpy as np
 from db_utils import get_connection
 from functools import cache
+import multiprocessing
 
 # RESULTS_FILE = 'results_mp - 122 questions.json'
 # RESULTS_FILE = 'working copy of things\\unchecked.xlsx'
@@ -30,8 +31,8 @@ SKIP_SYMB_CHECK_SOURCES = []
 #    'GHOSTS\nSymbolic IntegrationQ7'
 #]
 
-POOL_SIZE = 15
-ROW_TIMEOUT = 60 
+POOL_SIZE = 5
+ROW_TIMEOUT = 30 
 UPPER_LIMIT_FINITE = 10
 CHUNK_SIZE = 50
 DEBUG = False
@@ -483,6 +484,59 @@ def iter_tasks(tasks_df, already_done_df=None):
         yield row_dict
 
 
+def main_single_core():
+    tasks_df = load_tasks(parse_sympy=False, sql_filter="challenge_id < 17092")
+    all_subs = load_subs()
+    tasks_df.sort_values(by='challenge_id', inplace=True)
+
+    results = []
+    completed = 0
+    timeouts = 0
+
+    with ProcessPool(max_workers=1, max_tasks=1) as pool:
+        for i, question_data in tasks_df.iterrows():
+            question_data = question_data.to_dict()
+            q_id = question_data['challenge_id']
+            print(f"Checking {i}: {q_id} on response {question_data['response_id']}")
+
+            if q_id not in all_subs.index:
+                subs = None
+            else:
+                subs = all_subs.loc[q_id].values.tolist()
+
+            future = pool.schedule(check_answer, args=(question_data, subs), timeout=ROW_TIMEOUT)
+
+            try:
+                result = future.result()
+                results.append(result)
+                completed += 1
+            except TimeoutError:
+                print(f"Row {i} (challenge_id={q_id}) timed out.")
+                timeouts += 1
+                errored_line = question_data.copy()
+                for key in [
+                    'numeric_correct', 'strict_mode',
+                    'latex_parsing_method', 'model_answer_sympy',
+                    'symbolic_correct']:
+                    errored_line[key] = None
+                errored_line['numeric_comparison_error'] = 'timeout'
+                errored_line['symbolic_comparison_error'] = 'timeout'
+                update_db(errored_line)
+            except Exception as e:
+                print(f"Row {i} (challenge_id={q_id}) failed with exception: {e}")
+                errored_line = question_data.copy()
+                for key in [
+                    'numeric_correct', 'strict_mode',
+                    'latex_parsing_method', 'model_answer_sympy',
+                    'symbolic_correct']:
+                    errored_line[key] = None
+                errored_line['numeric_comparison_error'] = str(e)
+                errored_line['symbolic_comparison_error'] = str(e)
+                update_db(errored_line)
+
+            if (completed + timeouts) % 50 == 0:
+                print(f"Completed {completed} rows, {timeouts} timeouts")
+
 def main():
     tasks_df = load_tasks(parse_sympy=False, sql_filter="challenge_id < 17092")
     all_subs = load_subs()
@@ -542,4 +596,5 @@ def main():
     # combined_df.to_excel(OUTPUT_FILE, index=False)
 
 if __name__ == '__main__':
-    main()
+    # main()
+    main_single_core()
