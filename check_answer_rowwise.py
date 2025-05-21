@@ -490,9 +490,10 @@ def main_single_core():
     all_subs = load_subs()
     tasks_df.sort_values(by='challenge_id', inplace=True)
 
-    chunk_start = sys.argv[1]
+    chunk_start = int(sys.argv[1])
     chunk_end = chunk_start + CHUNK_SIZE
     tasks_df = tasks_df.iloc[chunk_start:chunk_end]
+    print(len(tasks_df))
 
     results = []
     completed = 0
