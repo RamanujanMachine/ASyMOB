@@ -13,6 +13,7 @@ import numpy as np
 from db_utils import get_connection
 from functools import cache
 import multiprocessing
+import sys
 
 # RESULTS_FILE = 'results_mp - 122 questions.json'
 # RESULTS_FILE = 'working copy of things\\unchecked.xlsx'
@@ -488,6 +489,10 @@ def main_single_core():
     tasks_df = load_tasks(parse_sympy=False, sql_filter="challenge_id < 17092")
     all_subs = load_subs()
     tasks_df.sort_values(by='challenge_id', inplace=True)
+
+    chunk_start = sys.argv[1]
+    chunk_end = chunk_start + CHUNK_SIZE
+    tasks_df = tasks_df.iloc[chunk_start:chunk_end]
 
     results = []
     completed = 0
