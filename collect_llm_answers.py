@@ -6,6 +6,7 @@ from db_utils import load_tasks, insert_row, get_connection
 import traceback
 import multiprocessing as mp
 from pathlib import Path
+import json
 
 
 RETRY_ATTEMPT = True
@@ -184,6 +185,16 @@ def upload_result_to_db(conn, task, result, acquisition_time):
         'acquisition_time': acquisition_time,
         'acquisition_method': 'Responses/completion API'
     }
+    # Uncomment the following lines to insert the row into a file
+    # output_filename = (
+    #     f'sample_data/result_{added_row["model"]}_'
+    #     f'{added_row["challenge_id"]}_{added_row["code_execution"]}'
+    #     '.json'
+    # )
+    # with open(output_filename, 'w') as f:
+    #     json.dump(added_row, f)
+
+    # Comment out the following line to insert the row into a file
     insert_row(
         conn=conn,  # Assuming you have a connection object
         table_name='model_responses',
@@ -231,6 +242,9 @@ def main():
         sql_filter="challenge_id <= 17092 and error is null",
         retry_errors=True
     )
+    # Comment the command above and uncomment the following line to use tasks
+    # from a sample file 
+    # tasks_df = pd.read_pickle('sample_data\\sample_collect_answers.pkl')
     tasks_df = tasks_df.sample(frac=1).reset_index(drop=True)
 
     args = [

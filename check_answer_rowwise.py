@@ -14,6 +14,8 @@ from db_utils import get_connection
 from functools import cache
 import multiprocessing
 import sys
+import pickle
+
 
 RESULTS_FILE = r'results_4.1_only_assistants\joined.xlsx'
 OUTPUT_FILE = r'results_4.1_only_assistants\4.1_assistant_checked.xlsx'
@@ -438,11 +440,22 @@ def check_answer(question_data, numeric_subs, recheck_errors=False):
         if key not in question_data:
             question_data[key] = None
     
+    # Uncomment the following line to run from a sample file
+    # output_filename = (
+    #     f'sample_data\\check_result_{question_data["response_id"]}.json'
+    # )
+    # with open(output_filename, 'w') as f:
+    #     pickle.dump(question_data, f)
+    # Comment the following line to run from a sample file
     update_db(question_data, check_symbolic, check_numeric)
     return question_data
 
 
 def main_single_core():
+    # Uncomment the following line to run the from a sample file
+    # tasks_df = pd.read_pickle('sample_data\\sample_check_answers.pkl')
+    # all_subs = pd.read_pickle('sample_data\\subs.pkl')
+    # Comment the following line to run the from a sample file
     tasks_df = load_tasks(parse_sympy=False, sql_filter="challenge_id < 17092")
     all_subs = load_subs()
     tasks_df.sort_values(by='challenge_id', inplace=True)
@@ -484,6 +497,7 @@ def main_single_core():
                     errored_line[key] = None
                 errored_line['numeric_comparison_error'] = 'timeout'
                 errored_line['symbolic_comparison_error'] = 'timeout'
+                # Comment when running from a sample file
                 update_db(errored_line)
             except Exception as e:
                 print(f"Row {i} (challenge_id={q_id}) failed with exception: {e}")
@@ -495,6 +509,7 @@ def main_single_core():
                     errored_line[key] = None
                 errored_line['numeric_comparison_error'] = str(e)
                 errored_line['symbolic_comparison_error'] = str(e)
+                # Comment when running from a sample file
                 update_db(errored_line)
 
             if (completed + timeouts) % 50 == 0:
