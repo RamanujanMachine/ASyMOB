@@ -15,8 +15,6 @@ from functools import cache
 import multiprocessing
 import sys
 
-# RESULTS_FILE = 'results_mp - 122 questions.json'
-# RESULTS_FILE = 'working copy of things\\unchecked.xlsx'
 RESULTS_FILE = r'results_4.1_only_assistants\joined.xlsx'
 OUTPUT_FILE = r'results_4.1_only_assistants\4.1_assistant_checked.xlsx'
 DISCARDED_FILE = 'discarded.json'
@@ -25,12 +23,6 @@ DISCARDED_FOLDER = Path('discarded_results')
 NUMER_SUBS_FILE = 'numer_subs_x_positive.json'
 QUESTIONS_FILE = 'questions.json'
 SKIP_SYMB_CHECK_SOURCES = []
-
-#[    'U-Math\nintegral_calc\n4c1292e1-d4b3-4acf-afaf-eaac62f2662d',
-#     'UGMathBench\nCalculus_-_single_variable_0624',
-#    'MathOdyssey\nProblem 328 from Calculus and Analysis - College Math',
-#    'GHOSTS\nSymbolic IntegrationQ7'
-#]
 
 POOL_SIZE = 5
 ROW_TIMEOUT = 30 
@@ -450,50 +442,15 @@ def check_answer(question_data, numeric_subs, recheck_errors=False):
     return question_data
 
 
-def iter_tasks(tasks_df, already_done_df=None):
-    """
-    Returns a dataframe with the tasks needed to be done.
-    """
-    with open(QUESTIONS_FILE, 'r') as f:
-        questions = json.load(f)
-    questions_df = pd.DataFrame.from_records(questions)
-    questions_df['question_id'] = questions_df['Index'].astype(np.int64)
-
-    tasks_df = tasks_df.merge(
-        questions_df[['question_id', 'Source', 'Variation']],
-        left_on='question_id',
-        right_on='question_id',
-        how='left'
-    )
-
-    if already_done_df is None:
-        already_done_df = pd.DataFrame(columns=tasks_df.columns)
-
-    already_done_identifiers = [_get_distinct_identifier(row.to_dict())
-        for _, row in already_done_df.iterrows()]
-    
-    for _, row in tasks_df.iterrows():
-        identifier = _get_distinct_identifier(row.to_dict())
-
-        if identifier in already_done_identifiers:
-            continue
-        
-        row_dict = row.to_dict()
-
-        if row['Variation'] != 'Original':
-            continue
-        yield row_dict
-
-
 def main_single_core():
     tasks_df = load_tasks(parse_sympy=False, sql_filter="challenge_id < 17092")
     all_subs = load_subs()
     tasks_df.sort_values(by='challenge_id', inplace=True)
 
-    chunk_start = int(sys.argv[1])
+    chunk_start = int(sys.argv[1]) * CHUNK_SIZE
     chunk_end = chunk_start + CHUNK_SIZE
     tasks_df = tasks_df.iloc[chunk_start:chunk_end]
-    print(len(tasks_df))
+    print(f'from {chunk_start} -> {chunk_end}', len(tasks_df))
 
     results = []
     completed = 0
