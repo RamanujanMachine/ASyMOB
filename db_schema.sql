@@ -66,7 +66,7 @@ create table symbolic_verification
     model_answer_sympy        text
 );
 
-create view pipeline_results
+create view pipeline_results_extra
             (challenge_id, variation, source, true_answer_sympy, response_id, model, code_execution, full_answer,
              final_answer_latex, acquisition_time, error, model_answer, symbolic_correct, numeric_correct,
              symbolic_comparison_error, numeric_comparison_error, response_acquisition_time, symbolic_check_time,
@@ -212,3 +212,27 @@ SELECT challenge_id,
        sv_latex_parsing_method,
        state
 FROM tab;
+
+
+create view asymob.pipeline_results as
+select
+    qs.challenge_id,
+    qs.variation,
+    qs.source,
+    qs.answer_sympy as true_answer_sympy,
+    mr.model,
+    mr.code_execution,
+    mr.full_answer,
+    mr.final_answer_latex,
+    mr.tokens_used,
+    sv.symbolic_correct,
+    nv.numeric_correct
+
+from asymob.challenges qs
+    left join asymob.model_responses mr
+        using (challenge_id)
+    left join asymob.numeric_verification nv
+        using (response_id)
+    left join asymob.symbolic_verification sv
+        using (response_id)
+where challenge_id < 17092
