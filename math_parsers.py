@@ -107,8 +107,12 @@ def latex_to_sympy_deter(latex_str):
             r'\\atan',
             latex_str)
         
-        # use constants for e and pi
-        return clean_sp_object(parse_latex(latex_str), swap_funcs=False)
+        parsed_expr = parse_latex(latex_str)
+        if isinstance(parsed_expr, sp.logic.boolalg.BooleanTrue):
+            # Sometimes, parse_latex returns a BooleanTrue object, which is not
+            # a valid sympy expression. We leave it for the LLM to fix.
+            return pd.NA
+        return clean_sp_object(parsed_expr, swap_funcs=False)
     except LatexFuncCallError as e:
         raise e 
     except Exception as e:
