@@ -81,14 +81,14 @@ python validate_answers_rowwise.py
 ## OUTPUT
 The output of the validation pipeline is stored in a database. The pipeline's 
 results are stored in the view `pipeline_results`. The columns of the view are:
-- *challenge_id* - The ID of the challenge in the dataset.
-- *variation* - The variation type on the challenge, e.g., "Numeric-One-3", "Symbolic-All".
-- *source* - The source of the challenge, e.g., "ASyMOB", "MATH".
-- *true_answer_sympy* - The correct answer to the challenge in SymPy format.
-- *response_id* - The model's response ID in the database. It is a unique identifier for the a specific model's configuration (model and code configuration) and the challenge.
-- *model* - The model used to answer the challenge, e.g., "gpt-3.5-turbo", "gpt-4".
-- *code_execution* - Indicates whether the prompt used incentivized the model to execute code for the answer. If `None`, no prefix was added to the prompt to incentivize code execution.
-- *full_answer* - The full answer provided by the model, including any code execution output.
-- *final_answer_latex* - The final answer provided by the model in LaTeX format, extracted from the full answer.
-- *symbolic_correct* - Wether the model's answer is correct symbolically.
-- *numeric_correct* - Wether the model's answer is correct numerically.
+- *challenge_id* - the ID of the challenge in the database.
+- *variation* - the variation of the challenge.
+- *source* - the source of the challenge.
+- *true_answer_sympy* - the true answer to the challenge in SymPy format.
+- *model* - the model that answered the challenge.
+- *code_execution* - whether the answer was validated using code execution.
+- *full_answer* - the full answer provided by the model.
+- *final_answer_latex* - the final answer provided by the model in LaTeX format.
+- *tokens_used* - the number of tokens used by the model to answer the challenge.
+- *symbolic_correct* - whether the answer was validated symbolically.
+- *numeric_correc* - whether the answer was validated numerically.
