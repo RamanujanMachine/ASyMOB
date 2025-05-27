@@ -1,0 +1,496 @@
+Index,Challenge,Answer in Latex,Answer in Sympy,Variation,Source
+1,Compute the first 5 nonzero terms (not necessarily a quadratic polynomial) of the Maclaurin series of $ f(x) = e^{\sin(x)} $,1+x+\frac{x^2}{2}-\frac{x^4}{8}-\frac{x^5}{15}+\cdots,-x**5/15 - x**4/8 + x**2/2 + x + 1,Original,"U-Math
+sequences_series
+1ccc052c-9604-4459-a752-98ebdf3e0764"
+2,Find the (infinite) power series of $f(x) \cdot g(x)$ for given $f(x) = \sum_{n=1}^\infty \left(n \cdot x^n\right)$ and $g(x) = \sum_{n=1}^\infty \left(n \cdot x^n\right)$,\sum_{n=2}^\infty\left(\frac{1}{6}\cdot n\cdot\left(n^2-1\right)\cdot x^n\right),"Sum(n*x**n*(n**2 - 1), (n, 2, oo))/6",Original,"U-Math
+sequences_series
+fb6418ae-3440-4258-9388-89d799fd859a"
+3,Compute the first 6 nonzero terms of the Maclaurin series of $f(x) = \sin(x) \cdot \cos\left(\frac{ \pi }{ 4 }\right) + \cos(x) \cdot \sin\left(\frac{ \pi }{ 4 }\right)$,\frac{1}{34560\cdot\sqrt{2}}\cdot\left(288\cdot x^5+1440\cdot x^4-5760\cdot x^3-17280\cdot x^2+34560\cdot x+34560\right),sqrt(2)*(x**5 + 5*x**4 - 20*x**3 - 60*x**2 + 120*x + 120)/240,Original,"U-Math
+sequences_series
+f89bd354-18c9-4f31-b91f-cf6421e24921"
+4,Compute the first 4 nonzero terms of the Maclaurin series of $f(x) = e^x \cdot \cos(x)$,1+x-\frac{x^3}{3}-\frac{x^4}{6},-x**4/6 - x**3/3 + x + 1,Original,"U-Math
+sequences_series
+d1fe21df-ee7f-40c2-9655-6bd6a7a23ff1"
+5,Compute $\lim_{x \to 0}\left(\frac{ 2 \cdot \cos(x)+4 }{ 5 \cdot x^3 \cdot \sin(x) }-\frac{ 6 }{ 5 \cdot x^4 }\right)$,\frac{1}{150},1/150,Original,"U-Math
+sequences_series
+068e40ce-9108-4ef8-8ee5-0d1471ebbe43"
+6,Evaluate $\lim_{x \to 0^{+}}\left(\left(\frac{ \tan\left(\frac{ x }{ 2 }\right) }{ \frac{ x }{ 2 } }\right)^{\frac{ 3 }{ x^2 }}\right)$,$e^{\frac{1}{4}}$,exp(1/4),Original,"U-Math
+differential_calc
+363dd580-f1fc-4867-a6ef-db2a03139745"
+7,"Evaluate
+$ \lim_{x \to 5} \left( \frac{ 3 \cdot x }{ x-5 }-\frac{ 3 }{ \ln\left(\frac{ x }{ 5 }\right) } \right) $",\frac{3}{2},3/2,Original,"U-Math
+differential_calc
+2d799998-115a-489b-a48b-57090954303e"
+8,"Evaluate
+$ \lim_{x \to \infty} \left(x - x^2 \cdot \ln\left(1 + \frac{ 1 }{ x }\right)\right) $",\frac{1}{2},1/2,Original,"U-Math
+differential_calc
+efdc4110-cf56-4f37-bf54-40fdd5d58145"
+9,"Evaluate
+$ \lim_{x \to 0^{+}} \left( \left( \frac{ \tan(2 \cdot x) }{ 2 \cdot x } \right)^{\frac{ 1 }{ 3 \cdot x^2 }} \right) $",e^{\frac{4}{9}},e**(4/9),Original,"U-Math
+differential_calc
+99a2304d-5d8e-4245-90da-a80651ca15d8"
+10,"Evaluate
+$ \lim_{x \to 0}\left( \left| \frac{ -\sin(x) }{ x } \right| \right)^{\frac{ 1 }{ 4 \cdot x^2 }} $",e^{\frac{-1}{24}},e**(-1/24),Original,"U-Math
+differential_calc
+84c6a419-c103-41d5-aad5-dd8e690c6e88"
+11,"Integrate 
+$ \int \sin(x)^4 \cdot \cos(x)^6 dx $",$C+\frac{1}{320}\cdot\left(\sin(2\cdot x)\right)^5+\frac{1}{128}\cdot\left(\frac{3\cdot x}{2}-\frac{\sin(4\cdot x)}{2}+\frac{\sin(8\cdot x)}{16}\right)$,C + 3*x/256 + sin(2*x)**5/320 - sin(4*x)/256 + sin(8*x)/2048,Original,"U-Math
+integral_calc
+0c0ba3db-1470-4c36-975c-91ff5f51986f"
+12,"Calculate the integral:
+$
+\int \frac{ \sqrt[5]{x}+\sqrt[5]{x^4}+x \cdot \sqrt[5]{x} }{ x \cdot \left(1+\sqrt[5]{x^2}\right) }   dx
+$",C+5\cdot\arctan\left(\sqrt[5]{x}\right)+\frac{5}{4}\cdot\sqrt[5]{x}^4,C + 5*x**(4/5)/4 + 5*atan(x**(1/5)),Original,"U-Math
+integral_calc
+126c4165-b3d5-4470-8412-08e79d9821cf"
+13,"Solve the integral:
+$
+\int \frac{ 1 }{ \sin(x)^7 \cdot \cos(x) }   dx
+$",C+\ln\left(\left|\tan(x)\right|\right)-\frac{3}{2\cdot\left(\tan(x)\right)^2}-\frac{3}{4\cdot\left(\tan(x)\right)^4}-\frac{1}{6\cdot\left(\tan(x)\right)^6},C + log(Abs(tan(x))) - 3 / (2 * tan(x)**2) - 3 / (4 * tan(x)**4) - 1 / (6 * tan(x)**6),Original,"U-Math
+integral_calc
+00f6affb-905a-4109-a78e-2dde7a0b83accf"
+14,"Compute the integral:
+$
+-2 \cdot \int x^{-4} \cdot \left(4+x^2\right)^{\frac{ 1 }{ 2 }}   dx
+$",C+\frac{1}{6}\cdot\left(\frac{4}{x^2}+1\right)\cdot\sqrt{\frac{4}{x^2}+1},(C*x**2 + sqrt((x**2 + 4)/x**2)*(x**2 + 4)/6)/x**2,Original,"U-Math
+integral_calc
+05ea9929-8cbb-432b-bbbb-ec1e74c9f401"
+15,"Solve the integral:
+$
+\int \left(\frac{ x+4 }{ x-4 } \right)^{\frac{ 3 }{ 2 }}   dx
+$",C+\sqrt{\frac{x+4}{x-4}}\cdot(x-20)-12\cdot\ln\left(\left|\frac{\sqrt{x-4}-\sqrt{x+4}}{\sqrt{x-4}+\sqrt{x+4}}\right|\right),C + sqrt((x + 4)/(x - 4)) * (x - 20) - 12 * ln(Abs((sqrt(x - 4) - sqrt(x + 4)) / (sqrt(x - 4) + sqrt(x + 4)))),Original,"U-Math
+integral_calc
+08c72d46-1abd-49e1-9c9c-ce509902be6e"
+16,Compute the integral: $ \int \frac{ -1 }{ x^2 \cdot \left(3+x^3\right)^{\frac{ 5 }{ 3 }} }   dx $,\frac{1}{9}\cdot\sqrt[3]{1+\frac{3}{x^3}}+\frac{1}{18\cdot\left(1+\frac{3}{x^3}\right)^{\frac{2}{3}}},(x**3 + 2)/(6*x**3*(1 + 3/x**3)**(2/3)),Original,"U-Math
+integral_calc
+4c1292e1-d4b3-4acf-afaf-eaac62f2662d"
+17,"Compute the integral:
+$ \int \frac{ 4 \cdot x+\sqrt{4 \cdot x-5} }{ 5 \cdot \sqrt[4]{4 \cdot x-5}+\sqrt[4]{(4 \cdot x-5)^3} }   dx $",C+25\cdot\sqrt[4]{4\cdot x-5}+\frac{1}{5}\cdot\sqrt[4]{4\cdot x-5}^5-\frac{4}{3}\cdot\sqrt[4]{4\cdot x-5}^3-\frac{125}{\sqrt{5}}\cdot\arctan\left(\frac{1}{\sqrt{5}}\cdot\sqrt[4]{4\cdot x-5}\right),C + (4*x - 5)**(5/4)/5 - 4*(4*x - 5)**(3/4)/3 + 25*(4*x - 5)**(1/4) - 25*sqrt(5)*atan(sqrt(5)*(4*x - 5)**(1/4)/5),Original,"U-Math
+integral_calc
+147944c5-b782-48c5-a664-d66deb92d9a7"
+18,"Solve the integral:
+$
+\int \frac{ 3 }{ \sin(2 \cdot x)^7 \cdot \cos(-2 \cdot x) }   dx
+$",C+\frac{3}{2}\cdot\left(\ln\left(\left|\tan(2\cdot x)\right|\right)-\frac{3}{2\cdot\left(\tan(2\cdot x)\right)^2}-\frac{3}{4\cdot\left(\tan(2\cdot x)\right)^4}-\frac{1}{6\cdot\left(\tan(2\cdot x)\right)^6}\right),"C + (3/2) * (log(Abs(tan(2*x))) - 3/(2 * tan(2*x)**2) - 3/(4 * tan(2*x)**4) - 1/(6 * tan(2*x)**6)
+)",Original,"U-Math
+integral_calc
+1db212f0-2fac-410d-969d-fe3b5b55d076"
+19,"Solve the integral:
+$
+\int \frac{ 1 }{ \sin(8 \cdot x)^5 }   dx
+$",C+\frac{1}{128}\cdot\left(2\cdot\left(\tan(4\cdot x)\right)^2+6\cdot\ln\left(\left|\tan(4\cdot x)\right|\right)+\frac{1}{4}\cdot\left(\tan(4\cdot x)\right)^4-\frac{2}{\left(\tan(4\cdot x)\right)^2}-\frac{1}{4\cdot\left(\tan(4\cdot x)\right)^4}\right),"C + Rational(1, 128) * (2 * tan(4 * x)**2 + 6 * log(Abs(tan(4 * x))) + Rational(1, 4) * tan(4 * x)**4 - 2 / tan(4 * x)**2 - 1 / (4 * tan(4 * x)**4))",Original,"U-Math
+integral_calc
+275f7ceb-f331-4a3f-96ec-346e6d81b32a"
+20,"Evaluate the integral:
+$
+I = \int \left(x^3 + 3\right) \cdot \cos(2 \cdot x)   dx
+$",\frac{1}{256}\cdot\left(384\cdot\sin(2\cdot x)+128\cdot x^3\cdot\sin(2\cdot x)+192\cdot x^2\cdot\cos(2\cdot x)-96\cdot\cos(2\cdot x)-256\cdot C-192\cdot x\cdot\sin(2\cdot x)\right),-C + x**3*sin(2*x)/2 + 3*x**2*cos(2*x)/4 - 3*x*sin(2*x)/4 + 3*sin(2*x)/2 - 3*cos(2*x)/8,Original,"U-Math
+integral_calc
+47a11349-0386-4969-9263-d3cdfcc98cb9"
+21,"Use factoring to calculate the following limit.
+$ \lim_{x \rightarrow K} \frac {{x}^4-K^4} {{x}^5-K^5} $",\frac{4}{5 K},4/(5*K),Original,"UGMathBench
+Calculus_-_single_variable_0016"
+22,Find the limit. $ \lim_{x \to 0} \frac{1-\cos\!\left(10x\right)}{\cos^{2}\!\left(6x\right)-1}$,\frac{-25}{18},-25/18,Original,"UGMathBench
+Calculus_-_single_variable_0022"
+23,Evaluate the limit. $ \lim_{x\to 1} \dfrac{x^2+11x-12}{\ln x}=$,13,13,Original,"UGMathBench
+Calculus_-_single_variable_0508"
+24,"Evaluate the limit below, given that $f(t)=\left(\frac{4^t+6^t}{4}\right)^{1/t}$. $\lim\limits_{t\to+\infty} f(t)$",6,6,Original,"UGMathBench
+Calculus_-_single_variable_0512"
+25,Calculate the integral. $\int_{2}^{\infty} 3x^{2}e^{-x^{3}}  dx=$,\frac{1}{e^{8}},e**(-8),Original,"UGMathBench
+Calculus_-_single_variable_0592"
+26,Evaluate the indefinite integral. $\int \tan^{3}\!\left(x\right)\sec^{9}\!\left(x\right)   dx$,\frac{\sec^{11}{\left(x \right)}}{11} - \frac{\sec^{9}{\left(x \right)}}{9},sec(x)**11/11 - sec(x)**9/9,Original,"UGMathBench
+Calculus_-_single_variable_0604"
+27,"Evaluate the indefinite integral.
+$\int 208 \cos^4(16x) dx$",78 x + \frac{13 \sin{\left(16 x \right)} \cos^{3}{\left(16 x \right)}}{4} + \frac{39 \sin{\left(16 x \right)} \cos{\left(16 x \right)}}{8},78*x + 13*sin(16*x)*cos(16*x)**3/4 + 39*sin(16*x)*cos(16*x)/8,Original,"UGMathBench
+Calculus_-_single_variable_0606"
+28,"Evaluate the integral.
+$ \int \frac{10x^2-48x-38}{x^3-5x^2-8x+48} dx $",\frac{2 \left(\left(x - 4\right) \left(3 \log{\left(\left|{x - 4}\right| \right)} + 2 \log{\left(\left|{x + 3}\right| \right)}\right) + 5\right)}{x - 4} ,2*((x - 4)*(3*log(Abs(x - 4)) + 2*log(Abs(x + 3))) + 5)/(x - 4),Original,"UGMathBench
+Calculus_-_single_variable_0612"
+29,Evaluate the integral. $ \int e^{x}\sqrt{64-e^{2x}} \;dx$ $=$,\frac{e^{x} \sqrt{64 - e^{2 x}}}{2} + 32 \operatorname{asin}{\left(\frac{e^{x}}{8} \right)},e**x*sqrt(64 - e**(2*x))/2 + 32*asin(e**x/8),Original,"UGMathBench
+Calculus_-_single_variable_0624"
+30,Evaluate $\lim_{x \to 0} \frac{e^{-3x^3}-1+3x^3-\frac{9}{2}x^6}{12x^9}$,\frac{-3}{8},-3/8,Original,"UGMathBench
+Calculus_-_single_variable_0939"
+31,"Solve the following first-order differential equation:
+$
+\frac{dy}{dx} + 2y = e^{-x}, \quad y(0) = 1.
+$",e^{-x},e**(-x),Original,"MathOdyssey
+Problem 340 from Differential Equations - College Math"
+32,Consider the differential equation $\frac{dy}{dx} = xy$. Find the value of $y(\sqrt{2})$ given that $y(0) = 2$.,2e,2*e,Original,"MathOdyssey
+Problem 339 from Differential Equations - College Math"
+33,"Evaluate the following limit:
+$
+\lim_{n \to \infty} \left(\sqrt{n^2+2n-1}-\sqrt{n^2+3}\right).
+$",1,1,Original,"MathOdyssey
+Problem 315 from Calculus and Analysis - College Math"
+34,Evaluate $\lim\limits_{x\to 4}\frac{x-4}{\sqrt{x}-2}$.,4,4,Original,"MathOdyssey
+Problem 317 from Calculus and Analysis - College Math"
+35,Evaluate $\displaystyle{\int_0^4(2x-\sqrt{16-x^2})dx}$.,16 - 4 \pi,16 - 4*pi,Original,"MathOdyssey
+Problem 325 from Calculus and Analysis - College Math"
+36,Evaluate the series $\sum\limits_{n=1}^\infty\frac{1}{(n+1)(n+3)}$.,\frac{5}{12},5/12,Original,"MathOdyssey
+Problem 326 from Calculus and Analysis - College Math"
+37,Evaluate the limit $\lim\limits_{x\to 0}\frac{(1+x)^{\frac{1}{x}}-e}{x}$.,-\frac{ e}{2},-e/2,Original,"MathOdyssey
+Problem 327 from Calculus and Analysis - College Math"
+38,Evaluate the series $\sum\limits_{n=0}^\infty \frac{1}{2n+1}\left(\frac12\right)^{2n+1}$.,\ln\sqrt{3},log(3)/2,Original,"MathOdyssey
+Problem 328 from Calculus and Analysis - College Math"
+39,Evaluate the limit $\lim\limits_{n\to\infty}\sum\limits_{k=0}^{n-1}\frac{1}{\sqrt{n^2-k^2}}$.,\frac{\pi}{2},pi/2,Original,"MathOdyssey
+Problem 329 from Calculus and Analysis - College Math"
+40,Evaluate the iterated integral $\displaystyle{\int_0^1dy\int_y^1(e^{-x^2}+e^x)dx}$.,\frac{3}{2}-\frac12 e^{-1},(3*e - 1)/(2*e),Original,"MathOdyssey
+Problem 336 from Calculus and Analysis - College Math"
+41,What is the integral of $ 2x - x^7atan(3) $,x^2-\frac{1}{8} x^8 \tan ^{-1}(3),-x**8*atan(3)/8 + x**2,Original,"GHOSTS 
+Symbolic Integration
+Q97"
+42,What is the integral of $ 1 + x + x^3*cosh(2) $,\frac{1}{4} x^4 \cosh (2)+\frac{x^2}{2}+x,x**4*cosh(2)/4 + x**2/2 + x,Original,"GHOSTS 
+Symbolic Integration
+Q98"
+43,What is the integral of $ 12 + 6cosh(x) $,12 x + 6 \sinh{\left(x \right)},12*x + 6*sinh(x),Original,"GHOSTS 
+Symbolic Integration
+Q90"
+44,What is the integral of 4x^7 + sin(1 + x),\frac{x^8}{2} - \cos(1+x) ,x**8/2 - cos(x + 1),Original,"GHOSTS 
+Symbolic Integration
+Q14"
+45,What is the integral of 2x + 2x^2 + x[(x + x*e^x)^-1],\frac{2 x^3}{3}+x^2-2 \tanh ^{-1}\left(2 e^x+1\right),2*x**3/3 + x**2 + x - log(exp(x) + 1),Original,"GHOSTS 
+Symbolic Integration
+Q7"
+46,What is the integral of -x + cos[ln(sin(3))] * ln(3x),-\frac{1}{2} x (x-2 \log (3 x) \cos (\log (\sin (3)))+2 \cos (\log (\sin (3)))),"-1*x*((x - 2*log(3*x, E)*cos(log(sin(3), E))) + 2*cos(log(sin(3), E)))/2",Original,"GHOSTS 
+Symbolic Integration
+Q15"
+47,What is the integral of 3x - 4*[cos(x+3)]*x^2,\frac{3 x^2}{2}-4 \left(x^2-2\right) \sin (x+3)-8 x \cos (x+3),-8*x*cos(x + 3) + ((3*x**2)/2 - 4*(x**2 - 2)*sin(x + 3)),Original,"GHOSTS 
+Symbolic Integration
+Q18"
+48,What is the integral of -3 + atan(x) + ln(tanh(3)),x \arctan(x) - \frac{1}{2} \ln(1 + x^2) + x \ln(\tanh(3)) - 3x + C,x*atan(x) - 3*x + x*log(tanh(3)) - log(x**2 + 1)/2,Original,"GHOSTS 
+Symbolic Integration
+Q20"
+49,What is the integral of e^{x \left(x + 4\right)^{2}} \left(x + 4\right) \left(3 x + 4\right),e^{x (x+4)^2},e**(x*(x + 4)**2),Original,"GHOSTS 
+Symbolic Integration
+Q22"
+50,What is the integral of -e^{3x} * sin(e^{3x}),\frac{1}{3} \cos \left(e^{3 x}\right),cos(e**(3*x))/3,Original,"GHOSTS 
+Symbolic Integration
+Q29"
+51,"If $\log _{2} x-2 \log _{2} y=2$, determine $y$, as a function of $x$",\frac{1}{2} \sqrt{x},sqrt(x)/2,Original,"OlympiadBench
+oe_to_maths_en_comp
+2498"
+52,"If $f(x)=2 x+1$ and $g(f(x))=4 x^{2}+1$, determine an expression for $g(x)$.",x^2-2 x+2,x**2 - 2*x + 2,Original,"OlympicArena
+Math_1381"
+53,Solve the following integral $\int_0^{\frac{\pi}{2}} \frac{x \sin(2x)}{1 + \cos^2(2x)}   dx$,Pi^2 / 16,Pi**2 / 16,Original,OBMU 2019 - Q21
+54,"Solve the following integral:
+$\int_{1}^{2} \frac{e^x(x - 1)}{x(x + e^x)}   dx$ ",\ln\left( \frac{2 + e^2}{2 + 2e} \right),"log((e**2 + 2)/(2*e + 2), E)",Original,OBMU 2019 - Q18
+55,"Solve the following integral:
+$\int_{0}^{\pi} \log(\sin(x))   dx$",-\pi \log (2),"-pi*log(2, E)",Original,OBMU 2019 - Q22
+56,"Evaluate the following hypergeometric function. Return a closed-form symbolic answer.
+
+$ {}_2F_1\left( \begin{array}{c} 1,1\ \\ 2 \end{array}; -1 \right) $",\log (2),"log(2, E)",Original,"ASyMOB
+Hypergeometrics
+Q1"
+57,"Evaluate the following hypergeometric function. Return a closed-form symbolic answer.
+
+$ {}_2F_1\left( \begin{array}{c} 1,1 \\ 3 \end{array}; -2 \right) $",\frac{3 \log (3)}{2}-1,"-1 + (3*log(3, E))/2",Original,"ASyMOB
+Hypergeometrics
+Q2"
+58,"Evaluate the following hypergeometric function. Return a closed-form symbolic answer.
+
+$ {}_3F_2\left( \begin{array}{c} 1,1,1 \\ 2,2 \end{array}; -1 \right) $",\frac{\pi ^2}{12},pi**2/12,Original,"ASyMOB
+Hypergeometrics
+Q3"
+59,"Evaluate the following hypergeometric function. Return a closed-form symbolic answer.
+
+$ {}_3F_2\left( \begin{array}{c} -1,-1,-1 \\ -1,-1 \end{array}; x \right) $",1-x,1-x,Original,"ASyMOB
+Hypergeometrics
+Q4"
+60,"Solve the following integral. Return a closed-form symbolic answer.
+
+\int \frac{ 1 }{ 1 + x^3 }   dx",-\frac{1}{6} \log \left(x^2-x+1\right)+\frac{1}{3} \log (x+1)+\frac{\tan ^{-1}\left(\frac{2 x-1}{\sqrt{3}}\right)}{\sqrt{3}},"(log(x + 1, E)/3 - 1*log((x**2 - x) + 1, E)/6) + atan((2*x - 1)/(sqrt(3)))/(sqrt(3))",Original,"ASyMOB
+Hypergeometrics
+Q5"
+61,"Solve the following integral.
+
+\int \frac{(4 + (4 - 1)x^1)x^{2-1}}{2(1 + x^1 + x^{4})\sqrt{1 + x^1}} dx",\tan ^{-1}\left(\frac{x^2}{\sqrt{x+1}}\right),atan(x**2/sqrt(x + 1)),Original,"ASyMOB
+Hypergeometrics
+Q6"
+62,"Compute up to degree 5 ($x^5$) the terms of the Maclaurin series of $ f(x) =  A e^{B \sin(x)} $, where A and B are symbolic constants.","\frac{1}{6} A \left(B^3-B\right) x^3+\frac{1}{2} A B^2 x^2+\frac{1}{120} A \left(B^5-10 B^3+B\right) x^5+\frac{1}{24} A
+   \left(B^4-4 B^2\right) x^4+A B x+A",A*B**2*x**2/2 + A*B*x + A + x**5*A*(B**5 - 10*B**3 + B)/120 + x**4*A*(B**4 - 4*B**2)/24 + x**3*A*(B**3 - B)/6,Symbolic,"U-Math
+sequences_series
+1ccc052c-9604-4459-a752-98ebdf3e0764"
+63,Find the (infinite) power series of $f(x) \cdot g(x)$ for given $f(x) = \sum_{n=1}^\infty \left(A n \cdot (F x)^n\right)$ and $g(x) = \sum_{n=1}^\infty \left(B n \cdot (F x)^n\right$,\sum_{n=2}^\infty \frac{1}{6} A B n \left(n^2-1\right) F^n \cdot x^n,"A*B*Sum(F**n*x**n*n*(n**2 - 1), (n, 2, oo))/6",Symbolic,"U-Math
+sequences_series
+fb6418ae-3440-4258-9388-89d799fd859a"
+64,Compute the first 6 nonzero terms of the Maclaurin series of $f(x) = F \left(\sin(A x) \cdot \cos\left(\frac{ B \pi }{ 4 }\right) + \cos(A x) \cdot \sin\left(\frac{ B \pi }{ 4 }\right)\right)$,"\frac{1}{120} A^5 F x^5 \cos \left(\frac{\pi  B}{4}\right)+\frac{1}{24} A^4 F x^4 \sin \left(\frac{\pi 
+   B}{4}\right)-\frac{1}{6} A^3 F x^3 \cos \left(\frac{\pi  B}{4}\right)-\frac{1}{2} A^2 F x^2 \sin \left(\frac{\pi 
+   B}{4}\right)+A F x \cos \left(\frac{\pi  B}{4}\right)+F \sin \left(\frac{\pi  B}{4}\right)",F*(A**5*x**5*cos(B*pi/4) + 5*A**4*x**4*sin(B*pi/4) - 20*A**3*x**3*cos(B*pi/4) - 60*A**2*x**2*sin(B*pi/4) + 120*A*x*cos(B*pi/4) + 120*sin(B*pi/4))/120,Symbolic,"U-Math
+sequences_series
+f89bd354-18c9-4f31-b91f-cf6421e24921"
+65,Compute the terms up to order 4 ($x^4$) of the Maclaurin series of $f(x) = F e^{A x} \cdot \cos(B x)$,"F x^3 \left(\frac{A^3}{6}-\frac{A B^2}{2}\right)+\frac{1}{2} F x^2 \left(A^2-B^2\right)+F x^4 \left(\frac{A^4}{24}-\frac{A^2
+   B^2}{4}+\frac{B^4}{24}\right)+A F x+F",F*(4*A*x**3*(A**2 - 3*B**2) + 24*A*x + x**4*(A**4 - 6*A**2*B**2 + B**4) + 12*x**2*(A**2 - B**2) + 24)/24,Symbolic,"U-Math
+sequences_series
+d1fe21df-ee7f-40c2-9655-6bd6a7a23ff1"
+66,Compute $\lim_{x \to 0}\frac{(2 \cos (F x)+4) \csc (F x)}{5 A (F x)^3}-\frac{6}{5 A (F x)^4}$,\frac{1}{A 150},1/(150*A),Symbolic,"U-Math
+sequences_series
+068e40ce-9108-4ef8-8ee5-0d1471ebbe43"
+67,"Evaluate 
+$ \lim_{x \to 0^+} A \left( \frac{ \tan\left( \frac{B x}{2} \right) }{ \frac{B x}{2} } \right)^{ \frac{F 3}{(B x)^2} } $",$A /cdot e^{\frac{F}{4}}$,A*e**(F/4),Symbolic,"U-Math
+differential_calc
+363dd580-f1fc-4867-a6ef-db2a03139745"
+68,"Evaluate
+$ \lim_{x \to A 5} \left( \frac{ 3 B x }{ x - 5 A }-\frac{ 3 B }{ \ln\left(\frac{ x }{ 5 A }\right) } \right)^{F} $
+",\left( \frac{3B}{2} \right)^F,(3*B/2)**F,Symbolic,"U-Math
+differential_calc
+2d799998-115a-489b-a48b-57090954303e"
+69,"Evaluate
+$ \lim_{x \to \infty} \left(A x - A F x^2 \cdot \ln\left(1 + \frac{ 1 }{ F x }\right)\right)^(1 B) $
+",\left(\frac{A}{2 F}\right)^{B},(A/(2*F))**B,Symbolic,"U-Math
+differential_calc
+efdc4110-cf56-4f37-bf54-40fdd5d58145"
+70,"Evaluate
+$ \lim_{x \to 0^+} F \left( \frac{\tan(A x)}{A x} \right)^{\frac{1 H}{3 B x^2}} $",F e^{\frac{A^{2} H}{9 B}},F*e**((A**2*H)/((9*B))),Symbolic,"U-Math
+differential_calc
+99a2304d-5d8e-4245-90da-a80651ca15d8"
+71,"Evaluate 
+$ \lim_{x \to 0} \left| F \left( \frac{-\sin(A x)}{A x} \right)^{\frac{1}{4 B x^2}} \right| $",\left( e^{-\frac{A^2}{6B}} \right)^{\frac{1}{4}} \left| F \right|,"(exp(-A**2 / (6 * B)))**Rational(1, 4) * Abs(F)",Symbolic,"U-Math
+differential_calc
+84c6a419-c103-41d5-aad5-dd8e690c6e88"
+72,"Integrate
+$ \int B \sin(F x)^4 \cdot \cos(F x)^6 dx $",\frac{\frac{B \sin{\left(2 F x \right)}}{512} - \frac{B \sin{\left(4 F x \right)}}{256} - \frac{B \sin{\left(6 F x \right)}}{1024} + \frac{B \sin{\left(8 F x \right)}}{2048} + \frac{B \sin{\left(10 F x \right)}}{5120} + \frac{F x \left(256 A + 3 B\right)}{256}}{F},(3*B*x)/256 + (B*sin(2*F*x))/(512*F) - (B*sin(4*F*x))/(256*F) - (B*sin(6*F*x))/(1024*F) + (B*sin(8*F*x))/(2048*F) + (B*sin(10*F*x))/(5120*F),Symbolic ,"U-Math
+integral_calc
+0c0ba3db-1470-4c36-975c-91ff5f51986f"
+73,"Solve the following integral. Assume A,B,F,G are real and positive.
+$ \int \frac{A \sqrt[5]{x} + B x^{4/5} + F x^{6/5}}{x \left(1 G+x^{2/5}\right)}   dx $","\frac{5}{4} \left(\frac{4 A \tan ^{-1}\left(\frac{\sqrt[5]{x}}{\sqrt{G}}\right)}{\sqrt{G}}+2 x^{2/5} (B-F G)+2 G (F G-B) \log
+   \left(G+x^{2/5}\right)+F x^{4/5}\right)","(5/4)*(F*x**(4/5) + ((2*(x**(2/5)*(B - F*G)) + (4*(A*atan(x**(1/5)/(sqrt(G)))))/(sqrt(G))) + 2*(G*(-B + F*G)*log(G + x**(2/5), E))))",Symbolic,"U-Math
+integral_calc
+126c4165-b3d5-4470-8412-08e79d9821cf"
+74,"Solve the following integral. Assume A,B,F are real and positive
+
+$ \int \frac{A \csc ^7(F x) \sec (F x)}{1 B}   dx $",-\frac{A \left(2 \csc ^6(F x)+3 \csc ^4(F x)+6 \csc ^2(F x)+12 (\log (\cos (F x))-\log (\sin (F x)))\right)}{12 B F},-A*(-12*log(sin(F*x)) + 12*log(cos(F*x)) + 2*csc(F*x)**6 + 3*csc(F*x)**4 + 6*csc(F*x)**2)/(12*B*F),Symbolic,"U-Math
+integral_calc
+00f6affb-905a-4109-a78e-2dde7a0b83accf"
+75,"Solve the following integral. Assume A,B,F are real and positive.
+
+$ \int -\frac{2 A \sqrt{4 B + (F x)^2}}{ (F x)^4}   dx $",\frac{A \left(4 B+F^2 x^2\right)^{3/2}}{6 B F^4 x^3},A*(4*B + F**2*x**2)**(3/2)/(6*B*F**4*x**3),Symbolic,"U-Math
+integral_calc
+05ea9929-8cbb-432b-bbbb-ec1e74c9f401"
+76,"Solve the following integral. Assume A,B,F are real and positive.
+
+$ \int \left(\frac{B (4 A + F x)}{F x - 4 A}\right)^{3/2}   dx $","\frac{B \sqrt{\frac{B (4 A+F x)}{F x-4 A}} \left(\sqrt{4 A+F x} (F x-20 A)+24 A \sqrt{F x-4 A} \tanh ^{-1}\left(\frac{\sqrt{4
+   A+F x}}{\sqrt{F x-4 A}}\right)\right)}{F \sqrt{4 A+F x}}",B*sqrt(-B*(4*A + F*x)/(4*A - F*x))*(24*A*sqrt(-4*A + F*x)*atanh(sqrt(4*A + F*x)/sqrt(-4*A + F*x)) + (-20*A + F*x)*sqrt(4*A + F*x))/(F*sqrt(4*A + F*x)),Symbolic,"U-Math
+integral_calc
+08c72d46-1abd-49e1-9c9c-ce509902be6e"
+77,"Solve the following integral. Assume A,B,F,G are real and positive.
+
+$ \int \frac{ -1 A }{B (F x)^2 \cdot \left(3 G + (F x)^3\right)^{\frac{ 5 }{ 3 }} }   dx $",\frac{A \left(F^3 x^3+2 G\right)}{6 B F^2 G^2 x \left(F^3 x^3+3 G\right)^{2/3}},A*(F**3*x**3 + 2*G)/(6*B*F**2*G**2*x*(F**3*x**3 + 3*G)**(2/3)),Symbolic,"U-Math
+integral_calc
+4c1292e1-d4b3-4acf-afaf-eaac62f2662d"
+78,"Solve the following integral. Assume A,B,F,G,H are real and positive.
+
+$ \int \frac{\sqrt{4 A x-5 B}+4 F x}{5 G \sqrt[4]{4 A x - 5 B} + H (4 A x - 5 B)^{3/4}}   dx $","\frac{\frac{\sqrt{H} \left(20 A^2 H^2 x+375 F G^2 \sqrt{4 A x-5 B}+5 B H \left(12 F H \sqrt{4 A x-5 B}-5 A H+25 F G\right)+A H
+   \left(12 F H x \sqrt{4 A x-5 B}-75 G \sqrt{4 A x-5 B}-100 F G x\right)\right)}{\sqrt[4]{4 A x-5 B}}-75 \sqrt{5} \sqrt{G}
+   \left(-A G H+B F H^2+5 F G^2\right) \tan ^{-1}\left(\frac{\sqrt{H} \sqrt[4]{4 A x-5 B}}{\sqrt{5} \sqrt{G}}\right)}{15 A^2
+   H^{7/2}}",(75*sqrt(5)*sqrt(G)*(4*A*x - 5*B)**(1/4)*(A*G*H - B*F*H**2 - 5*F*G**2)*atan(sqrt(5)*sqrt(H)*(4*A*x - 5*B)**(1/4)/(5*sqrt(G))) + sqrt(H)*(20*A**2*H**2*x + A*H*(-100*F*G*x + 12*F*H*x*sqrt(4*A*x - 5*B) - 75*G*sqrt(4*A*x - 5*B)) + 5*B*H*(-5*A*H + 25*F*G + 12*F*H*sqrt(4*A*x - 5*B)) + 375*F*G**2*sqrt(4*A*x - 5*B)))/(15*A**2*H**(7/2)*(4*A*x - 5*B)**(1/4)),Symbolic,"U-Math
+integral_calc
+147944c5-b782-48c5-a664-d66deb92d9a7"
+79,"Solve the following integral. Assume A,B,F are real and positive.
+
+$ \int \frac{3 A \csc ^7(2 F x) \sec (2 F x)}{1 B}   dx $",-\frac{A \left(2 \csc ^6(2 F x)+3 \csc ^4(2 F x)+6 \csc ^2(2 F x)+12 (\log (\cos (2 F x))-\log (\sin (2 F x)))\right)}{8 B F},-A*(-12*log(sin(2*F*x)) + 12*log(cos(2*F*x)) + 2*csc(2*F*x)**6 + 3*csc(2*F*x)**4 + 6*csc(2*F*x)**2)/(8*B*F),Symbolic,"U-Math
+integral_calc
+1db212f0-2fac-410d-969d-fe3b5b55d076"
+80,"Solve the following integral. Assume A,F are real and positive.
+
+$ \int A \csc^5 (8 F x)   dx $","-\frac{A \left(\csc ^4(4 F x)+6 \csc ^2(4 F x)-\sec ^4(4 F x)-6 \sec ^2(4 F x)+24 (\log (\cos (4 F x))-\log (\sin (4 F
+   x)))\right)}{512 F}",-A*(-24*log(sin(4*F*x)) + 24*log(cos(4*F*x)) + csc(4*F*x)**4 + 6*csc(4*F*x)**2 - sec(4*F*x)**4 - 6*sec(4*F*x)**2)/(512*F),Symbolic,"U-Math
+integral_calc
+275f7ceb-f331-4a3f-96ec-346e6d81b32a"
+81,"Solve the following integral. Assume A,B,F are real and positive.
+
+$ \int \cos (2 F x) \left(A (F x)^3+3 B \right)   dx $",\frac{2 \sin (2 F x) \left(A F x \left(2 F^2 x^2-3\right)+6 B\right)+3 A \left(2 F^2 x^2-1\right) \cos (2 F x)}{8 F},((2*A*F*x*(2*F**2*x**2 - 3) + 12*B)*sin(2*F*x) + 3*A*(2*F**2*x**2 - 1)*cos(2*F*x))/(8*F),Symbolic,"U-Math
+integral_calc
+47a11349-0386-4969-9263-d3cdfcc98cb9"
+82,"Use factoring to calculate the following limit.
+Assume A,B,F are real and positive.
+$ \lim_{x \rightarrow K} \frac{(F x)^{4 B} - K^{4 B}}{A \left((F x)^{5 B}- K^{5 B}\right)} $",\frac{4 K^{-B}}{5 A},4/(5*A*K**B),Symbolic,"UGMathBench
+Calculus_-_single_variable_0016"
+83,"Calculate the following limit.
+Assume A,B,F are real and positive.
+$ \frac{1 B - B \cos (10 F x)}{A \cos ^2(6 F x) - 1 A} $",-\frac{25 B}{18 A},-25*B/(18*A),Symbolic,"UGMathBench
+Calculus_-_single_variable_0022"
+84,"Calculate the following limit.
+Assume A,B,F are real and positive.
+$ \frac{A (F x)^2+11 A F x - 12 A}{B \log (F x)} $",\frac{13 A}{B},13*A/B,Symbolic,"UGMathBench
+Calculus_-_single_variable_0508"
+85,"Calculate the following limit.
+Assume A,F are real and A>1.
+
+$ \lim\limits_{x\to+\infty} 4^{-\frac{1}{F x}} \left(\frac{(4 A)^{F x} + (6 A)^{F x} }{1 A}\right)^{\frac{1}{F x}} $",6 A,6*A,Symbolic,"UGMathBench
+Calculus_-_single_variable_0512"
+86,"Calculate the following integral. 
+Assume A,B, F are real and positive.
+$\int_{2 B}^{\infty} 3 A (F x)^2 e^{- (F x)^3}  dx=$",\frac{A e^{-8 B^3 F^3}}{F},A/(F*e**(8*B**3*F**3)),Symbolic,"UGMathBench
+Calculus_-_single_variable_0592"
+87,"Evaluate the indefinite integral. 
+Assume A, F are real and positive.
+$\int A \tan ^3(F x) \sec ^9(F x)   dx$",\frac{A \sec ^9(F x) \left(9 \sec ^2(F x)-11\right)}{99 F},A*(9*sec(F*x)**2 - 11)*sec(F*x)**9/(99*F),Symbolic,"UGMathBench
+Calculus_-_single_variable_0604"
+88,"Evaluate the indefinite integral.
+Assume A, F are real and positive.
+$\int 208 A \cos ^4(16 F x)  dx$",\frac{13 A (192 F x+8 \sin (32 F x)+\sin (64 F x))}{32 F},13*A*(192*F*x + 8*sin(32*F*x) + sin(64*F*x))/(32*F),Symbolic,"UGMathBench
+Calculus_-_single_variable_0606"
+89,"Evaluate the integral.
+Assume A, B, F, G are real and positive.
+$ \int \frac{-38 A+10 B (F x)^2-48 F G x}{(F x)^3-5 (F x)^2-8 F x+48} dx $",\frac{2 \left(\frac{7 (19 A-80 B+96 G)}{F x-4}+(19 A+200 B-72 G) \log (4-F x)+(-19 A+45 B+72 G) \log (F x+3)\right)}{49 F},2*(133*A - 560*B + 672*G + (F*x - 4)*((-19*A + 45*B + 72*G)*log(F*x + 3) + (19*A + 200*B - 72*G)*log(-F*x + 4)))/(49*F*(F*x - 4)),Symbolic,"UGMathBench
+Calculus_-_single_variable_0612"
+90,"Evaluate the integral.
+Assume A,B,F are real and positive.
+$ \int A e^{F x} \sqrt{64 B-e^{2 F x}} \;dx$",\frac{A \left(e^{F x} \sqrt{64 B-e^{2 F x}}+64 B \tan ^{-1}\left(\frac{e^{F x}}{\sqrt{64 B-e^{2 F x}}}\right)\right)}{2 F},A*(64*B*atan(e**(F*x)/sqrt(64*B - e**(2*F*x))) + e**(F*x)*sqrt(64*B - e**(2*F*x)))/(2*F),Symbolic,"UGMathBench
+Calculus_-_single_variable_0624"
+91,"Evaluate the following limit.
+Assume A,B,F are real and positive.
+$\lim_{x \to 0} \frac{-\frac{9}{2} (1 B)^2 (F x)^6+3 B F^3 x^3+e^{-3 B (F x)^3}-1}{12 A (F x)^9} $",-\frac{3 B^3}{8 A},-3*B**3/(8*A),Symbolic,"UGMathBench
+Calculus_-_single_variable_0939"
+92,"Solve the following first-order differential equation:
+Assume A,B,F,G are real and positive.
+$ A y'(x)+2 B y(x)=F e^{-x}, \quad y(0)=1 G.$","\frac {e^{-\frac{2 B x}{A}} \left(F \left(-e^{x \left(\frac{2 B}{A}-1\right)}\right)+A G-2 B
+   G+F\right)}{A-2 B}",(A*G - 2*B*G + F + F*(-e**x*((-A + 2*B)/A)))/(e**(2*B*x/A)*(A - 2*B)),Symbolic,"MathOdyssey
+Problem 340 from Differential Equations - College Math"
+93,"Consider the differential equation 
+$A y'(x)=B x y(x)$. 
+Find the value of $y(\sqrt{2})$ given that $y(0) = 2 F$.
+Assume A,B,F are real and positive.",2 F e^{\frac{B}{A}},2*F*e**(B/A),Symbolic,"MathOdyssey
+Problem 339 from Differential Equations - College Math"
+94,"Evaluate the following limit:
+$ \lim_{x \to \infty} \sqrt{-(1 B) + H (F x)^2 + 2 F G x}-\sqrt{3 A + H (F x)^2} .$
+Assume A,B,F,G,H are real and positive.",\frac{G}{\sqrt{H}},G/sqrt(H),Symbolic,"MathOdyssey
+Problem 315 from Calculus and Analysis - College Math"
+95,"Evaluate $\lim\limits_{x\to \frac{4 B}{1 F}} \frac{A (F x - 4 B)}{\sqrt{F x}-2 \sqrt{1 B}} $.
+
+Assume A,B,F are real and positive.",4 A \sqrt{B},4*A*sqrt(B),Symbolic,"MathOdyssey
+Problem 317 from Calculus and Analysis - College Math"
+96,"Evaluate $\int_0^(4 B)  (2 A x - \sqrt{(4 B F)^2 - (F x)^2}) dx$.
+
+Assume A,B,F are real and positive.",\frac{1}{4} B^2 (4 A-\pi  F),B**2*(A - F*pi/4),Symbolic,"MathOdyssey
+Problem 325 from Calculus and Analysis - College Math"
+97,"Evaluate the series $\sum\limits_{x=1}^\infty \frac{1 A}{B (1 F + x) (1 F+x+2)} $.
+
+Assume A,B,F are real and positive.",\frac{A (2 F+3)}{2 B (F+1) (F+2)},A*(2*F + 3)/(2*(F + 2)*B*(F + 1)),Symbolic,"MathOdyssey
+Problem 326 from Calculus and Analysis - College Math"
+98,"Evaluate the limit $\lim\limits_{x \to 0} \frac{(A x+1)^{\frac{1}{A x}}-e}{B x} $.
+
+Assume A,B are real and positive.",-\frac{e A}{2 B},-A*e/(2*B),Symbolic,"MathOdyssey
+Problem 327 from Calculus and Analysis - College Math"
+99,"Evaluate the series $\sum\limits_{n=0}^\infty \frac{ \left(\frac{1}{2 B}\right)^{A (2 n+1)}}{F (2 n+1)} $.
+
+Assume A,B,F are real and positive.",\frac{\tanh ^{-1}\left(2^{-A} \left(\frac{1}{B}\right)^A\right)}{F},atanh((1/(2*B))**A)/F,Symbolic,"MathOdyssey
+Problem 328 from Calculus and Analysis - College Math"
+100,"Evaluate the limit
+$\lim\limits_{n\to\infty}\sum\limits_{k=0}^{n-1}\frac{1 A}{B \sqrt{F n^2-k^2}}$
+
+Assume A,B, $F \ge 1$ are real and positive.",\frac{A}{B} \arcsin\left(\frac{1}{\sqrt{F}}\right),A*asin(1/sqrt(F))/B,Symbolic,"MathOdyssey
+Problem 329 from Calculus and Analysis - College Math"
+101,"Evaluate the iterated integral $\int_0^1dy\int_y^1 e^{-A (F x)^2}+B e^{F x} dx$.
+
+Assume A,B,F are real and positive.",\frac{2 A B \left(e^F (F-1)+1\right)-e^{-A F^2}+1}{2 A F^2},(e**(A*F**2)*(2*A*B*(e**F*(F - 1) + 1) + 1) - 1)/(2*A*F**2*e**(A*F**2)),Symbolic,"MathOdyssey
+Problem 336 from Calculus and Analysis - College Math"
+102,"What is the integral of $ 2 A x-B x^{7 F} \tan ^{-1}(3 G) $
+
+Assume A,B,F,G are real and positive.",x \left(A x-\frac{B x^{7 F} \tan ^{-1}(3 G)}{7 F+1}\right),x*((A*x*(7*F + 1) - B*x**(7*F)*atan(3*G))/(7*F + 1)),Symbolic,"GHOSTS 
+Symbolic Integration
+Q97"
+103,"What is the integral of
+$ (1 A) + B F x + \cosh (2 G) (F x)^{3 H} $
+
+Assume A,B,F,G,H are real and positive.",A x+\frac{1}{2} B F x^2+\frac{x \cosh (2 G) (F x)^{3 H}}{3 H+1},x*(2*(F*x)**(3*H)*cosh(2*G) + (2*A + B*F*x)*(3*H + 1))/(2*(3*H + 1)),Symbolic,"GHOSTS 
+Symbolic Integration
+Q98"
+104,"What is the integral of $12 A+6 B \cosh (F x)$
+
+Assume A,B,F are real and positive.",12 A x+\frac{6 B \sinh (F x)}{F},12*A*x + 6*B*sinh(F*x)/F,Symbolic,"GHOSTS 
+Symbolic Integration
+Q90"
+105,"What is the integral of 
+$ 4 (B x)^{7 F}+G \sin ((1 H)+A x) $
+
+Assume A,B,F,G,H are real and positive.",\frac{4 A x (B x)^{7 F}-(7 F+1) G \cos (H+A x)}{7 F A+A},(4*A*x*(B*x)**(7*F) - G*(7*F + 1)*cos(H + A*x))/(A*(7*F + 1)),Symbolic,"GHOSTS 
+Symbolic Integration
+Q14"
+106,"What is the integral of
+$ 2 x+2 B x^{2 F}+\frac{x}{G x+H x e^{A x}} $.
+
+Assume A,B,F,G,H are real and positive.","x \left(x+\frac{2 B x^{2 F}}{2 F+1}\right)-\frac{\log \left(G A \left(G+H e^{A x}\right)\right)}{G A}+\frac{\log \left(e^{A
+   x}\right)}{G A}",(G*A*x*((x*(2*F + 1) + 2*B*x**(2*F))/(2*F + 1)) + log(e**(A*x)) - log(G*A*(G + H*e**(A*x))))/(G*A),Symbolic,"GHOSTS 
+Symbolic Integration
+Q7"
+107,"What is the integral of 
+$ B \log (3 H x) \cos (F \log (\sin (3)))-A x $
+
+Assume A,B,F,H are real and positive.",B x (\log (3 H x)-1) \cos (F \log (\sin (3)))-\frac{A x^2}{2},-A*x**2/2 + B*x*(log(3*H*x) - 1)*cos(F*log(sin(3))),Symbolic,"GHOSTS 
+Symbolic Integration
+Q15"
+108,"What is the integral of
+$ 3 A x - 4 B (H x)^2 \cos (F x+3 G) $
+
+Assume A,B,F,G,H are real and positive.",\frac{3 A x^2}{2}-\frac{8 B H^2 x \cos (F x+3 G)}{F^2}-\frac{4 B H^2 \left(F^2 x^2-2\right) \sin (F x+3 G)}{F^3},(3*A*F**3*x**2 - 16*B*F*H**2*x*cos(F*x + 3*G) - 8*B*H**2*(F**2*x**2 - 2)*sin(F*x + 3*G))/(2*F**3),Symbolic,"GHOSTS 
+Symbolic Integration
+Q18"
+109,"What is the integral of 
+$ A \tan ^{-1}(B x)+F \log (G \tanh (3 H))-3 $
+
+Assume A,B,F,G,H are real and positive.",-\frac{A \log \left(B^2 x^2+1\right)}{2 B}+A x \tan ^{-1}(B x)+x (F \log (G \tanh (3 H))-3),A*x*atan(B*x) - A*log(B**2*x**2 + 1)/(2*B) + x*(F*log(G*tanh(3*H)) - 3),Symbolic,"GHOSTS 
+Symbolic Integration
+Q20"
+110,"What is the integral of
+$ A (F x+4 G) (3 F x+4 G) e^{B x (F x+4 G)^2} $
+
+Assume A,B,F,G are real and positive.",\frac{A e^{B x (F x+4 G)^2}}{B},A*e**(B*x*(F*x + 4*G)**2)/B,Symbolic,"GHOSTS 
+Symbolic Integration
+Q22"
+111,"What is the integral of
+
+$ -A e^{3 B x} \sin \left(F e^{3 B x}\right) $
+
+Assume A,B,F are real and positive.",\frac{A \cos \left(F e^{3 B x}\right)}{3 B F},A*cos(F*e**(3*B*x))/(3*B*F),Symbolic,"GHOSTS 
+Symbolic Integration
+Q29"
+112,"If $\log_{2 A} x - 2 F \log _{2 A} y=2 B$, determine $y$, as a function of $x$
+
+Assume A,B,F are real and positive.",e^{\frac{2 F \log (2 A) \log (x)}{\log (2 A)-2 B \log(x)}},e**(-2*F*log(2*A)*log(x)/(2*B*log(x) - log(2*A))),Symbolic,"OlympiadBench
+oe_to_maths_en_comp
+2498"
+113,"If $f(x)=2 A x+ (1 B)$ and $g(f(x)) = 4 F x^{2}+ (1 G)$, determine an expression for $g(x)$.",\frac{F (x-B)^2}{A^2}+G,G + F*(-B + x)**2/A**2,Symbolic,"OlympicArena
+Math_1381"
+114,"Solve the following integral. Assume A,B,F are real and B>0.
+
+$\int_0^{\frac{\pi}{2 F}} \frac{A x \sin(2 F x)}{(1 B) + \cos^2(2 F x)}   dx$",\frac{A\pi}{4F^2\sqrt{B}} \arctan\!\frac{1}{\sqrt{B}},A*pi*atan(1/sqrt(B))/(4*sqrt(B)*F**2),Symbolic,OBMU 2019 - Q21
+115,"Solve the following integral. Assume A,B,F,G are real and positive.
+
+$\int_{1}^{2} \frac{A e^{F x} (F x-1)}{F x \left(B e^{F x}+F G x\right)}   dx$ ",-\frac{A \log \left(\frac{2 (e B+G)}{e^2 B+2 G}\right)}{B F},"-A*log((2*(B*e + G))/(B*e**2 + 2*G), E)/(B*F)",Symbolic,OBMU 2019 - Q18
+116,"Solve the following integral. Assume A,B,F are real and positive.
+
+Solve the following integral:
+$\int_{0}^{\pi} A \log(B (\sin(x))^{1 F})   dx$",A \pi \log\left(\frac{B}{2^F}\right),"A*(pi*log(B/(2**F), E))",Symbolic ,OBMU 2019 - Q22
+117,"Evaluate the following hypergeometric function. Assume the parameters: A,B are real numbers. Return a closed-form symbolic answer.
+
+$ {}_2F_1\left( \begin{array}{c} 1 ,1 \\ 2 \end{array}; (-A)^B \right) $",-(-A)^{-B} \log \left(1-(-A)^B\right),"log(1 - (-A)**B, E)/((-A)**B)",Symbolic ,"ASyMOB
+Hypergeometrics
+Q1"
+118,"Evaluate the following hypergeometric function. Assume the parameters: A,B are real numbers. Return a closed-form symbolic answer.
+
+$ {}_2F_1\left( \begin{array}{c} 1 ,1 \\ 3 \end{array}; -2 \cdot (A^B) \right) $","\frac{1}{2} A^{-2 B} \left(\left(2 A^B+1\right) \log \left(2 A^B+1\right)-2
+   A^B\right)","(-2*(A**B) + (2*(A**B) + 1)*log(2*(A**B) + 1, E))/(2*(A**B)**2)",Symbolic ,"ASyMOB
+Hypergeometrics
+Q2"
+119,"Evaluate the following hypergeometric function. Assume the parameters: A,B,G,H are real numbers. Return a closed-form symbolic answer.
+
+$ {}_8F_7\left( \begin{array}{c} 1,1,1, (1 A), (1 B), 1, (1 G), (1 H) \\ 2,2, (1 H), (1 G), (1 B), 1, (1 A) \end{array}; -1 \right) $",\frac{\pi ^2}{12},pi**2/12,Symbolic ,"ASyMOB
+Hypergeometrics
+Q3"
+120,"Evaluate the following hypergeometric function. Assume the parameters: x,A,B,G,H are real numbers. Return a closed-form symbolic answer.
+
+$ {}_3F_2\left( \begin{array}{c} -1,-A, -B \\ -H, -G \end{array}; x \right) $",1-\frac{A B x}{H G},1 - A*(B*x)/(H*G),Symbolic ,"ASyMOB
+Hypergeometrics
+Q4"
+121,"Solve the following integral. Assume the parameters: A,B,F are real numbers. Return a closed-form symbolic answer.
+
+$ \int \frac{ 1 A }{ 1 B + (x F)^3 }   dx $","-\frac{A \left(\log \left(B^{2/3}-\sqrt[3]{B} F x+F^2 x^2\right)-2 \log \left(\sqrt[3]{B}+F x\right)+2 \sqrt{3} \tan
+   ^{-1}\left(\frac{1-\frac{2 F x}{\sqrt[3]{B}}}{\sqrt{3}}\right)\right)}{6 B^{2/3} F}",-A*(-2*log(B**(1/3) + F*x) + log(B**(2/3) - B**(1/3)*F*x + F**2*x**2) + 2*sqrt(3)*atan(sqrt(3)*(B**(1/3) - 2*F*x)/(3*B**(1/3))))/(6*B**(2/3)*F),Symbolic ,"ASyMOB
+Hypergeometrics
+Q5"
+122,"Solve the following integral. Assume A,B are positive integers.
+
+$ \int \frac{(4 A + (4 A - (1 B))x^{1 B})x^{2 A - 1}}{2 (1 + x^{1 B} + x^{4 A})\sqrt{1 + x^{1 B}}} dx $",\tan ^{-1}\left(\frac{\left x^A}{\sqrt{x^B+1}}\right),atan(x**A/(sqrt(x**B + 1))),Symbolic ,"ASyMOB
+Hypergeometrics
+Q6"

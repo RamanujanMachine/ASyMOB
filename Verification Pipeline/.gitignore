@@ -1,0 +1,7 @@
+api_keys.json
+db_conn_parameters.py
+**.pyc
+*.xlsx
+openai_batches/*
+checked_results_chunks*/*
+*/
