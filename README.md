@@ -78,3 +78,17 @@ results are stored in the view `pipeline_results`. The columns of the view are:
 - *tokens_used* - The number of tokens used by the model to answer the query.
 - *symbolic_correct* - Whether the answer was successfully validated symbolically.
 - *numeric_correc* - Whether the answer was successfully validated numerically.
+
+# Citation
+If you use ASyMOB in your research, please cite the paper:
+```bibtex
+@misc{ASyMOB,
+      title={ASyMOB: Algebraic Symbolic Mathematical Operations Benchmark}, 
+      author={Michael Shalyt and Rotem Elimelech and Ido Kaminer},
+      year={2025},
+      eprint={2505.23851},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL},
+      url={https://arxiv.org/abs/2505.23851}, 
+}
+```
