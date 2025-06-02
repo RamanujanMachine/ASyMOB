@@ -1,3 +1,5 @@
+This repository contains the data-generation and LLM-testing code associated with the paper ["ASyMOB: Algebraic Symbolic Mathematical Operations Benchmark"](https://arxiv.org/abs/2505.23851).
+
 # ASyMOB Dataset Generation
 
 ASyMOB_Generation.py generates a diverse set of mathematical question variants from a seed CSV file. It leverages the `sympy` library for symbolic mathematics to create various perturbations of original questions, including symbolic, numeric, and equivalence-based transformations. The generated questions are then saved to a JSON file.
