@@ -7,7 +7,7 @@ from hugging_face_interface import HuggingFaceInterface
 
 MODELS_GENERATORS = {
     # OpenAI models
-    # "openai/o3": lambda: OpenAIInterface("o3"),
+    "o3": lambda: OpenAIInterface("o3"),
     "o4-mini": lambda: OpenAIInterface("o4-mini"), 
     "gpt-4o": lambda: OpenAIInterface("gpt-4o"), 
     "gpt-4.1": lambda: OpenAIInterface("gpt-4.1"),
