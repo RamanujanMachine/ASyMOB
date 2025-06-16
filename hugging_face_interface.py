@@ -15,7 +15,7 @@ class HuggingFaceInterface(GenericLLMInterface):
             )
         self.chat_history = []
 
-    def send_message(self, message, code_execution=False, return_tokens=False):
+    def send_message(self, message, code_execution=False, return_extra=False):
         """
         Send a message to Hugging Face's API, optionally enabling the code interpreter tool.
 
@@ -39,10 +39,11 @@ class HuggingFaceInterface(GenericLLMInterface):
 
         full_reply = response.choices[0].message.content
 
-        if return_tokens:
+        if return_extra:
             return (
                 full_reply,
-                response.usage.total_tokens
+                response.usage.total_tokens,
+                None # no code execution support in Hugging Face API
             )
         return full_reply
 
