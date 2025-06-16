@@ -5,7 +5,6 @@ from llm_interface import GenericLLMInterface
 
 CODE_RUNNING_MODELS = [
     'gemini-2.0-flash',
-    # 2.0 flash light does not support code execution
     'gemini-2.5-flash-preview-04-17',
     'gemini-2.5-pro-preview-03-25',
     # gemma-3-27b-it does not support code execution
@@ -22,7 +21,7 @@ class GeminiInterface(GenericLLMInterface):
         self._load_api_key(provider='gemini')
         self.client = genai.Client(api_key=self.api_key)
 
-    def send_message(self, message, code_execution=False, return_tokens=False):
+    def send_message(self, message, code_execution=False, return_extra=False):
         tools = []
         if code_execution and self.model in CODE_RUNNING_MODELS:
             tools.append(
@@ -45,6 +44,7 @@ class GeminiInterface(GenericLLMInterface):
 
         response = ''
 
+        code_executed = False
         for chunk in self.client.models.generate_content_stream(
             model=self.model,
             contents=contents,
@@ -53,28 +53,20 @@ class GeminiInterface(GenericLLMInterface):
             if chunk.candidates is None or chunk.candidates[0].content is None or chunk.candidates[0].content.parts is None:
                 continue
             if chunk.candidates[0].content.parts[0].text:
-                # print(chunk.candidates[0].content.parts[0].text, end="")
                 response += chunk.candidates[0].content.parts[0].text
             if chunk.candidates[0].content.parts[0].executable_code:
-                # print(chunk.candidates[0].content.parts[0].executable_code)
                 response += str(chunk.candidates[0].content.parts[0].executable_code)
-                if not code_execution:
-                    # Should't be here, but just in case
-                    print("Code execution is not enabled.")
-                    raise ValueError("Code execution is not enabled.")
             if chunk.candidates[0].content.parts[0].code_execution_result:
                 response += str(chunk.candidates[0].content.parts[0].code_execution_result)
-                if not code_execution:
-                    # Should't be here, but just in case
-                    print("Code execution is not enabled.")
-                    raise ValueError("Code execution is not enabled.")
-                # print(chunk.candidates[0].content.parts[0].code_execution_result)
+                code_executed = True
+
         
-        if return_tokens:
+        if return_extra:
             # looks like the last chunk contains all of the token count
             return (
                 response,
-                chunk.usage_metadata.total_token_count 
+                chunk.usage_metadata.total_token_count,
+                code_executed
             )
         return response
 

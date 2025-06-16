@@ -12,9 +12,10 @@ class OpenAIInterface(GenericLLMInterface):
         self._load_api_key(provider='openai')
         self.client = OpenAI(api_key=self.api_key)
 
-    def send_message(self, message, code_execution=False, flex=False, return_tokens=False):
+    def send_message(self, message, code_execution=False, return_extra=False):
         """
-        Send a message to OpenAI's API, optionally enabling the code interpreter tool.
+        Send a message to OpenAI's API, optionally enabling the code 
+        interpreter tool.
         
         Args:
             message (str): The user message.
@@ -23,22 +24,30 @@ class OpenAIInterface(GenericLLMInterface):
         Returns:
             str: The assistant's reply.
         """
-        if not flex:
+
+        if not code_execution:
             response = self.client.responses.create(
                 model=self.model,
-                input=message,
+                input=message
             )
         else:
-            response = self.client.with_options(timeout=900.0).responses.create(
+            response = response = self.client.responses.create(
                 model=self.model,
                 input=message,
-                service_tier="flex",
+                tools=[{
+                    'type': 'code_interpreter', 
+                    'container': {'type': 'auto'}}]
             )
 
-        if return_tokens:
+        if return_extra:
+            code_used = any([
+                out.type == 'code_interpreter_call' 
+                for out in response.output])
+            
             return (
                 response.output_text, 
-                response.usage.total_tokens
+                response.usage.total_tokens,
+                code_used
             )
 
         return response.output_text
