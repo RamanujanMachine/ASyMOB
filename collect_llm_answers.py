@@ -11,39 +11,75 @@ import json
 
 RETRY_ATTEMPT = True
 
+# # prompt 2:
+# MATH_INSTRUCTIONS = (
+#     'Answer the question. End with: "The final answer is:" followed by a '
+#     'single LaTeX expression on a new line, wrapped in $$.\n'
+# )
+
+# NO_CODE_PREFIX = (
+#     "Assume you don’t have access to a computer. Do not use code.\n"
+# )
+
+# USE_CODE_PREFIX = (
+#     "You may use your internal Python tool to solve this.\n"
+# )
+# print(MATH_INSTRUCTIONS)
+# print(NO_CODE_PREFIX)
+# print(USE_CODE_PREFIX)
+
+# ChatGPT suggested prompt (prompt 1)
 MATH_INSTRUCTIONS = (
-    'Finish your answer by writing "The final answer is:" and then the '
-    'answer in latex in a new line. Write the answer as a single expression. '
-    'Do not split your answer to different terms. Use $$ to wrap over the '
-    'latex text. Do not write anything after the latex answer.\n'
+    'Answer the following question. End with: "The final answer is:" followed '
+    'by a single LaTeX expression on a new line, wrapped in $$.\n'
+    'Do not split the answer into multiple terms or add text after the LaTeX.\n'
 )
 NO_CODE_PREFIX = (
-    "Assume you don't have access to a computer: do not use "
-    "code, solve this manually - using your internal reasoning.\n"
+    "Assume you don't have access to a computer, and do not use code to solve "
+    "the question.\n"
 )
-USE_CODE_PREFIX = (
-    "Please use Python to solve the following question. Don't show it, "
-    "just run it internally.\n"
+USE_CODE_PREFIX = ( ''
+    "Use Python tools to assist you solving this problem.\n"
 )
+
+# Original 
+# MATH_INSTRUCTIONS = (
+#     'Finish your answer by writing "The final answer is:" and then the '
+#     'answer in latex in a new line. Write the answer as a single expression. '
+#     'Do not split your answer to different terms. Use $$ to wrap over the '
+#     'latex text. Do not write anything after the latex answer.\n'
+# )
+# NO_CODE_PREFIX = (
+#     "Assume you don't have access to a computer: do not use "
+#     "code, solve this manually - using your internal reasoning.\n"
+# )
+# USE_CODE_PREFIX = (
+#     "Please use Python to solve the following question. Don't show it, "
+#     "just run it internally.\n"
+# )
 # All models that support responses API
 MODELS_LIST = [
-    ('DeepSeek-Prover-V2-671B', None),
+    # ('DeepSeek-Prover-V2-671B', None),
     ('DeepSeek-R1', None),
     ('DeepSeek-V3', None),
     ('gemini/gemini-2.0-flash', False),
     ('gemini/gemini-2.0-flash', True),
     ('gemini/gemini-2.5-flash-preview-04-17', False),
     ('gemini/gemini-2.5-flash-preview-04-17', True),
-    ('gemini/gemma-3-27b-it', None),
-    ('gpt-4.1', False),
-    ('gpt-4.1', True),
-    ('gpt-4o', False),
-    ('gpt-4o-mini', False),
-    ('meta-llama/Llama-4-Scout-17B-16E-Instruct', None),
-    ('nvidia/Llama-3_3-Nemotron-Super-49B-v1', None),
+    # ('gemini/gemma-3-27b-it', None),
+    # ('gpt-4.1', False),
+    # ('gpt-4.1', True),
+    # ('gpt-4o', False),
+    # ('gpt-4o', True),
+    # ('gpt-4o-mini', False),
+    # ('gpt-4o-mini', True),
     ('o4-mini', False),
     ('o4-mini', True),
-    ('Qwen/Qwen2.5-72B-Instruct', None)
+    ('o3', False),
+    ('o3', True),
+    # ('meta-llama/Llama-4-Scout-17B-16E-Instruct', None),
+    # ('nvidia/Llama-3_3-Nemotron-Super-49B-v1', None),
+    # ('Qwen/Qwen2.5-72B-Instruct', None),
 ]
 # CHUNKS_DIR = Path('LLM_survey_chunks_QWEN3')
 
@@ -132,8 +168,8 @@ def ask_model(model_name, question_text, code_execution):
     Returns a sympy object extracted from the textual answer, the sympy 
     expression as a string and the textual answer itself.
     """
-    prompt = _incentivize_code_execution(
-        MATH_INSTRUCTIONS + question_text, 
+    prompt = MATH_INSTRUCTIONS + _incentivize_code_execution(
+        question_text, 
         use_code=code_execution
     )
     if model_name not in MODELS_GENERATORS:
@@ -143,10 +179,10 @@ def ask_model(model_name, question_text, code_execution):
         }
     model = MODELS_GENERATORS[model_name]()
     try:
-        textual_answer, tokens = model.send_message(
+        textual_answer, tokens, code_attempted = model.send_message(
             message=prompt,
             code_execution=code_execution,
-            return_tokens=True
+            return_extra=True
         )
     except Exception as e:
         print(f"Error sending message to {model_name}: {e}")
@@ -156,7 +192,8 @@ def ask_model(model_name, question_text, code_execution):
     result = {
         'prompt': prompt,
         'full_answer': textual_answer,
-        'tokens_used': tokens
+        'tokens_used': tokens,
+        'code_attempted': code_attempted
     }
     try:
         # extract the final answer from the textual answer
@@ -183,7 +220,8 @@ def upload_result_to_db(conn, task, result, acquisition_time):
         'final_answer_latex': result.get('final_answer_latex'),
         'error': result.get('error', None),
         'acquisition_time': acquisition_time,
-        'acquisition_method': 'Responses/completion API'
+        'acquisition_method': 'Responses/completion API',
+        'code_attempted': result.get('code_attempted', None)
     }
     # Uncomment the following lines to insert the row into a file
     # output_filename = (
@@ -239,7 +277,8 @@ def main():
     acquisition_time = '2025-05-21 19:00:00.000000'
     tasks_df = load_tasks(
         models=MODELS_LIST, 
-        sql_filter="challenge_id <= 17092 and error is null",
+        # sql_filter="challenge_id <= 17092 and error is null",
+        sql_filter="variation in ('Original', 'Numeric-All-0', 'Equivalence-One-Easy')",
         retry_errors=True
     )
     # Comment the command above and uncomment the following line to use tasks
