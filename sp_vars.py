@@ -28,7 +28,7 @@ var_mapping = {
     'B': B,
     'C': C,
     'D': D,
-    'E': E,
+    'E': e,  # E is not a variable, but a constant
     'F': F,
     'G': G,
     'H': H,
