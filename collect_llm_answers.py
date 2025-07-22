@@ -10,53 +10,18 @@ import json
 
 
 RETRY_ATTEMPT = True
-
-# # prompt 2:
-# MATH_INSTRUCTIONS = (
-#     'Answer the question. End with: "The final answer is:" followed by a '
-#     'single LaTeX expression on a new line, wrapped in $$.\n'
-# )
-
-# NO_CODE_PREFIX = (
-#     "Assume you don’t have access to a computer. Do not use code.\n"
-# )
-
-# USE_CODE_PREFIX = (
-#     "You may use your internal Python tool to solve this.\n"
-# )
-# print(MATH_INSTRUCTIONS)
-# print(NO_CODE_PREFIX)
-# print(USE_CODE_PREFIX)
-
-# ChatGPT suggested prompt (prompt 1)
 MATH_INSTRUCTIONS = (
-    'Answer the following question. End with: "The final answer is:" followed '
-    'by a single LaTeX expression on a new line, wrapped in $$.\n'
-    'Do not split the answer into multiple terms or add text after the LaTeX.\n'
+    'Answer the question. End with: "The final answer is:" followed by a '
+    'single LaTeX expression on a new line, wrapped in $$.\n'
+)
+USE_CODE_PREFIX = (
+    "Please use Python to solve the question.\n"
 )
 NO_CODE_PREFIX = (
     "Assume you don't have access to a computer, and do not use code to solve "
     "the question.\n"
 )
-USE_CODE_PREFIX = ( ''
-    "Use Python tools to assist you solving this problem.\n"
-)
 
-# Original 
-# MATH_INSTRUCTIONS = (
-#     'Finish your answer by writing "The final answer is:" and then the '
-#     'answer in latex in a new line. Write the answer as a single expression. '
-#     'Do not split your answer to different terms. Use $$ to wrap over the '
-#     'latex text. Do not write anything after the latex answer.\n'
-# )
-# NO_CODE_PREFIX = (
-#     "Assume you don't have access to a computer: do not use "
-#     "code, solve this manually - using your internal reasoning.\n"
-# )
-# USE_CODE_PREFIX = (
-#     "Please use Python to solve the following question. Don't show it, "
-#     "just run it internally.\n"
-# )
 # All models that support responses API
 MODELS_LIST = [
     # ('DeepSeek-Prover-V2-671B', None),
@@ -64,22 +29,24 @@ MODELS_LIST = [
     ('DeepSeek-V3', None),
     ('gemini/gemini-2.0-flash', False),
     ('gemini/gemini-2.0-flash', True),
-    ('gemini/gemini-2.5-flash-preview-04-17', False),
-    ('gemini/gemini-2.5-flash-preview-04-17', True),
-    # ('gemini/gemma-3-27b-it', None),
+    # ('gemini/gemini-2.5-flash-preview-04-17', False),
+    # ('gemini/gemini-2.5-flash-preview-04-17', True),
+    ('gemini/gemini-2.5-flash', True),
+    ('gemini/gemini-2.5-flash', False),
+    ('gemini/gemma-3n-e4b-it', None),
     # ('gpt-4.1', False),
     # ('gpt-4.1', True),
     # ('gpt-4o', False),
     # ('gpt-4o', True),
     # ('gpt-4o-mini', False),
     # ('gpt-4o-mini', True),
-    ('o4-mini', False),
-    ('o4-mini', True),
-    ('o3', False),
-    ('o3', True),
-    # ('meta-llama/Llama-4-Scout-17B-16E-Instruct', None),
-    # ('nvidia/Llama-3_3-Nemotron-Super-49B-v1', None),
-    # ('Qwen/Qwen2.5-72B-Instruct', None),
+    # ('o4-mini', False),
+    # ('o4-mini', True),
+    # ('o3', False),
+    # ('o3', True),
+    ('meta-llama/Llama-4-Scout-17B-16E-Instruct', None),
+    ('nvidia/Llama-3_3-Nemotron-Super-49B-v1', None),
+    ('Qwen/Qwen2.5-72B-Instruct', None),
 ]
 # CHUNKS_DIR = Path('LLM_survey_chunks_QWEN3')
 
@@ -247,8 +214,8 @@ def llm_survey_wrapper(task, acquisition_time):
     q_id = task['challenge_id']
     model = task['model']
     code_execution=task['code_execution']
-    indicator = Path(f'collection_state/{q_id}_{model.replace("/", '_')}_{code_execution}.txt')
-    indicator.touch()
+    # indicator = Path(f'collection_state/{q_id}_{model.replace("/", '_')}_{code_execution}.txt')
+    # indicator.touch()
     try:
         print(f"Processing question {q_id} ({code_execution})"
               f"with model {model}...")
@@ -270,16 +237,16 @@ def llm_survey_wrapper(task, acquisition_time):
             result, 
             acquisition_time
         )
-    indicator.unlink()
+    # indicator.unlink()
 
 
 def main():
-    acquisition_time = '2025-05-21 19:00:00.000000'
+    acquisition_time = '2025-06-30 14:00:00.000000'
     tasks_df = load_tasks(
         models=MODELS_LIST, 
         # sql_filter="challenge_id <= 17092 and error is null",
-        sql_filter="variation in ('Original', 'Numeric-All-0', 'Equivalence-One-Easy')",
-        retry_errors=True
+        # sql_filter="variation in ('Original', 'Numeric-All-0')",
+        retry_errors=False,
     )
     # Comment the command above and uncomment the following line to use tasks
     # from a sample file 
@@ -291,7 +258,7 @@ def main():
         for _, task in tasks_df.iterrows()
     ]
     print(f"Number of tasks: {len(args)}")
-    with mp.Pool(processes=30) as pool:
+    with mp.Pool(processes=60) as pool:
         # Map the function to the pool
         # results = pool.starmap(collect_single_question, args)
         pool.starmap(llm_survey_wrapper, args)
