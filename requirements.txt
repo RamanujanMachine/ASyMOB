@@ -1,5 +1,12 @@
-lightllm
+litellm
 openpyxl
 pandas
 numpy
 sympy
+psycopg2-binary
+google-genai
+antlr4-python3-runtime==4.11.0 
+pebble
+groq
+anthropic
+psycopg2
