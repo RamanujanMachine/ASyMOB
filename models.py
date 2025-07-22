@@ -16,7 +16,8 @@ MODELS_GENERATORS = {
     # Google Gemini models
     "gemini/gemini-2.0-flash": lambda: GeminiInterface("gemini-2.0-flash"),
     "gemini/gemini-2.5-flash-preview-04-17": lambda: GeminiInterface("gemini-2.5-flash-preview-04-17"),
-    "gemini/gemma-3-27b-it": lambda: GeminiInterface("gemma-3-27b-it"),
+    "gemini/gemini-2.5-flash": lambda: GeminiInterface("gemini-2.5-flash"),
+    "gemini/gemma-3n-e4b-it": lambda: GeminiInterface("gemma-3n-e4b-it"),
 
     # Claude
     # 'claude': lambda: ClaudeInterface(),
@@ -25,7 +26,7 @@ MODELS_GENERATORS = {
     # 'Qwen/Qwen3-235B-A22B': lambda: HuggingFaceInterface('Qwen/Qwen3-235B-A22B', inference_provider='nebius'),
     'Qwen/Qwen2.5-72B-Instruct': lambda: HuggingFaceInterface('Qwen/Qwen2.5-72B-Instruct'),
     'DeepSeek-Prover-V2-671B': lambda: HuggingFaceInterface("deepseek-ai/DeepSeek-Prover-V2-671B"),
-    'DeepSeek-R1': lambda: HuggingFaceInterface('deepseek-ai/DeepSeek-R1', inference_provider='together'),
+    'DeepSeek-R1': lambda: HuggingFaceInterface('deepseek-ai/DeepSeek-R1', inference_provider='fireworks-ai'),
     'DeepSeek-V3': lambda: HuggingFaceInterface('deepseek-ai/DeepSeek-V3', inference_provider='together'),
     'meta-llama/Llama-4-Scout-17B-16E-Instruct': lambda: HuggingFaceInterface("meta-llama/Llama-4-Scout-17B-16E-Instruct"),
     'nvidia/Llama-3_3-Nemotron-Super-49B-v1': lambda: HuggingFaceInterface('nvidia/Llama-3_3-Nemotron-Super-49B-v1', inference_provider='nebius'),
