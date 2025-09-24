@@ -8,7 +8,7 @@ from concurrent.futures import TimeoutError
 from pebble import ProcessPool, ProcessExpired
 import time
 
-N_PROCESSES = 4
+N_PROCESSES = 6
 SLEEP_TIME = 5  # seconds
 TASK_TIMEOUT = 30 # seconds
 
@@ -17,7 +17,6 @@ def update_tasks(tasks_df):
     if tasks_df is None or tasks_df.empty:
         return load_tasks(
             parse_sympy=False, 
-            sql_filter="challenge_id < 17092"
         )
 
     return tasks_df
@@ -69,7 +68,7 @@ if __name__ == "__main__":
     with ProcessPool(max_workers=N_PROCESSES) as pool:
         while True:
             for slot_id, (future, task) in enumerate(zip(running_futures, running_tasks)):
-                if future is not None and future.done():
+                if future is not None and (future.done() or start_times[slot_id] > time.time() + TASK_TIMEOUT*1.2):
                     result = process_done_future(future, task)
                     # clear slot
                     running_futures[slot_id] = None
@@ -101,7 +100,6 @@ if __name__ == "__main__":
 
             if all(f is None for f in running_futures) and len(tasks_df) == 0:
                 print("All tasks completed.")
-                tasks_df = update_tasks(tasks_df)
                 tasks_df = load_tasks(
                     parse_sympy=False, 
                     # sql_filter="challenge_id < 17092"
