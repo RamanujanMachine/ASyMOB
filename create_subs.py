@@ -9,8 +9,8 @@ sys.set_int_max_str_digits(2**30)
 
 N_SUBS = 5
 N_TRIES = 200
-QUESTIONS_FILE = 'ASyMOB_Validation_Dataset2.json'
-OUTPUT_FILE = 'subs.csv'
+QUESTIONS_FILE = 'ASyMOB_Validation_Dataset2_1.json'
+OUTPUT_FILE = 'subs_1.csv'
 VAR_SUBSTITUTIONS = {
     A: lambda: float(np.random.randint(1, 10)),
     B: lambda: float(np.random.randint(1, 10)),
@@ -27,8 +27,6 @@ VAR_SUBSTITUTIONS = {
 
     C: lambda: 0, # C is the integration constant, so we can set it to 0
 }
-SKIP_LIST = [
-]
 
 def floatify(expr):
     if expr.is_Number and expr.is_Integer:
@@ -46,13 +44,6 @@ if __name__ == '__main__':
     all_questions_subs = {}
     for question in questions:
         q_id = question['Index']
-        # if question['Variation'] in [f"Numeric-One-{i}" for i in range(7,11)]:
-        #     continue
-        # if question['Variation'] in [f"Numeric-All-{i}" for i in range(7,11)]:
-        #     continue
-        if int(q_id) in SKIP_LIST:
-            # skip questions that are known to cause issues
-            continue
         print(q_id, question['Answer in Sympy'])
         true_answer = sp.parse_expr(question['Answer in Sympy'], evaluate=False)
         true_answer = floatify(true_answer)
