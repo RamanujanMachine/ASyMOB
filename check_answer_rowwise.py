@@ -34,6 +34,8 @@ DEBUG = False
 CHECK_TIME = pd.Timestamp.now()
 print(f"Check time: {CHECK_TIME}")
 
+SCHEMA = 'asymob'
+
 
 def load_tasks(sql_filter=None, parse_sympy=False, include_full_answer=True, recheck_errors=False):
     skip_retries_filter = '''
@@ -56,12 +58,12 @@ def load_tasks(sql_filter=None, parse_sympy=False, include_full_answer=True, rec
         symbolic_correct,
         numeric_comparison_error,
         symbolic_comparison_error
-    from asymob.model_responses resp
+    from {SCHEMA}.model_responses resp
         left join asymob.challenges chal
             using (challenge_id)
-        left join asymob.symbolic_verification sym_ver
+        left join {SCHEMA}.symbolic_verification sym_ver
             using (response_id)
-        left join asymob.numeric_verification numer_ver
+        left join {SCHEMA}.numeric_verification numer_ver
             using (response_id)
     -- only query unchecked items
     where (numeric_correct is null or symbolic_correct is null)
@@ -105,7 +107,7 @@ def update_db(question_data, update_symbolic=True, update_numeric=True):
         return
 
     numeric_insert = r"""
-    INSERT INTO asymob.numeric_verification (
+    INSERT INTO """ + SCHEMA + r""".numeric_verification (
         response_id,
         numeric_correct,
         strict_mode,
@@ -132,7 +134,7 @@ def update_db(question_data, update_symbolic=True, update_numeric=True):
     """
 
     symbolic_insert = r"""
-        INSERT INTO asymob.symbolic_verification (
+        INSERT INTO """ + SCHEMA + r""".symbolic_verification (
             response_id,
             symbolic_correct,
             symbolic_comparison_error,
@@ -230,7 +232,7 @@ def compare_numeric(true_answer, model_answer, subs_vals, allowed_diff=1e-5,
     if debug:
         print('true_answer: ', true_answer)
         print('model_answer: ', model_answer)
-        print('subs_vals:', subs_vals)
+        print('subs_vals: ', subs_vals)
 
     diffs = []
     for true_answer_numer, subs in subs_vals:
