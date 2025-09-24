@@ -3,10 +3,12 @@ import pandas as pd
 from sp_vars import *
 import re
 from db_utils import load_tasks, insert_row, get_connection
+from pebble import ProcessPool, ProcessExpired
 import traceback
 import multiprocessing as mp
 from pathlib import Path
 import json
+import openai
 
 
 RETRY_ATTEMPT = True
@@ -22,33 +24,31 @@ NO_CODE_PREFIX = (
     "the question.\n"
 )
 
-# All models that support responses API
 MODELS_LIST = [
-    # ('DeepSeek-Prover-V2-671B', None),
+    ('DeepSeek-Prover-V2-671B', None),
     ('DeepSeek-R1', None),
     ('DeepSeek-V3', None),
     ('gemini/gemini-2.0-flash', False),
     ('gemini/gemini-2.0-flash', True),
-    # ('gemini/gemini-2.5-flash-preview-04-17', False),
-    # ('gemini/gemini-2.5-flash-preview-04-17', True),
+    ('gemini/gemini-2.5-flash-preview-04-17', False),
+    ('gemini/gemini-2.5-flash-preview-04-17', True),
     ('gemini/gemini-2.5-flash', True),
     ('gemini/gemini-2.5-flash', False),
     ('gemini/gemma-3n-e4b-it', None),
-    # ('gpt-4.1', False),
-    # ('gpt-4.1', True),
-    # ('gpt-4o', False),
-    # ('gpt-4o', True),
-    # ('gpt-4o-mini', False),
-    # ('gpt-4o-mini', True),
-    # ('o4-mini', False),
-    # ('o4-mini', True),
-    # ('o3', False),
-    # ('o3', True),
+    ('gpt-4.1', False),
+    ('gpt-4.1', True),
+    ('gpt-4o', False),
+    ('gpt-4o', True),
+    ('gpt-4o-mini', False),
+    ('gpt-4o-mini', True),
+    ('o4-mini', False),
+    ('o4-mini', True),
+    ('o3', False),
+    ('o3', True),
     ('meta-llama/Llama-4-Scout-17B-16E-Instruct', None),
     ('nvidia/Llama-3_3-Nemotron-Super-49B-v1', None),
     ('Qwen/Qwen2.5-72B-Instruct', None),
 ]
-# CHUNKS_DIR = Path('LLM_survey_chunks_QWEN3')
 
 
 def _incentivize_code_execution(message, use_code=True):
@@ -151,6 +151,10 @@ def ask_model(model_name, question_text, code_execution):
             code_execution=code_execution,
             return_extra=True
         )
+    except openai.OpenAIError as e:
+        print(f"OPENAI timeout error to {model_name}: {e}")
+        print('message:', MATH_INSTRUCTIONS + question_text)
+        return {'prompt': prompt, 'error': 'openai_timeout_error: ' + str(e)}
     except Exception as e:
         print(f"Error sending message to {model_name}: {e}")
         print('message:', MATH_INSTRUCTIONS + question_text)
@@ -214,8 +218,6 @@ def llm_survey_wrapper(task, acquisition_time):
     q_id = task['challenge_id']
     model = task['model']
     code_execution=task['code_execution']
-    # indicator = Path(f'collection_state/{q_id}_{model.replace("/", '_')}_{code_execution}.txt')
-    # indicator.touch()
     try:
         print(f"Processing question {q_id} ({code_execution})"
               f"with model {model}...")
@@ -237,15 +239,12 @@ def llm_survey_wrapper(task, acquisition_time):
             result, 
             acquisition_time
         )
-    # indicator.unlink()
 
 
 def main():
-    acquisition_time = '2025-06-30 14:00:00.000000'
+    acquisition_time = '2025-09-19 15:00:00.000000'
     tasks_df = load_tasks(
         models=MODELS_LIST, 
-        # sql_filter="challenge_id <= 17092 and error is null",
-        # sql_filter="variation in ('Original', 'Numeric-All-0')",
         retry_errors=False,
     )
     # Comment the command above and uncomment the following line to use tasks
@@ -258,9 +257,9 @@ def main():
         for _, task in tasks_df.iterrows()
     ]
     print(f"Number of tasks: {len(args)}")
-    with mp.Pool(processes=60) as pool:
+
+    with mp.Pool(processes=5) as pool:
         # Map the function to the pool
-        # results = pool.starmap(collect_single_question, args)
         pool.starmap(llm_survey_wrapper, args)
 
 
