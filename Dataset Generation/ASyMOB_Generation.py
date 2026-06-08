@@ -1,12 +1,14 @@
 import csv
+import os
 import json
 import sympy as sp
 import re
 import random
 import itertools
 
-# Load CSV file containing seed questions and maximal symbolic perturbations. 
-csv_file_path = 'Seed_and_Max_Symbolic_Perturbations.csv'
+# Load CSV file containing seed questions and symbolic perturbations. 
+script_dir = os.path.dirname(os.path.realpath(__file__))
+csv_file_path = os.path.join(script_dir, 'Seed and Symbolic Questions.csv')
 
 with open(csv_file_path, 'r', encoding='utf-8') as cf:
     data = list(csv.DictReader(cf))  # Read CSV into list of dicts
@@ -14,22 +16,13 @@ cur_data_len = len(data)
 print("Length of initial data: ", cur_data_len)  # Print initial dataset size
 
 # Define symbolic variables that appear in the symbolic perturbations - and will be replaced by various expressions during variant generation.
-x, A, B, F, G, H, N = sp.symbols('x A B F G H N', real=True)
+x, A, B, F, G, H, J, N = sp.symbols('x A B F G H J N', real=True)
 Q = sp.symbols('Q', real=True, positive=True)
 
-
 # Define symbolic perturbation characters and their corresponding sympy symbols
-symnoise_char_list = ['A', 'B', 'F', 'G', 'H']
-symnoise_sym_list = [A, B, F, G, H]
-local_sym_dict = {'x': x, 'A': A, 'B': B, 'F': F, 'G': G, 'H': H, 'N': N, 'Q': Q}
-
-# These sources contain explicit hypergeometric functions, which are marked by 'F' - so 'F' is not treated as a symbolic perturbation character. 
-# The hg_ variables below represent this special treatment.
-hypergeomatric_question_sources = ["ASyMOB\nHypergeometrics\nQ1", "ASyMOB\nHypergeometrics\nQ2", "ASyMOB\nHypergeometrics\nQ3", "ASyMOB\nHypergeometrics\nQ4"]
-hg_symnoise_char_list = ['A', 'B', 'G', 'H']
-hg_symnoise_sym_list = [A, B, G, H]
-hg_local_sym_dict = {'x': x, 'A': A, 'B': B, 'G': G, 'H': H, 'N': N, 'Q': Q}
-
+symnoise_char_list = ['A', 'B', 'G', 'H', 'J']
+symnoise_sym_list = [A, B, G, H, J]
+local_sym_dict = {'x': x, 'A': A, 'B': B, 'G': G, 'H': H, 'J': J, 'N': N, 'Q': Q}
 
 # List of easy equivalent forms (should simplify to 1)
 equivalent_forms_easy = [
@@ -49,8 +42,8 @@ equivalent_forms_hard = [
 ]
 
 # Test that all equivalent forms simplify to 1 and are numerically close to 1.
-# Note that some expressions above do not simplify to 1 by sp.simplify - due to the CAS's limitations - but are evaluated correctly to 1 numerically.
-# We still print the warning to raise user awareness.
+# Note that some expressions do not simplify to 1 by sp.simplify - due to the CAS's limitations - but are evaluated correctly to 1 numerically.
+# A warning is printed nevertheless to raise user awareness.
 equivalence_test_x = -2.5
 equivalence_test_Q = 0.5
 equivalence_test_margin = 1e-4
@@ -82,12 +75,12 @@ def replace_in_dollars(s, old, new):
     return re.sub(r'\$(.*?)\$', repl, s)
 
 def char_in_dollars(s, char):
-    """Return True if char appears inside any $...$ substring in s."""
+    # Return True if char appears inside any $...$ substring in s.
     matches = re.findall(r'\$(.*?)\$', s)
     return any(char in match for match in matches)
 
 def check_for_problematic_symbols(sp_ans):
-    """Check for problematic symbols in sp_ans, but allow infinities if they are only used as summation or integration limits."""
+    # Check for problematic symbols in sp_ans, but allow infinities if they are only used as summation or integration limits.
     # Check for NaN or zoo anywhere
     if sp_ans.has(sp.nan) or sp_ans.has(sp.zoo):
         return True
@@ -110,9 +103,11 @@ def generate_variants(items, symnoise_chars, symnoise_syms, sym_dict, cur_ind):
     next_ind = cur_ind
     new_items = []
     for item in items:
+        print(item.get("Index"))
         latex_chall = item.get("Challenge")
         sp_sym_ans = sp.sympify(item.get("Answer in Sympy"), locals = sym_dict)
         source = item.get("Source")
+        categ = item.get("Category")
         chars_in_latex = []
         syms_in_latex = []
         # Find which symbolic perturbation characters are present in the LaTeX challenge
@@ -145,7 +140,8 @@ def generate_variants(items, symnoise_chars, symnoise_syms, sym_dict, cur_ind):
                     "Answer in Sympy": str(sp_sym_ans_ones),
                     "Answer in Latex": "",
                     "Variation": "Equivalence-All-Easy",
-                    "Source": source
+                    "Source": source,
+                    "Category": categ
                 })
             # Substitute hard forms
             latex_chall_copy = latex_chall
@@ -158,7 +154,8 @@ def generate_variants(items, symnoise_chars, symnoise_syms, sym_dict, cur_ind):
                     "Answer in Sympy": str(sp_sym_ans_ones),
                     "Answer in Latex": "",
                     "Variation": "Equivalence-All-Hard",
-                    "Source": source
+                    "Source": source,
+                    "Category": categ
                 })
 
         # Generate single-symbolic substitutions (easy/hard) and numeric perturbation variants
@@ -171,7 +168,7 @@ def generate_variants(items, symnoise_chars, symnoise_syms, sym_dict, cur_ind):
                 replace_form = r' \left(' + eq_forms_latex_easy[j].replace('Q', chars_in_latex[i]) + r'\right) '
                 latex_chall_copy = replace_in_dollars(latex_chall_copy, chars_in_latex[i], replace_form )
                 for ch in chars_left_in_latex:
-                    latex_chall_copy = replace_in_dollars(latex_chall_copy, ch, '')
+                    latex_chall_copy = replace_in_dollars(latex_chall_copy, ch, '1')
                 next_ind += 1
                 new_items.append({
                         "Index": str(next_ind),
@@ -179,14 +176,15 @@ def generate_variants(items, symnoise_chars, symnoise_syms, sym_dict, cur_ind):
                         "Answer in Sympy": str(sp_sym_ans_ones),
                         "Answer in Latex": "",
                         "Variation": "Equivalence-One-Easy",
-                        "Source": source
+                        "Source": source,
+                        "Category": categ
                     })
                 # Substitute one hard form
                 latex_chall_copy = latex_chall
                 replace_form = r' \left(' + eq_forms_latex_hard[j].replace('Q', chars_in_latex[i]) + r'\right) '
                 latex_chall_copy = replace_in_dollars(latex_chall_copy, chars_in_latex[i], replace_form)
                 for ch in chars_left_in_latex:
-                    latex_chall_copy = replace_in_dollars(latex_chall_copy, ch, '')
+                    latex_chall_copy = replace_in_dollars(latex_chall_copy, ch, '1')
                 next_ind += 1
                 new_items.append({
                         "Index": str(next_ind),
@@ -194,7 +192,8 @@ def generate_variants(items, symnoise_chars, symnoise_syms, sym_dict, cur_ind):
                         "Answer in Sympy": str(sp_sym_ans_ones),
                         "Answer in Latex": "",
                         "Variation": "Equivalence-One-Hard",
-                        "Source": source
+                        "Source": source,
+                        "Category": categ
                     })
                 
             # Numeric perturbation: replace one symbol with a random integer of increasing digit length
@@ -207,10 +206,10 @@ def generate_variants(items, symnoise_chars, symnoise_syms, sym_dict, cur_ind):
                     print(f"Warning: Numeric-One noise for {item} contains problems: {sp_sym_ans_copy}. Retrying")
                     nn1 = random.randint(10**(noise_digits-1), 10**noise_digits - 1)
                     sp_sym_ans_copy = sp_sym_ans_copy.subs(syms_in_latex[i], sp.UnevaluatedExpr(nn1), evaluate=False)
-                replace_form = r' \left(' + str(nn1) + r'\right) '
+                replace_form = str(nn1)
                 latex_chall_copy = replace_in_dollars(latex_chall_copy, chars_in_latex[i], replace_form)
                 for ch in chars_left_in_latex:
-                    latex_chall_copy = replace_in_dollars(latex_chall_copy, ch, '')
+                    latex_chall_copy = replace_in_dollars(latex_chall_copy, ch, '1')
                 for sym in syms_in_latex:
                     sp_sym_ans_copy = sp_sym_ans_copy.subs(sym, 1)
                 latex_chall_copy = re.sub(r'Assume.*?\.', '', latex_chall_copy)
@@ -221,7 +220,8 @@ def generate_variants(items, symnoise_chars, symnoise_syms, sym_dict, cur_ind):
                     "Answer in Sympy": str(sp_sym_ans_copy),
                     "Answer in Latex": "",
                     "Variation": f"Numeric-One-{noise_digits}",
-                    "Source": source
+                    "Source": source,
+                    "Category": categ
                 })
 
             
@@ -238,7 +238,7 @@ def generate_variants(items, symnoise_chars, symnoise_syms, sym_dict, cur_ind):
                 for i in range(len(chars_in_latex)):
                     sp_sym_ans_copy = sp_sym_ans_copy.subs(syms_in_latex[i], sp.UnevaluatedExpr(nn_lst[i]), evaluate=False)
             for i in range(len(chars_in_latex)):
-                latex_chall_copy = replace_in_dollars(latex_chall_copy, chars_in_latex[i], r' \left(' + str(nn_lst[i]) + r'\right) ' )
+                latex_chall_copy = replace_in_dollars(latex_chall_copy, chars_in_latex[i], str(nn_lst[i]) )
 
             # Remove "Assume ... ." clause from latex_chall if it exists
             latex_chall_copy = re.sub(r'Assume.*?\.', '', latex_chall_copy)
@@ -251,7 +251,8 @@ def generate_variants(items, symnoise_chars, symnoise_syms, sym_dict, cur_ind):
                 "Answer in Sympy": str(sp_sym_ans_copy),
                 "Answer in Latex": "",
                 "Variation": f"Numeric-All-{noise_digits}",
-                "Source": source
+                "Source": source,
+                "Category": categ
             })
             
         # Generate variants with some symbols replaced by 1 (partial symbolic)
@@ -261,7 +262,7 @@ def generate_variants(items, symnoise_chars, symnoise_syms, sym_dict, cur_ind):
                 latex_chall_copy = latex_chall
                 sp_sym_ans_copy = sp_sym_ans
                 for ind in oned_set:
-                    latex_chall_copy = replace_in_dollars(latex_chall_copy, chars_in_latex[ind], '')
+                    latex_chall_copy = replace_in_dollars(latex_chall_copy, chars_in_latex[ind], '1')
                     sp_sym_ans_copy = sp_sym_ans_copy.subs(syms_in_latex[ind], 1)
                 next_ind += 1
                 new_items.append({
@@ -270,20 +271,23 @@ def generate_variants(items, symnoise_chars, symnoise_syms, sym_dict, cur_ind):
                     "Answer in Sympy": str(sp_sym_ans_copy),
                     "Answer in Latex": "",
                     "Variation": f"Symbolic-{len(chars_in_latex) - i}",
-                    "Source": source
+                    "Source": source,
+                    "Category": categ
                 })
     # Add new_items to data before writing output
     data.extend(new_items)
 
-# Generate 'Numeric-All-2-S' variants - the 'Variance' subset
-def generate_NA2S(items, symnoise_chars, symnoise_syms, sym_dict, cur_ind, noise_digits, reps_num):
+# Generate 'Numeric-All-N-S' variants - the 'Variance' subset
+def generate_NA_N_S(items, symnoise_chars, symnoise_syms, sym_dict, cur_ind, noise_digits, reps_num):
     next_ind = cur_ind
     new_items = []
 
     for item in items:
+        print(item.get("Index"))
         latex_chall = item.get("Challenge")
         sp_sym_ans = sp.sympify(item.get("Answer in Sympy"), locals = sym_dict)
         source = item.get("Source")
+        categ = item.get("Category")
         chars_in_latex = []
         syms_in_latex = []
         # Find which symbolic noise characters are present in the LaTeX challenge
@@ -309,7 +313,7 @@ def generate_NA2S(items, symnoise_chars, symnoise_syms, sym_dict, cur_ind, noise
                     sp_sym_ans_copy = sp_sym_ans_copy.subs(syms_in_latex[i], sp.UnevaluatedExpr(nn_lst[i]), evaluate=False)
 
             for i in range(len(chars_in_latex)):
-                latex_chall_copy = replace_in_dollars(latex_chall_copy, chars_in_latex[i], r' \left(' + str(nn_lst[i]) + r'\right) ' )
+                latex_chall_copy = replace_in_dollars(latex_chall_copy, chars_in_latex[i], str(nn_lst[i]) )
                 
             # Remove "Assume ... ." clause from latex_chall if it exists
             latex_chall_copy = re.sub(r'Assume.*?\.', '', latex_chall_copy)
@@ -320,29 +324,72 @@ def generate_NA2S(items, symnoise_chars, symnoise_syms, sym_dict, cur_ind, noise
                 "Answer in Sympy": str(sp_sym_ans_copy),
                 "Answer in Latex": "",
                 "Variation": f"Numeric-All-{noise_digits}-S",
-                "Source": source
+                "Source": source,
+                "Category": categ
             })
     # Add new_items to data before writing output
     data.extend(new_items)
 
+def generate_Num0(items, symnoise_chars, symnoise_syms, sym_dict, cur_ind):
+    next_ind = cur_ind
+    new_items = []
 
-# Split items into regular and hypergeometric symbolic questions
-sym_var_items = [item for item in data if (item.get('Variation', '').strip() == 'Symbolic' and item.get('Source') not in hypergeomatric_question_sources)]
-hypergeometric_sym_var_items = [item for item in data if (item.get('Variation', '').strip() == 'Symbolic' and item.get('Source') in hypergeomatric_question_sources)]
+    for item in items:
+        print(item.get("Index"))
+        latex_chall = item.get("Challenge")
+        sp_sym_ans = sp.sympify(item.get("Answer in Sympy"), locals = sym_dict)
+        source = item.get("Source")
+        categ = item.get("Category")
+        chars_in_latex = []
+        syms_in_latex = []
+        for i in range(len(symnoise_chars)):
+            if char_in_dollars(latex_chall, symnoise_chars[i]):
+                chars_in_latex.append(symnoise_chars[i])
+                syms_in_latex.append(symnoise_syms[i])
+        if len(chars_in_latex) == 0:
+            print(source)
+
+        sp_sym_ans_ones = sp_sym_ans.subs(dict(zip(symnoise_syms, [1]*len(symnoise_syms))))
+
+        latex_chall_copy = latex_chall
+        # sp_sym_ans_copy = sp_sym_ans
+        nn_lst = [1 for _ in range(len(chars_in_latex))]
+
+        for i in range(len(chars_in_latex)):
+            latex_chall_copy = replace_in_dollars(latex_chall_copy, chars_in_latex[i], str(nn_lst[i]) )
+
+        # Remove "Assume ... ." clause from latex_chall if it exists
+        latex_chall_copy = re.sub(r'Assume.*?\.', '', latex_chall_copy)
+
+        # Add new item with rolling index
+        next_ind += 1
+        new_items.append({
+            "Index": str(next_ind),
+            "Challenge": latex_chall_copy,
+            "Answer in Sympy": str(sp_sym_ans_ones),
+            "Answer in Latex": "",
+            "Variation": f"Numeric-All-0",
+            "Source": source,
+            "Category": categ
+        })  
+    data.extend(new_items)          
+
+
+sym_var_items = [item for item in data if (item.get('Variation', '').strip() == 'Symbolic' )]
 
 # Generate all variants for regular and hypergeometric items
 generate_variants(sym_var_items, symnoise_char_list, symnoise_sym_list, local_sym_dict, cur_data_len)
 cur_data_len = len(data)
-generate_variants(hypergeometric_sym_var_items, hg_symnoise_char_list, hg_symnoise_sym_list, hg_local_sym_dict, cur_data_len)
+generate_NA_N_S(sym_var_items, symnoise_char_list, symnoise_sym_list, local_sym_dict, cur_data_len, 2, 50)
 cur_data_len = len(data)
-generate_NA2S(sym_var_items, symnoise_char_list, symnoise_sym_list, local_sym_dict, cur_data_len, 2, 50)
+generate_NA_N_S(sym_var_items, symnoise_char_list, symnoise_sym_list, local_sym_dict, cur_data_len, 3, 50)
 cur_data_len = len(data)
-generate_NA2S(hypergeometric_sym_var_items, hg_symnoise_char_list, hg_symnoise_sym_list, hg_local_sym_dict, cur_data_len, 2, 50)
+generate_Num0(sym_var_items, symnoise_char_list, symnoise_sym_list, local_sym_dict, cur_data_len)
 cur_data_len = len(data)
 print("Final size of the ASyMOB dataset is: " ,cur_data_len) 
 
 # Write the full dataset to a JSON file
-output_json_path = 'Full_ASyMOB_Dataset.json'
+output_json_path = os.path.join(script_dir, 'Full_ASyMOB_Dataset.json')
 with open(output_json_path, 'w', encoding='utf-8') as jf:
     json.dump(data, jf, ensure_ascii=False, indent=2)
 
