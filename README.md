@@ -1,4 +1,4 @@
-This repository contains the data-generation and LLM-testing code associated with the paper ["ASyMOB: Algebraic Symbolic Mathematical Operations Benchmark"](https://arxiv.org/abs/2505.23851).
+This repository contains the data-generation and LLM-testing code associated with the paper ["ASyMOB: Algebraic Symbolic Mathematical Operations Benchmark"](https://icml.cc/virtual/2026/poster/63549).
 
 # ASyMOB Dataset Generation
 
@@ -12,14 +12,15 @@ ASyMOB_Generation.py generates a diverse set of mathematical question variants f
 
 ## Usage
 
-1.  **Prepare your seed data:** Ensure you have a CSV file named `Seed_and_Max_Symbolic_Perturbations.csv` in the same directory as the script. This CSV should contain the seed mathematical questions, their maximal symbolic perturbations, and answers as SymPy expressions.
+1.  **Prepare your seed data:** Ensure you have a CSV file named `Seed and Symbolic Questions.csv` in the same directory as the script. This CSV should contain the seed mathematical questions, their maximal symbolic perturbations, and answers as SymPy expressions.
 
-    The expected fields in `Seed_and_Max_Symbolic_Perturbations.csv` are:
+    The expected fields in `Seed and Symbolic Questions.csv` are:
     * **`Challenge`**: The mathematical question in LaTeX format, including assumptions regarding variables or other mathematical details.
     * **`Answer in LaTeX`** (optional): The answer to the question, represented as a LaTeX string.
     * **`Answer in Sympy`**: The answer to the question, represented as a SymPy expression string.
     * **`Variation`**: "Original" or "Symbolic".
     * **`Source`**: Identifies the origin of the question.
+    * **`Category`**: Question type (e.g. Integrals, Limits, etc.).
 
 2.  **Run the script:**
     ```
@@ -34,10 +35,11 @@ ASyMOB_Generation.py generates a diverse set of mathematical question variants f
     * **`Answer in Sympy`**: The answer to the question, represented as a SymPy expression string.
     * **`Variation`**: e.g., Equivalence-All-Hard, Numeric-One-3, etc.
     * **`Source`**: Same as the seed question from which this variation originated.
+    * **`Category`**: Same as the seed question from which this variation originated.
 
 ## Customization
 
--   **`Seed_and_Max_Symbolic_Perturbations.csv`:** Modify this CSV to add new seed questions or adjust existing ones.
+-   **`Seed and Symbolic Questions.csv`:** Modify this CSV to add new seed questions or adjust existing ones.
 -   **`symnoise_char_list`, `symnoise_sym_list`:** Adjust the lists of symbolic characters and their SymPy representations if your questions use different symbols for perturbation (ASyMOB uses 'A', 'B', 'F', 'G', 'H' by default).
 -   **`equivalent_forms_easy`, `equivalent_forms_hard`:** Add or modify the equivalent forms to introduce different types of mathematical equivalences.
 -   **`noise_digits` and `reps_num`:** In `generate_NA2S`, you can change `noise_digits` to control the range of random numbers used for numeric perturbations and `reps_num` to control the number of repetitions for each item.
