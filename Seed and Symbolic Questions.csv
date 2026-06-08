@@ -1,0 +1,884 @@
+Index,Challenge,Answer in Latex,Answer in Sympy,Variation,Source,Category
+1,Compute the first 5 nonzero terms of the Maclaurin series of $ e^{\sin(x)} $,1+x+\frac{x^2}{2}-\frac{x^4}{8}-\frac{x^5}{15}+\cdots,-x**5/15 - x**4/8 + x**2/2 + x + 1,Original,"U-Math
+sequences_series
+1ccc052c-9604-4459-a752-98ebdf3e0764",Series
+2,"Find the radius of convergence of the series:
+$ \sum_{n=1}^\infty \left(\frac{ \left((2 \cdot n)!\right) \cdot x^n }{ n^{2 \cdot n} }\right) $",\frac{e^2}{4},E**2 / 4,Original,"U-Math
+sequences_series
+ca5ffe7c-f495-43dc-a653-de477cabc185",Series
+3,Compute the first 6 nonzero terms of the Maclaurin series of $f(x) = \sin(x) \cdot \cos\left(\frac{ \pi }{ 4 }\right) + \cos(x) \cdot \sin\left(\frac{ \pi }{ 4 }\right)$,\frac{1}{34560\cdot\sqrt{2}}\cdot\left(288\cdot x^5+1440\cdot x^4-5760\cdot x^3-17280\cdot x^2+34560\cdot x+34560\right),sqrt(2)*(x**5 + 5*x**4 - 20*x**3 - 60*x**2 + 120*x + 120)/240,Original,"U-Math
+sequences_series
+f89bd354-18c9-4f31-b91f-cf6421e24921",Series
+4,Compute the first 4 nonzero terms of the Maclaurin series of $f(x) = e^x \cdot \cos(x)$,1+x-\frac{x^3}{3}-\frac{x^4}{6},-x**4/6 - x**3/3 + x + 1,Original,"U-Math
+sequences_series
+d1fe21df-ee7f-40c2-9655-6bd6a7a23ff1",Series
+5,Compute $\lim_{x \to 0}\left(\frac{ 2 \cdot \cos(x)+4 }{ 5 \cdot x^3 \cdot \sin(x) }-\frac{ 6 }{ 5 \cdot x^4 }\right)$,\frac{1}{150},1/150,Original,"U-Math
+sequences_series
+068e40ce-9108-4ef8-8ee5-0d1471ebbe43",Limits
+6,Evaluate $\lim_{x \to 0^{+}}\left(\left(\frac{ \tan\left(\frac{ x }{ 2 }\right) }{ \frac{ x }{ 2 } }\right)^{\frac{ 3 }{ x^2 }}\right)$,$e^{\frac{1}{4}}$,exp(1/4),Original,"U-Math
+differential_calc
+363dd580-f1fc-4867-a6ef-db2a03139745",Limits
+7,"Evaluate
+$ \lim_{x \to 5} \left( \frac{ 3 \cdot x }{ x-5 }-\frac{ 3 }{ \ln\left(\frac{ x }{ 5 }\right) } \right) $",\frac{3}{2},3/2,Original,"U-Math
+differential_calc
+2d799998-115a-489b-a48b-57090954303e",Limits
+8,"Evaluate
+$ \lim_{x \to \infty} \left(x - x^2 \cdot \ln\left(1 + \frac{ 1 }{ x }\right)\right) $",\frac{1}{2},1/2,Original,"U-Math
+differential_calc
+efdc4110-cf56-4f37-bf54-40fdd5d58145",Limits
+9,"Evaluate
+$ \lim_{x \to 0^{+}} \left( \left( \frac{ \tan(2 \cdot x) }{ 2 \cdot x } \right)^{\frac{ 1 }{ 3 \cdot x^2 }} \right) $",e^{\frac{4}{9}},e**(4/9),Original,"U-Math
+differential_calc
+99a2304d-5d8e-4245-90da-a80651ca15d8",Limits
+10,"Evaluate
+$ \lim_{x \to 0}\left( \left| \frac{ -\sin(x) }{ x } \right| \right)^{\frac{ 1 }{ 4 \cdot x^2 }} $",e^{\frac{-1}{24}},e**(-1/24),Original,"U-Math
+differential_calc
+84c6a419-c103-41d5-aad5-dd8e690c6e88",Limits
+11,"Integrate 
+$ \int \sin(x)^4 \cdot \cos(x)^6 dx $",$C+\frac{1}{320}\cdot\left(\sin(2\cdot x)\right)^5+\frac{1}{128}\cdot\left(\frac{3\cdot x}{2}-\frac{\sin(4\cdot x)}{2}+\frac{\sin(8\cdot x)}{16}\right)$,3*x/256 + sin(2*x)**5/320 - sin(4*x)/256 + sin(8*x)/2048,Original,"U-Math
+integral_calc
+0c0ba3db-1470-4c36-975c-91ff5f51986f",Integrals
+12,"Calculate the integral:
+$
+\int \frac{ \sqrt[5]{x}+\sqrt[5]{x^4}+x \cdot \sqrt[5]{x} }{ x \cdot \left(1+\sqrt[5]{x^2}\right) }   dx
+$",C+5\cdot\arctan\left(\sqrt[5]{x}\right)+\frac{5}{4}\cdot\sqrt[5]{x}^4,C + 5*x**(4/5)/4 + 5*atan(x**(1/5)),Original,"U-Math
+integral_calc
+126c4165-b3d5-4470-8412-08e79d9821cf",Integrals
+13,"Solve the integral:
+$
+\int \frac{ 1 }{ \sin(x)^7 \cdot \cos(x) }   dx
+$",C+\ln\left(\left|\tan(x)\right|\right)-\frac{3}{2\cdot\left(\tan(x)\right)^2}-\frac{3}{4\cdot\left(\tan(x)\right)^4}-\frac{1}{6\cdot\left(\tan(x)\right)^6},C + log(Abs(tan(x))) - 3 / (2 * tan(x)**2) - 3 / (4 * tan(x)**4) - 1 / (6 * tan(x)**6),Original,"U-Math
+integral_calc
+00f6affb-905a-4109-a78e-2dde7a0b83accf",Integrals
+14,"Compute the integral:
+$
+-2 \cdot \int x^{-4} \cdot \left(4+x^2\right)^{\frac{ 1 }{ 2 }}   dx
+$",C+\frac{1}{6}\cdot\left(\frac{4}{x^2}+1\right)\cdot\sqrt{\frac{4}{x^2}+1},(C*x**2 + sqrt((x**2 + 4)/x**2)*(x**2 + 4)/6)/x**2,Original,"U-Math
+integral_calc
+05ea9929-8cbb-432b-bbbb-ec1e74c9f401",Integrals
+15,"Solve the integral:
+$
+\int \left(\frac{ x+4 }{ x-4 } \right)^{\frac{ 3 }{ 2 }}   dx
+$",C+\sqrt{\frac{x+4}{x-4}}\cdot(x-20)-12\cdot\ln\left(\left|\frac{\sqrt{x-4}-\sqrt{x+4}}{\sqrt{x-4}+\sqrt{x+4}}\right|\right),C + sqrt((x + 4)/(x - 4)) * (x - 20) - 12 * log(Abs((sqrt(x - 4) - sqrt(x + 4)) / (sqrt(x - 4) + sqrt(x + 4)))),Original,"U-Math
+integral_calc
+08c72d46-1abd-49e1-9c9c-ce509902be6e",Integrals
+16,Compute the integral: $ \int \frac{ -1 }{ x^2 \cdot \left(3+x^3\right)^{\frac{ 5 }{ 3 }} }   dx $,\frac{1}{9}\cdot\sqrt[3]{1+\frac{3}{x^3}}+\frac{1}{18\cdot\left(1+\frac{3}{x^3}\right)^{\frac{2}{3}}},(x**3 + 2)/(6*x**3*(1 + 3/x**3)**(2/3)),Original,"U-Math
+integral_calc
+4c1292e1-d4b3-4acf-afaf-eaac62f2662d",Integrals
+17,"Compute the integral:
+$ \int \frac{ 4 \cdot x+\sqrt{4 \cdot x-5} }{ 5 \cdot \sqrt[4]{4 \cdot x-5}+\sqrt[4]{(4 \cdot x-5)^3} }   dx $",C+25\cdot\sqrt[4]{4\cdot x-5}+\frac{1}{5}\cdot\sqrt[4]{4\cdot x-5}^5-\frac{4}{3}\cdot\sqrt[4]{4\cdot x-5}^3-\frac{125}{\sqrt{5}}\cdot\arctan\left(\frac{1}{\sqrt{5}}\cdot\sqrt[4]{4\cdot x-5}\right),C + (4*x - 5)**(5/4)/5 - 4*(4*x - 5)**(3/4)/3 + 25*(4*x - 5)**(1/4) - 25*sqrt(5)*atan(sqrt(5)*(4*x - 5)**(1/4)/5),Original,"U-Math
+integral_calc
+147944c5-b782-48c5-a664-d66deb92d9a7",Integrals
+18,"Solve the integral:
+$
+\int \frac{ 3 }{ \sin(2 \cdot x)^7 \cdot \cos(-2 \cdot x) }   dx
+$",C+\frac{3}{2}\cdot\left(\ln\left(\left|\tan(2\cdot x)\right|\right)-\frac{3}{2\cdot\left(\tan(2\cdot x)\right)^2}-\frac{3}{4\cdot\left(\tan(2\cdot x)\right)^4}-\frac{1}{6\cdot\left(\tan(2\cdot x)\right)^6}\right),"C + (3/2) * (log(Abs(tan(2*x))) - 3/(2 * tan(2*x)**2) - 3/(4 * tan(2*x)**4) - 1/(6 * tan(2*x)**6)
+)",Original,"U-Math
+integral_calc
+1db212f0-2fac-410d-969d-fe3b5b55d076",Integrals
+19,"Solve the integral:
+$
+\int \frac{ 1 }{ (\sin(8 \cdot x))^5 }   dx
+$",C+\frac{1}{128}\cdot\left(2\cdot\left(\tan(4\cdot x)\right)^2+6\cdot\ln\left(\left|\tan(4\cdot x)\right|\right)+\frac{1}{4}\cdot\left(\tan(4\cdot x)\right)^4-\frac{2}{\left(\tan(4\cdot x)\right)^2}-\frac{1}{4\cdot\left(\tan(4\cdot x)\right)^4}\right),"C + Rational(1, 128) * (2 * tan(4 * x)**2 + 6 * log(Abs(tan(4 * x))) + Rational(1, 4) * tan(4 * x)**4 - 2 / tan(4 * x)**2 - 1 / (4 * tan(4 * x)**4))",Original,"U-Math
+integral_calc
+275f7ceb-f331-4a3f-96ec-346e6d81b32a",Integrals
+20,"Evaluate the integral:
+$ \int \left(x^3 + 3\right) \cdot \cos(2 \cdot x)   dx $",\frac{1}{256}\cdot\left(384\cdot\sin(2\cdot x)+128\cdot x^3\cdot\sin(2\cdot x)+192\cdot x^2\cdot\cos(2\cdot x)-96\cdot\cos(2\cdot x)-256\cdot C-192\cdot x\cdot\sin(2\cdot x)\right),-C + x**3*sin(2*x)/2 + 3*x**2*cos(2*x)/4 - 3*x*sin(2*x)/4 + 3*sin(2*x)/2 - 3*cos(2*x)/8,Original,"U-Math
+integral_calc
+47a11349-0386-4969-9263-d3cdfcc98cb9",Integrals
+21,"Use factoring to calculate the following limit.
+$ \lim_{x \rightarrow K} \frac {{x}^4-K^4} {{x}^5-K^5} $",\frac{4}{5 K},4/(5*K),Original,"UGMathBench
+Calculus_-_single_variable_0016",Limits
+22,Find the limit. $ \lim_{x \to 0} \frac{1-\cos\!\left(10x\right)}{\cos^{2}\!\left(6x\right)-1}$,\frac{-25}{18},-25/18,Original,"UGMathBench
+Calculus_-_single_variable_0022",Limits
+23,Evaluate the limit. $ \lim_{x\to 1} \dfrac{x^2+11x-12}{\ln x}=$,13,13,Original,"UGMathBench
+Calculus_-_single_variable_0508",Limits
+24,"Evaluate the limit below, given that $f(t)=\left(\frac{4^t+6^t}{4}\right)^{1/t}$. $\lim\limits_{t\to+\infty} f(t)$",6,6,Original,"UGMathBench
+Calculus_-_single_variable_0512",Limits
+25,Calculate the integral. $\int_{2}^{\infty} 3x^{2}e^{-x^{3}}  dx$,\frac{1}{e^{8}},e**(-8),Original,"UGMathBench
+Calculus_-_single_variable_0592",Integrals
+26,Evaluate the indefinite integral. $\int \tan^{3}\!\left(x\right)\sec^{9}\!\left(x\right)   dx$,\frac{\sec^{11}{\left(x \right)}}{11} - \frac{\sec^{9}{\left(x \right)}}{9},sec(x)**11/11 - sec(x)**9/9,Original,"UGMathBench
+Calculus_-_single_variable_0604",Integrals
+27,"Evaluate the indefinite integral.
+$\int 208 \cos^4(16x) dx$",78 x + \frac{13 \sin{\left(16 x \right)} \cos^{3}{\left(16 x \right)}}{4} + \frac{39 \sin{\left(16 x \right)} \cos{\left(16 x \right)}}{8},78*x + 13*sin(16*x)*cos(16*x)**3/4 + 39*sin(16*x)*cos(16*x)/8,Original,"UGMathBench
+Calculus_-_single_variable_0606",Integrals
+28,"Evaluate the integral.
+$ \int \frac{10x^2-48x-38}{x^3-5x^2-8x+48} dx $",\frac{2 \left(\left(x - 4\right) \left(3 \log{\left(\left|{x - 4}\right| \right)} + 2 \log{\left(\left|{x + 3}\right| \right)}\right) + 5\right)}{x - 4} ,2*((x - 4)*(3*log(Abs(x - 4)) + 2*log(Abs(x + 3))) + 5)/(x - 4),Original,"UGMathBench
+Calculus_-_single_variable_0612",Integrals
+29,Evaluate the integral. $ \int e^{x}\sqrt{64-e^{2x}} dx$,\frac{e^{x} \sqrt{64 - e^{2 x}}}{2} + 32 \operatorname{asin}{\left(\frac{e^{x}}{8} \right)},e**x*sqrt(64 - e**(2*x))/2 + 32*asin(e**x/8),Original,"UGMathBench
+Calculus_-_single_variable_0624",Integrals
+30,Evaluate $\lim_{x \to 0} \frac{e^{-3x^3}-1+3x^3-\frac{9}{2}x^6}{12x^9}$,\frac{-3}{8},-3/8,Original,"UGMathBench
+Calculus_-_single_variable_0939",Limits
+31,"Solve the following first-order differential equation:
+$ \frac{dy}{dx} + 2y = e^{-x}, \quad y(0) = 1. $",e^{-x},e**(-x),Original,"MathOdyssey
+Problem 340 from Differential Equations - College Math",Differential Equations
+32,Consider the differential equation $\frac{dy}{dx} = xy$. Find the value of $y(\sqrt{2})$ given that $y(0) = 2$.,2e,2*e,Original,"MathOdyssey
+Problem 339 from Differential Equations - College Math",Differential Equations
+33,"Evaluate the following limit:
+$
+\lim_{n \to \infty} \left(\sqrt{n^2+2n-1}-\sqrt{n^2+3}\right).
+$",1,1,Original,"MathOdyssey
+Problem 315 from Calculus and Analysis - College Math",Limits
+34,Evaluate $\lim\limits_{x\to 4}\frac{x-4}{\sqrt{x}-2}$.,4,4,Original,"MathOdyssey
+Problem 317 from Calculus and Analysis - College Math",Limits
+35,Evaluate $ \int_0^4(2x-\sqrt{16-x^2})dx$.,16 - 4 \pi,16 - 4*pi,Original,"MathOdyssey
+Problem 325 from Calculus and Analysis - College Math",Integrals
+36,Evaluate the series $\sum\limits_{n=1}^\infty\frac{1}{(n+1)(n+3)}$.,\frac{5}{12},5/12,Original,"MathOdyssey
+Problem 326 from Calculus and Analysis - College Math",Series
+37,Evaluate the limit $\lim\limits_{x\to 0}\frac{(1+x)^{\frac{1}{x}}-e}{x}$.,-\frac{ e}{2},-e/2,Original,"MathOdyssey
+Problem 327 from Calculus and Analysis - College Math",Limits
+38,Evaluate the series $\sum\limits_{n=0}^\infty \frac{1}{2n+1}\left(\frac12\right)^{2n+1}$.,\ln\sqrt{3},log(3)/2,Original,"MathOdyssey
+Problem 328 from Calculus and Analysis - College Math",Series
+39,Evaluate the limit $\lim\limits_{n\to\infty}\sum\limits_{k=0}^{n-1}\frac{1}{\sqrt{n^2-k^2}}$.,\frac{\pi}{2},pi/2,Original,"MathOdyssey
+Problem 329 from Calculus and Analysis - College Math",Limits
+40,Evaluate the iterated integral $\displaystyle{\int_0^1dy\int_y^1(e^{-x^2}+e^x)dx}$.,\frac{3}{2}-\frac12 e^{-1},(3*e - 1)/(2*e),Original,"MathOdyssey
+Problem 336 from Calculus and Analysis - College Math",Integrals
+41,What is the integral of $ 2x - x^7atan(3) $,x^2-\frac{1}{8} x^8 \tan ^{-1}(3),-x**8*atan(3)/8 + x**2,Original,"GHOSTS 
+Symbolic Integration
+Q97",Integrals
+42,What is the integral of $ 1 + x + x^3*cosh(2) $,\frac{1}{4} x^4 \cosh (2)+\frac{x^2}{2}+x,x**4*cosh(2)/4 + x**2/2 + x,Original,"GHOSTS 
+Symbolic Integration
+Q98",Integrals
+43,What is the integral of $ 12 + 6cosh(x) $,12 x + 6 \sinh{\left(x \right)},12*x + 6*sinh(x),Original,"GHOSTS 
+Symbolic Integration
+Q90",Integrals
+44,What is the integral of 4x^7 + sin(1 + x),\frac{x^8}{2} - \cos(1+x) ,x**8/2 - cos(x + 1),Original,"GHOSTS 
+Symbolic Integration
+Q14",Integrals
+45,What is the integral of 2x + 2x^2 + x*[(x + x*e^x)^(-1)],\frac{2 x^3}{3}+x^2-2 \tanh ^{-1}\left(2 e^x+1\right),2*x**3/3 + x**2 + x - log(exp(x) + 1),Original,"GHOSTS 
+Symbolic Integration
+Q7",Integrals
+46,What is the integral of -x + cos[ln(sin(3))] * ln(3x),-\frac{1}{2} x (x-2 \log (3 x) \cos (\log (\sin (3)))+2 \cos (\log (\sin (3)))),"-1*x*((x - 2*log(3*x, E)*cos(log(sin(3), E))) + 2*cos(log(sin(3), E)))/2",Original,"GHOSTS 
+Symbolic Integration
+Q15",Integrals
+47,What is the integral of 3x - 4*[cos(x+3)]*x^2,\frac{3 x^2}{2}-4 \left(x^2-2\right) \sin (x+3)-8 x \cos (x+3),-8*x*cos(x + 3) + ((3*x**2)/2 - 4*(x**2 - 2)*sin(x + 3)),Original,"GHOSTS 
+Symbolic Integration
+Q18",Integrals
+48,What is the integral of -3 + atan(x) + ln(tanh(3)),x \arctan(x) - \frac{1}{2} \ln(1 + x^2) + x \ln(\tanh(3)) - 3x + C,x*atan(x) - 3*x + x*log(tanh(3)) - log(x**2 + 1)/2,Original,"GHOSTS 
+Symbolic Integration
+Q20",Integrals
+49,What is the integral of e^{x \left(x + 4\right)^{2}} \left(x + 4\right) \left(3 x + 4\right),e^{x (x+4)^2},e**(x*(x + 4)**2),Original,"GHOSTS 
+Symbolic Integration
+Q22",Integrals
+50,What is the integral of -e^{3x} * sin(e^{3x}),\frac{1}{3} \cos \left(e^{3 x}\right),cos(e**(3*x))/3,Original,"GHOSTS 
+Symbolic Integration
+Q29",Integrals
+51,"If $\log _{2} x-2 \log _{2} y=2$, determine $y$, as a function of $x$",\frac{1}{2} \sqrt{x},sqrt(x)/2,Original,"OlympiadBench
+oe_to_maths_en_comp
+2498",Differential Equations
+52,"If $f(x)=2 x+1$ and $g(f(x))=4 x^{2}+1$, determine an expression for $g(x)$.",x^2-2 x+2,x**2 - 2*x + 2,Original,"OlympicArena
+Math_1381",Series
+53,Solve the following integral $\int_0^{\frac{\pi}{2}} \frac{x \sin(2x)}{1 + \cos^2(2x)}   dx$,Pi^2 / 16,pi**2 / 16,Original,OBMU 2019 - Q21,Integrals
+54,"Solve the following integral:
+$\int_{1}^{2} \frac{e^x(x - 1)}{x(x + e^x)}   dx$ ",\ln\left( \frac{2 + e^2}{2 + 2e} \right),"log((E**2 + 2)/(2*E + 2), E)",Original,OBMU 2019 - Q18,Integrals
+55,"Solve the following integral:
+$\int_{0}^{\pi} \log(\sin(x))   dx$",-\pi \log (2),"-pi*log(2, E)",Original,OBMU 2019 - Q22,Integrals
+56,"Evaluate the following hypergeometric function. Return a closed-form symbolic answer.
+
+$ {}_2F_1\left( \begin{array}{c} 1,1\ \\ 2 \end{array}; -1 \right) $",\log (2),"log(2, E)",Original,"ASyMOB
+Hypergeometrics
+Q1",Hypergeometrics
+57,"Evaluate the following hypergeometric function. Return a closed-form symbolic answer.
+
+$ {}_2F_1\left( \begin{array}{c} 1,1 \\ 3 \end{array}; -2 \right) $",\frac{3 \log (3)}{2}-1,"-1 + (3*log(3, E))/2",Original,"ASyMOB
+Hypergeometrics
+Q2",Hypergeometrics
+58,"Evaluate the following hypergeometric function. Return a closed-form symbolic answer.
+
+$ {}_3F_2\left( \begin{array}{c} 1,1,1 \\ 2,2 \end{array}; -1 \right) $",\frac{\pi ^2}{12},pi**2/12,Original,"ASyMOB
+Hypergeometrics
+Q3",Hypergeometrics
+59,"Evaluate the following hypergeometric function. Return a closed-form symbolic answer.
+
+$ {}_3F_2\left( \begin{array}{c} -1,-1,-1 \\ -1,-1 \end{array}; x \right) $",1-x,1-x,Original,"ASyMOB
+Hypergeometrics
+Q4",Hypergeometrics
+60,"Solve the following integral. Return a closed-form symbolic answer.
+
+\int \frac{ 1 }{ 1 + x^3 }   dx",-\frac{1}{6} \log \left(x^2-x+1\right)+\frac{1}{3} \log (x+1)+\frac{\tan ^{-1}\left(\frac{2 x-1}{\sqrt{3}}\right)}{\sqrt{3}},"(log(x + 1, E)/3 - 1*log((x**2 - x) + 1, E)/6) + atan((2*x - 1)/(sqrt(3)))/(sqrt(3))",Original,"ASyMOB
+Hypergeometrics
+Q5",Hypergeometrics
+61,"Solve the following integral.
+
+\int \frac{(4 + (4 - 1)x^1)x^{2-1}}{2(1 + x^1 + x^{4})\sqrt{1 + x^1}} dx",\tan ^{-1}\left(\frac{x^2}{\sqrt{x+1}}\right),atan(x**2/sqrt(x + 1)),Original,"ASyMOB
+Hypergeometrics
+Q6",Hypergeometrics
+62,"Evaluate the following hypergeometric function. Return a closed-form symbolic answer.
+
+$ {}_2F_1\left( \begin{array}{c} 1, 1 \\ 1 \end{array}; -1 \right) $",\frac{1}{2},1/2,Original,"ASyMOB
+Hypergeometrics
+Q7",Hypergeometrics
+63,"Evaluate the following hypergeometric function.Return a closed-form symbolic answer.
+
+$ {}_1F_1\left( \begin{array}{c} 1 \\ 1 \end{array}; 1 \right) $",e,E,Original,"ASyMOB
+Hypergeometrics
+Q8",Hypergeometrics
+64,"Evaluate the following hypergeometric function. Return a closed-form symbolic answer.
+
+$ {}_2F_1\left( \begin{array}{c} 1, -2 \\ 2+1 \end{array}; 1 \right) $",\frac{1}{2},1/2,Original,"ASyMOB
+Hypergeometrics
+Q9",Hypergeometrics
+65,"Evaluate the following hypergeometric function. Return a closed-form symbolic answer.
+
+$ {}_3F_1\left( \begin{array}{c} (1 + 1), -2, (1 + 3) \\ (2 + 1) \end{array}; \frac{1}{2} \right) $",\frac{5}{6},5/6,Original,"ASyMOB
+Hypergeometrics
+Q10",Hypergeometrics
+66,"Solve the following differential equation:
+$ x \cdot y' + y = x \cdot \sin(x), y(\pi) = 1 $",-\cos(x) + \frac{\sin(x)}{x} ,-cos(x) + sin(x)/x,Original,"ASyMOB
+Differential_Equations
+Q1",Differential Equations
+67,"Solve the following differential equation:
+$ y' =  e^{ x } \cdot y , y(1) = 1 $",e^{e^x-e},e**(-e + e**x),Original,"ASyMOB
+Differential_Equations
+Q2",Differential Equations
+68,"Solve the following differential equation:
+$ y' = 2 \cdot x \cdot y^2 - y , y(1) = 1 $",\frac{e}{2 e x-3 e^x+2 e},e/(2*e*x + 2*e - 3*e**x),Original,"ASyMOB
+Differential_Equations
+Q3",Differential Equations
+69,"Solve the following differential equation:
+$ y' = x y^2 - y , y(1) = 1 $",\frac{e}{e x-e^x+e},e/(e*x + e - e**x),Original,"ASyMOB
+Differential_Equations
+Q4",Differential Equations
+70,"Solve the following differential equation:
+$ y' = \frac{y^2 + 2 \cdot x \cdot y }{x^2} , y(1) = 1 $",-\frac{x^2}{x-2},-x**2/(x - 2),Original,"ASyMOB
+Differential_Equations
+Q5",Differential Equations
+71,"Solve the following differential equation:
+$ y' = e^{-x} - 2 \cdot y , y(1) = 1 $",e^{-2 x} \left(e^x-e+e^2\right),(e**2 - e + e**x)/e**(2*x),Original,"ASyMOB
+Differential_Equations
+Q6",Differential Equations
+72,"Solve the following differential equation:
+$ y' = 3 \cdot x^2 \cdot \left( y^2 + 1 \right) , y(1) = 1 $",\tan \left(x^3+\frac{1}{4} (\pi -4)\right),tan(pi/4 + x**3 - 1),Original,"ASyMOB
+Differential_Equations
+Q7",Differential Equations
+73,"Solve the following differential equation:
+$ y' = \frac{2 (y + x)}{x} , y(1) = 1 $",3 x^2-2 x,x*(3*x - 2),Original,"ASyMOB
+Differential_Equations
+Q8",Differential Equations
+74,"Solve the following differential equation:
+$ y' = \frac{ (y + x)}{x} , y(1) = 1 $",x+x \log (x),x*(log(x) + 1),Original,"ASyMOB
+Differential_Equations
+Q9",Differential Equations
+75,"Solve the following differential equation:
+$ y' = x , y(1) = 1 $",\frac{1}{2} \left(x^2+1\right),x**2/2 + 1/2,Original,"ASyMOB
+Differential_Equations
+Q10",Differential Equations
+76,"Solve the following differential equation:
+$ y' = x - 2 \cdot x \cdot y , y(1) = 1 $",\frac{1}{2} e^{-x^2} \left(e^{x^2}+e\right),e/(2*e**(x**2)) + 1/2,Original,"ASyMOB
+Differential_Equations
+Q11",Differential Equations
+77,"Solve the following differential equation:
+$ y' = -y + 2 \cdot \sin (x) + 5 \cdot \sin (2 \cdot x) , y(0) = 0 $",-e^{-x} \left(-e^x \sin (x)-e^x \sin (2 x)+e^x \cos (x)+2 e^x \cos (2 x)-3\right),sin(2*x) - 2*cos(2*x) - sqrt(2)*cos(x + pi/4) + 3/e**x,Original,"ASyMOB
+Differential_Equations
+Q12",Differential Equations
+78,"Solve the following differential equation:
+$ y' = \tan (y) , y(1) = 1 $",\sin ^{-1}\left(e^{x-1} \sin (1)\right),asin(e**(x - 1)*sin(1)),Original,"ASyMOB
+Differential_Equations
+Q13",Differential Equations
+79,"Solve the following differential equation:
+$ y' = \sin ^2(y) + 2 \cos ^2(y) , y(1) = 1 $","-\tan ^{-1}\left(\sqrt{2} \tan \left(-\sqrt{2} x+\sqrt{2}-\tan
+   ^{-1}\left(\frac{\tan (1)}{\sqrt{2}}\right)\right)\right)",atan(sqrt(2)*tan(sqrt(2)*x - sqrt(2) + atan(sqrt(2)*tan(1)/2))),Original,"ASyMOB
+Differential_Equations
+Q14",Differential Equations
+80,"Solve the following differential equation:
+$ y' = 2 \cos ^2(y) - \sin ^2(y) , y(0) = 0 $",\tan ^{-1}\left(\sqrt{2} \tanh \left(\sqrt{2} x\right)\right),atan(sqrt(2)*tanh(sqrt(2)*x)),Original,"ASyMOB
+Differential_Equations
+Q15",Differential Equations
+81,"Solve the following differential equation:
+$ y'' + y' + y + x = 0 , y(0) = 1 , y'(0) = 1 $","-\frac{1}{3} e^{-x/2} \left(3 e^{x/2} x-3 e^{x/2}-4 \sqrt{3} \sin
+   \left(\frac{\sqrt{3} x}{2}\right)\right)",-x + 1 + 4*sqrt(3)*sin(sqrt(3)*x/2)/(3*e**(x/2)),Original,"ASyMOB
+Differential_Equations
+Q16",Differential Equations
+82,"Solve the following differential equation:
+$ y'' + y' - 6 \cdot y = 0 , y(0) = 0 , y'(0) = 1 $",\frac{1}{5} e^{-3 x} \left(e^{5 x}-1\right),(e**(5*x) - 1)/(5*e**(3*x)),Original,"ASyMOB
+Differential_Equations
+Q17",Differential Equations
+83,"Solve the following differential equation:
+$ y'' + y = 0 , y(1) = 1 , y'(0) = 1 $",\sin (x)+\cos (x) (\sec (1)-\tan (1)),sin(x) - (-sec(1) + tan(1))*cos(x),Original,"ASyMOB
+Differential_Equations
+Q18",Differential Equations
+84,"Solve the following differential equation:
+$ y'' - y = 0 , y(1) = 1 , y'(1) = 1 $",e^{x-1},e**(x - 1),Original,"ASyMOB
+Differential_Equations
+Q19",Differential Equations
+85,"Solve the following differential equation:
+$ y'' - 2 \cdot y' - 3 \cdot y = \sin (x) , y(1) = 1 , y'(1) = 1 $","\frac{1}{40} e^{-x-3} \left(20 e^{4 x}-8 e^{x+3} \sin (x)+3 e^{4 x} \sin (1)+4
+   e^{x+3} \cos (x)+e^{4 x} \cos (1)+20 e^4+5 e^4 \sin (1)-5 e^4 \cos (1)\right)",e**(-x - 3)*(-5*sqrt(2)*e**4*cos(pi/4 + 1) + 20*e**4 + e**(4*x)*cos(1) + 3*e**(4*x)*sin(1) + 20*e**(4*x) - 8*e**(x + 3)*sin(x) + 4*e**(x + 3)*cos(x))/40,Original,"ASyMOB
+Differential_Equations
+Q20",Differential Equations
+86,"Calculate the following infinite product. Give a finite, closed form answer.
+$ \prod_{n=1}^\infty 1-\frac{81}{16 (n+1)^4} $",\frac{64 \sinh \left(\frac{3 \pi }{2}\right)}{585 \pi ^2},64*sinh(3*pi/2)/(585*pi**2),Original,"ASyMOB
+Series
+Q1",Series
+87,"Calculate the following infinite product. Give a finite, closed form answer.
+$ \prod_{n=1}^\infty \frac{\left(1-\frac{1}{(n+1)^2}\right) \left((n+1)^3-1\right)}{(n+1)^3+1} $",\frac{1}{3},1/3,Original,"ASyMOB
+Series
+Q2",Series
+88,"Calculate the following infinite product. Give a finite, closed form answer.
+$ \prod_{n=1}^\infty 1-\frac{1}{4 n^2} $",\frac{2}{\pi },2/pi,Original,"ASyMOB
+Series
+Q3",Series
+89,"Calculate the following infinite product. Give a finite, closed form answer.
+$ \prod_{n=1}^\infty \frac{1}{\left\lfloor \frac{n}{n+1}+\left\lfloor \frac{1}{n^2+1}\right\rfloor
+   \right\rfloor +n^2}+1 $",\frac{\sinh (\pi )}{\pi },sinh(pi)/pi,Original,"ASyMOB
+Series
+Q4",Series
+90,"Calculate the following infinite product. Give a finite, closed form answer.
+$ \prod_{n=1}^\infty \left(1-\frac{1}{64 \cdot n^6}\right) \left(1-\frac{4}{3} \sin^2\left(3^{-n}\right)\right) $",\frac{4 \frac{\sin(1)}{ 1} \cosh \left(\frac{\sqrt{3} \pi }{2}\right)}{\pi ^3},4*sin(1)*cosh(sqrt(3)*pi/2)/pi**3,Original,"ASyMOB
+Series
+Q5",Series
+91,"Calculate the following infinite sum. Give a finite, closed form answer.
+$ \sum_{n=1}^\infty \left(\frac{3}{5}\right)^n \left(1-\frac{1}{n}\right) $",\frac{3}{2}-\log \left(\frac{5}{2}\right),3/2 - log(5/2),Original,"ASyMOB
+Series
+Q6",Series
+92,"Calculate the following infinite sum. Give a finite, closed form answer.
+$ \sum_{n=1}^\infty \frac{(-1)^n}{2 n+5} $",\frac{\pi }{4}-\frac{13}{15},pi/4 - 13/15,Original,"ASyMOB
+Series
+Q7",Series
+93,"Calculate the following infinite sum. Give a finite, closed form answer.
+$ \sum_{n=1}^\infty 2^{1-3 n} \cdot 3^{n+1} $",\frac{18}{5},18/5,Original,"ASyMOB
+Series
+Q8",Series
+94,"Calculate the following infinite sum. Give a finite, closed form answer.
+$ \sum_{n=1}^\infty \frac{1}{n!} $",e-1,e - 1,Original,"ASyMOB
+Series
+Q9",Series
+95,"Calculate the following infinite sum. Give a finite, closed form answer.
+$ \sum_{n=1}^\infty \frac{1}{n^2-n-1} $","-\frac{\left(\sqrt{5}-5\right) \pi  \tan \left(\frac{\sqrt{5} \pi }{2}\right)}{5
+   \left(\sqrt{5}-1\right)}",sqrt(5)*pi*tan(sqrt(5)*pi/2)/5,Original,"ASyMOB
+Series
+Q10",Series
+96,"Calculate the following infinite sum. Give a finite, closed form answer.
+$ \sum_{n=1}^\infty \frac{n^3 + n^2 + n + 1}{n \cdot (n+1)^2 \cdot (n+2)^2} $",\frac{5}{12} \left(\pi ^2-9\right),5*pi**2/12 - 15/4,Original,"ASyMOB
+Series
+Q11",Series
+97,"Calculate the following infinite sum. Give a finite, closed form answer.
+$ \sum_{n=1}^\infty \frac{n+1}{(n+2) \cdot (n+3) \cdot (n+4)} $",\frac{5}{24},5/24,Original,"ASyMOB
+Series
+Q12",Series
+98,"Calculate the following infinite sum. Give a finite, closed form answer.
+$ \sum_{n=1}^\infty \frac{(-1)^n \cdot n+1}{(n+1) \cdot (n+2) \cdot (n+3)} $",\frac{17}{6}-4 \log (2),17/6 - log(16),Original,"ASyMOB
+Series
+Q13",Series
+99,"Calculate the following infinite sum. Give a finite, closed form answer.
+$ \sum_{n=1}^\infty (-2)^{-n} \left(n^2 + n + (-1)^n\right) $",\frac{19}{27},19/27,Original,"ASyMOB
+Series
+Q14",Series
+100,"Calculate the following infinite sum. Give a finite, closed form answer.
+$ \sum_{n=1}^\infty \frac{(-1)^{n+1}+1}{n^2+1} $",\frac{1}{2} \pi  \tanh \left(\frac{\pi }{2}\right),pi*tanh(pi/2)/2,Original,"ASyMOB
+Series
+Q15",Series
+101,"Compute up to degree 5 ($x^5$) the terms of the Maclaurin series of $ f(x) =  A \cdot e^{B \cdot \sin(x)} $.
+Assume A and B are real and positive.","\frac{1}{6} A \left(B^3-B\right) x^3+\frac{1}{2} A B^2 x^2+\frac{1}{120} A \left(B^5-10 B^3+B\right) x^5+\frac{1}{24} A
+   \left(B^4-4 B^2\right) x^4+A B x+A",A*B**2*x**2/2 + A*B*x + A + x**5*A*(B**5 - 10*B**3 + B)/120 + x**4*A*(B**4 - 4*B**2)/24 + x**3*A*(B**3 - B)/6,Symbolic,"U-Math
+sequences_series
+1ccc052c-9604-4459-a752-98ebdf3e0764",Series
+102,"Find the radius of convergence of the following series. Assume A,B,G,H are real and positive.
+
+$ \sum_{n=1}^\infty \frac{B \cdot (2 \cdot n)! \cdot (A \cdot x)^n}{G \cdot (H \cdot n)^{2 \cdot n}} $",\frac{e^2 \cdot H^2}{4 \cdot A},(E**2 * H**2) / (4 * A),Symbolic,"U-Math
+sequences_series
+ca5ffe7c-f495-43dc-a653-de477cabc185",Series
+103,"Compute the first 6 nonzero terms of the Maclaurin series of $f(x) = G \cdot \left(\sin(A \cdot x) \cdot \cos\left(\frac{ B \cdot \pi }{ 4 }\right) + \cos(A \cdot x) \cdot \sin\left(\frac{ B \cdot \pi }{ 4 }\right)\right)$
+Assume A,B,G are real and positive.","\frac{1}{120} A^5 G x^5 \cos \left(\frac{\pi  B}{4}\right)+\frac{1}{24} A^4 G x^4 \sin \left(\frac{\pi 
+   B}{4}\right)-\frac{1}{6} A^3 G x^3 \cos \left(\frac{\pi  B}{4}\right)-\frac{1}{2} A^2 G x^2 \sin \left(\frac{\pi 
+   B}{4}\right)+A G x \cos \left(\frac{\pi  B}{4}\right)+ G \sin \left(\frac{\pi  B}{4}\right)",G*(A**5*x**5*cos(B*pi/4) + 5*A**4*x**4*sin(B*pi/4) - 20*A**3*x**3*cos(B*pi/4) - 60*A**2*x**2*sin(B*pi/4) + 120*A*x*cos(B*pi/4) + 120*sin(B*pi/4))/120,Symbolic,"U-Math
+sequences_series
+f89bd354-18c9-4f31-b91f-cf6421e24921",Series
+104,"Compute the terms up to order 4 ($x^4$) of the Maclaurin series of $f(x) = G /cdot e^{A cdot x} \cdot \cos(B cdot x)$.
+Assume A,B,G are real and positive.","G x^3 \left(\frac{A^3}{6}-\frac{A B^2}{2}\right)+\frac{1}{2} G x^2 \left(A^2-B^2\right)+G x^4 \left(\frac{A^4}{24}-\frac{A^2
+   B^2}{4}+\frac{B^4}{24}\right)+A G x+G",G*(4*A*x**3*(A**2 - 3*B**2) + 24*A*x + x**4*(A**4 - 6*A**2*B**2 + B**4) + 12*x**2*(A**2 - B**2) + 24)/24,Symbolic,"U-Math
+sequences_series
+d1fe21df-ee7f-40c2-9655-6bd6a7a23ff1",Series
+105,"Compute $\lim_{x \to 0}\frac{(2 \cos (J \cdot x)+4) \csc (J \cdot x)}{5 \cdot A \cdot (J \cdot x)^3}-\frac{6}{5 \cdot A \cdot (J \cdot x)^4}$
+Assume A,J are real and positive.",\frac{1}{A 150},1/(150*A),Symbolic,"U-Math
+sequences_series
+068e40ce-9108-4ef8-8ee5-0d1471ebbe43",Limits
+106,"Evaluate 
+$ \lim_{x \to 0^+} A \cdot \left( \frac{ \tan\left( \frac{B \cdot x}{2} \right) }{ \frac{B \cdot x}{2} } \right)^{ \frac{3 \cdot J}{(B \cdot x)^2} } $
+Assume A,B,J are real and positive.",$A /cdot e^{\frac{J}{4}}$,A*e**(J/4),Symbolic,"U-Math
+differential_calc
+363dd580-f1fc-4867-a6ef-db2a03139745",Limits
+107,"Evaluate
+$ \lim_{x \to {5 \cdot A} } \left( \frac{ 3 \cdot B \cdot x }{ x - 5 \cdot A }-\frac{ 3 \cdot B }{ \ln\left(\frac{ x }{ 5 \cdot A }\right) } \right)^{J} $
+Assume A,B,J are real and positive.",\left( \frac{3B}{2} \right)^J,(3*B/2)**J,Symbolic,"U-Math
+differential_calc
+2d799998-115a-489b-a48b-57090954303e",Limits
+108,"Evaluate
+$ \lim_{x \to \infty} \left(A \cdot x - A \cdot J \cdot x^2 \cdot \ln\left(1 + \frac{ 1 }{ J \cdot x }\right)\right)^{B} $
+Assume A,B,J are real and positive.",\left(\frac{A}{2 J}\right)^{B},(A/(2*J))**B,Symbolic,"U-Math
+differential_calc
+efdc4110-cf56-4f37-bf54-40fdd5d58145",Limits
+109,"Evaluate
+$ \lim_{x \to 0^+} J \cdot \left( \frac{\tan(A \cdot x)}{A \cdot x} \right)^{\frac{ H }{3 \cdot B \cdot x^2}} $
+Assume A,B,J,H are real and positive.",J e^{\frac{A^{2} H}{9 B}},J*e**((A**2*H)/((9*B))),Symbolic,"U-Math
+differential_calc
+99a2304d-5d8e-4245-90da-a80651ca15d8",Limits
+110,"Evaluate 
+$ \lim_{x \to 0} \left| J \cdot \left( \frac{-\sin(A \cdot x)}{A \cdot x} \right)^{\frac{1}{4 \cdot B \cdot x^2}} \right| $
+Assume A,B,J are real and positive.",\left( e^{-\frac{A^2}{6B}} \right)^{\frac{1}{4}} \left| J \right|,"(exp(-A**2 / (6 * B)))**Rational(1, 4) * Abs(J)",Symbolic,"U-Math
+differential_calc
+84c6a419-c103-41d5-aad5-dd8e690c6e88",Limits
+111,"Integrate
+$ \int B \cdot \sin(J \cdot x)^4 \cdot \cos(J \cdot x)^6 dx $
+Assume B,J are real and positive.",\frac{\frac{B \sin{\left(2 J x \right)}}{512} - \frac{B \sin{\left(4 J x \right)}}{256} - \frac{B \sin{\left(6 J x \right)}}{1024} + \frac{B \sin{\left(8 J x \right)}}{2048} + \frac{B \sin{\left(10 J x \right)}}{5120} + \frac{J x \left(256 A + 3 B\right)}{256}}{J},(3*B*x)/256 + (B*sin(2*J*x))/(512*J) - (B*sin(4*J*x))/(256*J) - (B*sin(6*J*x))/(1024*J) + (B*sin(8*J*x))/(2048*J) + (B*sin(10*J*x))/(5120*J),Symbolic ,"U-Math
+integral_calc
+0c0ba3db-1470-4c36-975c-91ff5f51986f",Integrals
+112,"Solve the following integral. Assume A,B,G,H are real and positive.
+$ \int \frac{A \cdot \sqrt[5]{x} + B \cdot x^{4/5} + H \cdot x^{6/5}}{x \left(G+x^{2/5}\right)}   dx $","\frac{5}{4} \left(\frac{4 A \tan ^{-1}\left(\frac{\sqrt[5]{x}}{\sqrt{G}}\right)}{\sqrt{G}}+2 x^{2/5} (B-H G)+2 G (H G-B) \log
+   \left(G+x^{2/5}\right)+H x^{4/5}\right)","(5/4)*(H*x**(4/5) + ((2*(x**(2/5)*(B - H*G)) + (4*(A*atan(x**(1/5)/(sqrt(G)))))/(sqrt(G))) + 2*(G*(-B + H*G)*log(G + x**(2/5), E))))",Symbolic,"U-Math
+integral_calc
+126c4165-b3d5-4470-8412-08e79d9821cf",Integrals
+113,"Solve the following integral. Assume A,B,J are real and positive.
+
+$ \int \frac{A }{ B \cdot \sin ^7(J \cdot x) \cdot \cos (J \cdot x)}   dx $",-\frac{A \left(2 \csc ^6(J x)+3 \csc ^4(J x)+6 \csc ^2(J x)+12 (\log (\cos (J x))-\log (\sin (J x)))\right)}{12 B J},-A*(-12*log(sin(J*x)) + 12*log(cos(J*x)) + 2*(1/(sin(J*x)))**6 + 3*(1/(sin(J*x)))**4 + 6*(1/(sin(J*x)))**2)/(12*B*J),Symbolic,"U-Math
+integral_calc
+00f6affb-905a-4109-a78e-2dde7a0b83accf",Integrals
+114,"Solve the following integral. Assume A,B,J are real and positive.
+
+$ \int -\frac{2 \cdot A \cdot \sqrt{4 \cdot B + (J \cdot x)^2}}{ (J \cdot x)^4}   dx $",\frac{A \left(4 B+J^2 x^2\right)^{3/2}}{6 B J^4 x^3},A*(4*B + J**2*x**2)**(3/2)/(6*B*J**4*x**3),Symbolic,"U-Math
+integral_calc
+05ea9929-8cbb-432b-bbbb-ec1e74c9f401",Integrals
+115,"Solve the following integral. Assume A,B,J are real and positive.
+
+$ \int \left(\frac{B \cdot (4 \cdot A + J \cdot x)}{J \cdot x - 4 \cdot A}\right)^{\frac{ 3 }{ 2 }}   dx $","\frac{B \sqrt{\frac{B (4 A+J x)}{J x-4 A}} \left(\sqrt{4 A+J x} (J x-20 A)+24 A \sqrt{J x-4 A} \tanh ^{-1}\left(\frac{\sqrt{4
+   A+J x}}{\sqrt{J x-4 A}}\right)\right)}{J \sqrt{4 A+J x}}",B*sqrt(-B*(4*A + J*x)/(4*A - J*x))*(24*A*sqrt(-4*A + J*x)*atanh(sqrt(4*A + J*x)/sqrt(-4*A + J*x)) + (-20*A + J*x)*sqrt(4*A + J*x))/(J*sqrt(4*A + J*x)),Symbolic,"U-Math
+integral_calc
+08c72d46-1abd-49e1-9c9c-ce509902be6e",Integrals
+116,"Solve the following integral. Assume A,B,J,G are real and positive.
+
+$ \int \frac{ -A }{B \cdot (J \cdot x)^2 \cdot \left(3 \cdot G + (J \cdot x)^3\right)^{\frac{ 5 }{ 3 }} }   dx $",\frac{A \left(J^3 x^3+2 G\right)}{6 B J^2 G^2 x \left(J^3 x^3+3 G\right)^{2/3}},A*(J**3*x**3 + 2*G)/(6*B*J**2*G**2*x*(J**3*x**3 + 3*G)**(2/3)),Symbolic,"U-Math
+integral_calc
+4c1292e1-d4b3-4acf-afaf-eaac62f2662d",Integrals
+117,"Solve the following integral. Assume A,B,J,G,H are real and positive.
+
+$ \int \frac{\sqrt{4 \cdot A \cdot x - 5 \cdot B} + 4 \cdot J \cdot x}{5 \cdot G \cdot \sqrt[4]{4 \cdot A \cdot x - 5 \cdot B} + H \cdot (4 \cdot A \cdot x - 5 \cdot B)^{\frac{3}{4}}}   dx $","\frac{\frac{\sqrt{H} \left(20 A^2 H^2 x+375 J G^2 \sqrt{4 A x-5 B}+5 B H \left(12 J H \sqrt{4 A x-5 B}-5 A H+25 J G\right)+A H
+   \left(12 J H x \sqrt{4 A x-5 B}-75 G \sqrt{4 A x-5 B}-100 J G x\right)\right)}{\sqrt[4]{4 A x-5 B}}-75 \sqrt{5} \sqrt{G}
+   \left(-A G H+B J H^2+5 J G^2\right) \tan ^{-1}\left(\frac{\sqrt{H} \sqrt[4]{4 A x-5 B}}{\sqrt{5} \sqrt{G}}\right)}{15 A^2
+   H^{7/2}}",(75*sqrt(5)*sqrt(G)*(4*A*x - 5*B)**(1/4)*(A*G*H - B*J*H**2 - 5*J*G**2)*atan(sqrt(5)*sqrt(H)*(4*A*x - 5*B)**(1/4)/(5*sqrt(G))) + sqrt(H)*(20*A**2*H**2*x + A*H*(-100*J*G*x + 12*J*H*x*sqrt(4*A*x - 5*B) - 75*G*sqrt(4*A*x - 5*B)) + 5*B*H*(-5*A*H + 25*J*G + 12*J*H*sqrt(4*A*x - 5*B)) + 375*J*G**2*sqrt(4*A*x - 5*B)))/(15*A**2*H**(7/2)*(4*A*x - 5*B)**(1/4)),Symbolic,"U-Math
+integral_calc
+147944c5-b782-48c5-a664-d66deb92d9a7",Integrals
+118,"Solve the following integral. Assume A,B,J are real and positive.
+
+$ \int \frac{3 \cdot A \cdot \csc ^7(2 \cdot J \cdot x) \sec (2 \cdot J \cdot x)}{ B }   dx $",-\frac{A \left(2 \csc ^6(2 J x)+3 \csc ^4(2 J x)+6 \csc ^2(2 J x)+12 (\log (\cos (2 J x))-\log (\sin (2 J x)))\right)}{8 B J},-A*(-12*log(sin(2*J*x)) + 12*log(cos(2*J*x)) + 2*csc(2*J*x)**6 + 3*csc(2*J*x)**4 + 6*csc(2*J*x)**2)/(8*B*J),Symbolic,"U-Math
+integral_calc
+1db212f0-2fac-410d-969d-fe3b5b55d076",Integrals
+119,"Solve the following integral. Assume A,J are real and positive.
+
+$ \int \frac{ A }{ (\sin(8 \cdot J \cdot x))^5 }   dx $","-\frac{A \left(\csc ^4(4 J x)+6 \csc ^2(4 J x)-\sec ^4(4 J x)-6 \sec ^2(4 J x)+24 (\log (\cos (4 J x))-\log (\sin (4 J
+   x)))\right)}{512 J}",-A*(-24*log(sin(4*J*x)) + 24*log(cos(4*J*x)) + csc(4*J*x)**4 + 6*csc(4*J*x)**2 - sec(4*J*x)**4 - 6*sec(4*J*x)**2)/(512*J),Symbolic,"U-Math
+integral_calc
+275f7ceb-f331-4a3f-96ec-346e6d81b32a",Integrals
+120,"Solve the following integral. Assume A,B,J are real and positive.
+
+$ \int \cos (2 \cdot J \cdot x) \left(A \cdot (J \cdot x)^3+3 \cdot B \right)   dx $",\frac{2 \sin (2 J x) \left(A J x \left(2 J^2 x^2-3\right)+6 B\right)+3 A \left(2 J^2 x^2-1\right) \cos (2 J x)}{8 J},((2*A*J*x*(2*J**2*x**2 - 3) + 12*B)*sin(2*J*x) + 3*A*(2*J**2*x**2 - 1)*cos(2*J*x))/(8*J),Symbolic,"U-Math
+integral_calc
+47a11349-0386-4969-9263-d3cdfcc98cb9",Integrals
+121,"Use factoring to calculate the following limit.
+Assume A,B,J are real and positive.
+$ \lim_{x \rightarrow \frac{K}{J}} \frac{(J \cdot x)^{4 \cdot B} - K^{4 \cdot B}}{A \cdot \left((J \cdot x)^{5 \cdot B}- K^{5 \cdot B}\right)} $",\frac{4 K^{-B}}{5 A},4/(5*A*K**B),Symbolic,"UGMathBench
+Calculus_-_single_variable_0016",Limits
+122,"Calculate the following limit.
+Assume A,B,J are real and positive.
+$ \lim_{x \to 0} \frac{B - B \cdot \cos (10 \cdot J \cdot x)}{A \cdot \cos ^2(6 \cdot J \cdot x) - A} $",-\frac{25 B}{18 A},-25*B/(18*A),Symbolic,"UGMathBench
+Calculus_-_single_variable_0022",Limits
+123,"Calculate the following limit.
+Assume A,B,J are real and positive.
+$ \lim_{x\to 1} \frac{A \cdot (J \cdot x)^2 + 11 \cdot A \cdot J \cdot x - 12 \cdot A}{B \cdot \log (J \cdot x)} $",\frac{13 A}{B},13*A/B,Symbolic,"UGMathBench
+Calculus_-_single_variable_0508",Limits
+124,"Calculate the following limit.
+Assume A,J are real and A>1.
+
+$ \lim\limits_{x\to+\infty} 4^{-\frac{1}{J \cdot x}} \left(\frac{(4 \cdot A)^{J \cdot x} + (6 \cdot A)^{J \cdot x} }{ A }\right)^{\frac{1}{J \cdot x}} $",6 A,6*A,Symbolic,"UGMathBench
+Calculus_-_single_variable_0512",Limits
+125,"Calculate the following integral. 
+Assume A,B, J are real and positive.
+$\int_{2 \cdot B}^{\infty} 3 \cdot A \cdot (J \cdot x)^2 e^{- (J \cdot x)^3}  dx$",\frac{A e^{-8 B^3 J^3}}{J},A/(J*e**(8*B**3*J**3)),Symbolic,"UGMathBench
+Calculus_-_single_variable_0592",Integrals
+126,"Evaluate the indefinite integral. 
+Assume A, J are real and positive.
+$\int A \cdot \tan ^3(J \cdot x) \sec ^9(J \cdot x)   dx$",\frac{A \sec ^9(J x) \left(9 \sec ^2(J x)-11\right)}{99 J},A*(9*sec(J*x)**2 - 11)*sec(J*x)**9/(99*J),Symbolic,"UGMathBench
+Calculus_-_single_variable_0604",Integrals
+127,"Evaluate the indefinite integral.
+Assume A, J are real and positive.
+$\int 208 \cdot A \cdot \cos ^4(16 \cdot J \cdot x)  dx$",\frac{13 A (192 J x+8 \sin (32 J x)+\sin (64 J x))}{32 J},13*A*(192*J*x + 8*sin(32*J*x) + sin(64*J*x))/(32*J),Symbolic,"UGMathBench
+Calculus_-_single_variable_0606",Integrals
+128,"Evaluate the integral.
+Assume A, B, J, G are real and positive.
+$ \int \frac{-38 \cdot A+10 \cdot B \cdot (J \cdot x)^2 - 48 \cdot J \cdot G \cdot x}{(J \cdot x)^3 - 5 (J \cdot x)^2 - 8 \cdot J \cdot x+48} dx $",\frac{2 \left(\frac{7 (19 A-80 B+96 G)}{J x-4}+(19 A+200 B-72 G) \log (4-J x)+(-19 A+45 B+72 G) \log (J x+3)\right)}{49 J},2*(133*A - 560*B + 672*G + (J*x - 4)*((-19*A + 45*B + 72*G)*log(J*x + 3) + (19*A + 200*B - 72*G)*log(-J*x + 4)))/(49*J*(J*x - 4)),Symbolic,"UGMathBench
+Calculus_-_single_variable_0612",Integrals
+129,"Evaluate the integral.
+Assume A,B,J are real and positive.
+$ \int A \cdot e^{J \cdot x} \sqrt{64 \cdot B-e^{2 \cdot J \cdot x}} dx$",\frac{A \left(e^{J x} \sqrt{64 B-e^{2 J x}}+64 B \tan ^{-1}\left(\frac{e^{J x}}{\sqrt{64 B-e^{2 J x}}}\right)\right)}{2 J},A*(64*B*atan(e**(J*x)/sqrt(64*B - e**(2*J*x))) + e**(J*x)*sqrt(64*B - e**(2*J*x)))/(2*J),Symbolic,"UGMathBench
+Calculus_-_single_variable_0624",Integrals
+130,"Evaluate the following limit.
+Assume A,B,J are real and positive.
+$\lim_{x \to 0} \frac{-\frac{9}{2} \cdot B^2 (J \cdot x)^6 + 3 \cdot B \cdot J^3 \cdot x^3 + e^{-3 \cdot B \cdot (J \cdot x)^3}-1}{12 \cdot A \cdot (J \cdot x)^9} $",-\frac{3 B^3}{8 A},-3*B**3/(8*A),Symbolic,"UGMathBench
+Calculus_-_single_variable_0939",Limits
+131,"Solve the following first-order differential equation:
+Assume A,B,J,G are real and positive.
+$ A \cdot \frac{dy}{dx} + 2 \cdot B \cdot y = J \cdot e^{-x}, \quad y(0) = G .$","\frac {e^{-\frac{2 B x}{A}} \left(J \left(-e^{x \left(\frac{2 B}{A}-1\right)}\right)+A G-2 B
+   G+J\right)}{A-2 B}",(A*G - 2*B*G + J + J*(-e**x*((-A + 2*B)/A)))/(e**(2*B*x/A)*(A - 2*B)),Symbolic,"MathOdyssey
+Problem 340 from Differential Equations - College Math",Differential Equations
+132,"Consider the differential equation 
+$A \cdot \frac{dy}{dx} = B \cdot x \cdot y$. 
+Find the value of $y(\sqrt{2})$ given that $y(0) = 2 \cdot J$.
+Assume A,B,J are real and positive.",2 J e^{\frac{B}{A}},2*J*e**(B/A),Symbolic,"MathOdyssey
+Problem 339 from Differential Equations - College Math",Differential Equations
+133,"Evaluate the following limit:
+$ \lim_{x \to \infty} \sqrt{-B + H \cdot (J \cdot x)^2 + 2 \cdot J \cdot G \cdot x}-\sqrt{3 \cdot A + H \cdot (J \cdot x)^2} $
+Assume A,B,J,G,H are real and positive.",\frac{G}{\sqrt{H}},G/sqrt(H),Symbolic,"MathOdyssey
+Problem 315 from Calculus and Analysis - College Math",Limits
+134,"Evaluate $\lim\limits_{x\to \frac{4 \cdot B}{ J }} \frac{A \cdot (J \cdot x - 4 \cdot B)}{\sqrt{J \cdot x}-2 \sqrt{ B }} $.
+
+Assume A,B,J are real and positive.",4 A \sqrt{B},4*A*sqrt(B),Symbolic,"MathOdyssey
+Problem 317 from Calculus and Analysis - College Math",Limits
+135,"Evaluate $\int_0^{4 \cdot B}  (2 \cdot A \cdot x - \sqrt{(4 \cdot B \cdot J)^2 - (J \cdot x)^2}) dx$.
+
+Assume A,B,J are real and positive.",4 B^2 (4 A-\pi  J),4*B**2*(4*A - J*pi),Symbolic,"MathOdyssey
+Problem 325 from Calculus and Analysis - College Math",Integrals
+136,"Evaluate the series $\sum\limits_{x=1}^\infty \frac{ A }{B \cdot (J + x) (J +x+2)} $.
+
+Assume A,B,J are real and positive.",\frac{A (2 J+3)}{2 B (J+1) (J+2)},A*(2*J + 3)/(2*(J + 2)*B*(J + 1)),Symbolic,"MathOdyssey
+Problem 326 from Calculus and Analysis - College Math",Series
+137,"Evaluate the limit $\lim\limits_{x \to 0} \frac{(A \cdot x+1)^{\frac{1}{A \cdot x}}-e}{B \cdot x} $.
+
+Assume A,B are real and positive.",-\frac{e A}{2 B},-A*e/(2*B),Symbolic,"MathOdyssey
+Problem 327 from Calculus and Analysis - College Math",Limits
+138,"Evaluate the series $\sum\limits_{n=0}^\infty \frac{ \left(\frac{1}{2 \cdot B}\right)^{A \cdot (2 n+1)}}{J \cdot (2 n+1)} $.
+
+Assume A,B,J are real and positive.",\frac{\tanh ^{-1}\left(2^{-A} \left(\frac{1}{B}\right)^A\right)}{J},atanh((1/(2*B))**A)/J,Symbolic,"MathOdyssey
+Problem 328 from Calculus and Analysis - College Math",Series
+139,"Evaluate the limit
+$\lim\limits_{n\to\infty}\sum\limits_{k=0}^{n-1}\frac{ A }{B \cdot \sqrt{J \cdot n^2-k^2}}$
+
+Assume A,B, J are real and positive - and $J \ge 1$.",\frac{A}{B} \arcsin\left(\frac{1}{\sqrt{J}}\right),A*asin(1/sqrt(J))/B,Symbolic,"MathOdyssey
+Problem 329 from Calculus and Analysis - College Math",Limits
+140,"Evaluate the iterated integral $\int_0^1dy\int_y^1 e^{-A \cdot (J \cdot x)^2} + B \cdot e^{J \cdot x} dx$.
+
+Assume A,B,J are real and positive.",\frac{2 A B \left(e^J (J-1)+1\right)-e^{-A J^2}+1}{2 A J^2},(e**(A*J**2)*(2*A*B*(e**J*(J - 1) + 1) + 1) - 1)/(2*A*J**2*e**(A*J**2)),Symbolic,"MathOdyssey
+Problem 336 from Calculus and Analysis - College Math",Integrals
+141,"What is the integral of $ 2 \cdot A \cdot x - B \cdot x^{7 \cdot J} \tan ^{-1}(3 \cdot G) $
+
+Assume A,B,J,G are real and positive.",x \left(A x-\frac{B x^{7 J} \tan ^{-1}(3 G)}{7 J+1}\right),x*((A*x*(7*J + 1) - B*x**(7*J)*atan(3*G))/(7*J + 1)),Symbolic,"GHOSTS 
+Symbolic Integration
+Q97",Integrals
+142,"What is the integral of
+$ A + B \cdot J \cdot x + \cosh (2 \cdot G) \cdot (J \cdot x)^{3 \cdot H} $
+
+Assume A,B,J,G,H are real and positive.",A x+\frac{1}{2} B J x^2+\frac{x \cosh (2 G) (J x)^{3 H}}{3 H+1},x*(2*(J*x)**(3*H)*cosh(2*G) + (2*A + B*J*x)*(3*H + 1))/(2*(3*H + 1)),Symbolic,"GHOSTS 
+Symbolic Integration
+Q98",Integrals
+143,"What is the integral of $12 \cdot A + 6 \cdot B \cdot \cosh (J \cdot x)$
+
+Assume A,B,J are real and positive.",12 A x+\frac{6 B \sinh (J x)}{J},12*A*x + 6*B*sinh(J*x)/J,Symbolic,"GHOSTS 
+Symbolic Integration
+Q90",Integrals
+144,"What is the integral of 
+$ 4 \cdot (B \cdot x)^{7 \cdot J} + G \cdot \sin (H + A \cdot x) $
+
+Assume A,B,J,G,H are real and positive.",\frac{4 A x (B x)^{7 J}-(7 J+1) G \cos (H+A x)}{7 J A+A},(4*A*x*(B*x)**(7*J) - G*(7*J + 1)*cos(H + A*x))/(A*(7*J + 1)),Symbolic,"GHOSTS 
+Symbolic Integration
+Q14",Integrals
+145,"What is the integral of
+$ 2 x + 2 \cdot B \cdot x^{2 \cdot J}+\frac{x}{G \cdot x + H \cdot x \cdot e^{A \cdot x}} $.
+
+Assume A,B,J,G,H are real and positive.","x \left(x+\frac{2 B x^{2 J}}{2 J+1}\right)-\frac{\log \left(G A \left(G+H e^{A x}\right)\right)}{G A}+\frac{\log \left(e^{A
+   x}\right)}{G A}",(G*A*x*((x*(2*J + 1) + 2*B*x**(2*J))/(2*J + 1)) + log(e**(A*x)) - log(G*A*(G + H*e**(A*x))))/(G*A),Symbolic,"GHOSTS 
+Symbolic Integration
+Q7",Integrals
+146,"What is the integral of 
+$ B \cdot \log (3 \cdot H \cdot x) \cos (J \cdot \log (\sin (3))) - A \cdot x $
+
+Assume A,B,J,H are real and positive.",B x (\log (3 H x)-1) \cos (J \log (\sin (3)))-\frac{A x^2}{2},-A*x**2/2 + B*x*(log(3*H*x) - 1)*cos(J*log(sin(3))),Symbolic,"GHOSTS 
+Symbolic Integration
+Q15",Integrals
+147,"What is the integral of
+$ 3 \cdot A \cdot x - 4 \cdot B \cdot (H \cdot x)^2 \cdot \cos (J \cdot x + 3 \cdot G) $
+
+Assume A,B,J,G,H are real and positive.",\frac{3 A x^2}{2}-\frac{8 B H^2 x \cos (J x+3 G)}{J^2}-\frac{4 B H^2 \left(J^2 x^2-2\right) \sin (J x+3 G)}{J^3},(3*A*J**3*x**2 - 16*B*J*H**2*x*cos(J*x + 3*G) - 8*B*H**2*(J**2*x**2 - 2)*sin(J*x + 3*G))/(2*J**3),Symbolic,"GHOSTS 
+Symbolic Integration
+Q18",Integrals
+148,"What is the integral of 
+$ A \cdot \tan ^{-1}(B \cdot x) + J \cdot \log (G \cdot \tanh (3 \cdot H))-3 $
+
+Assume A,B,J,G,H are real and positive.",-\frac{A \log \left(B^2 x^2+1\right)}{2 B}+A x \tan ^{-1}(B x)+x (J \log (G \tanh (3 H))-3),A*x*atan(B*x) - A*log(B**2*x**2 + 1)/(2*B) + x*(J*log(G*tanh(3*H)) - 3),Symbolic,"GHOSTS 
+Symbolic Integration
+Q20",Integrals
+149,"What is the integral of
+$ A \cdot (J \cdot x + 4 \cdot G) \cdot (3 \cdot J \cdot x + 4 \cdot G) e^{B \cdot x \cdot (J \cdot x + 4 \cdot G)^2} $
+
+Assume A,B,J,G are real and positive.",\frac{A e^{B x (J x+4 G)^2}}{B},A*e**(B*x*(J*x + 4*G)**2)/B,Symbolic,"GHOSTS 
+Symbolic Integration
+Q22",Integrals
+150,"What is the integral of
+
+$ -A \cdot e^{3 \cdot B \cdot x} \cdot \sin \left(J \cdot e^{3 \cdot B \cdot x}\right) $
+
+Assume A,B,J are real and positive.",\frac{A \cos \left(J e^{3 B x}\right)}{3 B J},A*cos(J*e**(3*B*x))/(3*B*J),Symbolic,"GHOSTS 
+Symbolic Integration
+Q29",Integrals
+151,"If $\log_{(2 \cdot A)} x - 2 \cdot J \cdot \log _{(2 \cdot A)} y = 2 \cdot B$, determine $y$, as a function of $x$
+
+Assume A,B,J are real and positive.",e^{\frac{\log (x)-2 B \log (2 A)}{2 J}},e**((-2*B*log(2*A) + log(x))/(2*J)),Symbolic,"OlympiadBench
+oe_to_maths_en_comp
+2498",Differential Equations
+152,"If $f(x)=2 \cdot A \cdot x+ B $ and $g(f(x)) = 4 \cdot J \cdot x^{2}+ G$, determine an expression for $g(x)$.
+
+Assume A,B,J,G are real and positive.",\frac{J (x-B)^2}{A^2}+G,G + J*(-B + x)**2/A**2,Symbolic,"OlympicArena
+Math_1381",Series
+153,"Solve the following integral. Assume A,B,J are real and B>0.
+
+$\int_0^{\frac{\pi}{2 \cdot J}} \frac{A \cdot x \cdot \sin(2 \cdot J \cdot x)}{B + \cos^2(2 \cdot J \cdot x)}   dx$",\frac{A\pi}{4J^2\sqrt{B}} \arctan\!\frac{1}{\sqrt{B}},A*pi*atan(1/sqrt(B))/(4*sqrt(B)*J**2),Symbolic,OBMU 2019 - Q21,Integrals
+154,"Solve the following integral. Assume A,B,J,G are real and positive.
+
+$\int_{1}^{2} \frac{A \cdot e^{J \cdot x} \cdot (J \cdot x - 1)}{J \cdot x \cdot \left(B \cdot e^{J \cdot x} + J \cdot G \cdot x\right)}   dx$ ",-\frac{A \log \left(\frac{2 (e B+G)}{e^2 B+2 G}\right)}{B J},"-A*log((2*(B*E + G))/(B*E**2 + 2*G), E)/(B*J)",Symbolic,OBMU 2019 - Q18,Integrals
+155,"Solve the following integral. Assume A,B,J are real and positive.
+
+Solve the following integral:
+$\int_{0}^{\pi} A \cdot \log(B \cdot (\sin(x))^{ J })   dx$",A \pi \log\left(\frac{B}{2^J}\right),"A*(pi*log(B/(2**J), E))",Symbolic ,OBMU 2019 - Q22,Integrals
+156,"Evaluate the following hypergeometric function. Assume A,B are real numbers. Return a closed-form symbolic answer.
+
+$ {}_2F_1\left( \begin{array}{c} 1 ,1 \\ 2 \end{array}; (-A)^{B} \right) $",-(-A)^{-B} \log \left(1-(-A)^B\right),"log(1 - (-A)**B, E)/((-A)**B)",Symbolic ,"ASyMOB
+Hypergeometrics
+Q1",Hypergeometrics
+157,"Evaluate the following hypergeometric function. Assume the parameters: A,B are real numbers. Return a closed-form symbolic answer.
+
+$ {}_2F_1\left( \begin{array}{c} 1 ,1 \\ 3 \end{array}; -2 \cdot (A^{B}) \right) $","\frac{1}{2} A^{-2 B} \left(\left(2 A^B+1\right) \log \left(2 A^B+1\right)-2
+   A^B\right)","(-2*(A**B) + (2*(A**B) + 1)*log(2*(A**B) + 1, E))/(2*(A**B)**2)",Symbolic ,"ASyMOB
+Hypergeometrics
+Q2",Hypergeometrics
+158,"Evaluate the following hypergeometric function. Assume the parameters: A,B,G,H are real numbers. Return a closed-form symbolic answer.
+
+$ {}_8F_7\left( \begin{array}{c} 1,1,1, A , B , 1, G, H \\ 2,2, H, G, B, 1,  A \end{array}; -1 \right) $",\frac{\pi ^2}{12},pi**2/12,Symbolic ,"ASyMOB
+Hypergeometrics
+Q3",Hypergeometrics
+159,"Evaluate the following hypergeometric function. Assume the parameters: x,A,B,G,H are real numbers. Return a closed-form symbolic answer.
+
+$ {}_3F_2\left( \begin{array}{c} -1,-A, -B \\ -H, -G \end{array}; x \right) $",1-\frac{A B x}{H G},1 - A*(B*x)/(H*G),Symbolic ,"ASyMOB
+Hypergeometrics
+Q4",Hypergeometrics
+160,"Solve the following integral. Assume the parameters: A,B,J are real numbers. Return a closed-form symbolic answer.
+
+$ \int \frac{ A }{ B + (x \cdot J)^3 }   dx $","-\frac{A \left(\log \left(B^{2/3}-\sqrt[3]{B} J x+J^2 x^2\right)-2 \log \left(\sqrt[3]{B}+J x\right)+2 \sqrt{3} \tan
+   ^{-1}\left(\frac{1-\frac{2 J x}{\sqrt[3]{B}}}{\sqrt{3}}\right)\right)}{6 B^{2/3} J}",-A*(-2*log(B**(1/3) + J*x) + log(B**(2/3) - B**(1/3)*J*x + J**2*x**2) + 2*sqrt(3)*atan(sqrt(3)*(B**(1/3) - 2*J*x)/(3*B**(1/3))))/(6*B**(2/3)*J),Symbolic ,"ASyMOB
+Hypergeometrics
+Q5",Hypergeometrics
+161,"Solve the following integral. Assume A,B are positive integers.
+
+$ \int \frac{(2 \cdot A + (2 \cdot A - B) \cdot x^{B}) \cdot x^{A - 1}}{2 \cdot (1 + x^{B} + x^{2 \cdot A}) \cdot \sqrt{1 + x^{B}}} dx $",\tan ^{-1}\left(\frac{\left x^A}{\sqrt{x^B+1}}\right),atan(x**A/(sqrt(x**B + 1))),Symbolic ,"ASyMOB
+Hypergeometrics
+Q6",Hypergeometrics
+162,"Evaluate the following hypergeometric function. Assume the parameters: A,B,G are real numbers. Return a closed-form symbolic answer.
+
+$ {}_2F_1\left( \begin{array}{c} A, G \\ A \end{array}; -B \right) $",(B+1)^{-G},(B+1)**(-G),Symbolic ,"ASyMOB
+Hypergeometrics
+Q7",Hypergeometrics
+163,"Evaluate the following hypergeometric function. Assume the parameters: A,B are real numbers. Return a closed-form symbolic answer.
+
+$ {}_1F_1\left( \begin{array}{c} A \\ A \end{array}; B \right) $",e^B,E**B,Symbolic ,"ASyMOB
+Hypergeometrics
+Q8",Hypergeometrics
+164,"Evaluate the following hypergeometric function. Assume the parameters: A,B,G are real numbers. Return a closed-form symbolic answer.
+
+$ {}_2F_1\left( \begin{array}{c} A, -2 \\ 2+G \end{array}; B \right) $",-\frac{(-A-1) A B^2}{(G+2) (G+3)}-\frac{2 A B}{G+2}+1,1 - (2*A*B)/(2+G) + (B**2 * A * (A+1))/((2+G)*(3+G)),Symbolic ,"ASyMOB
+Hypergeometrics
+Q9",Hypergeometrics
+165,"Evaluate the following hypergeometric function. Assume the parameters: A,B,G, H are real numbers. Return a closed-form symbolic answer.
+
+$ {}_3F_1\left( \begin{array}{c} (A + 1), -2, (H + 3) \\ (2 + G) \end{array}; \frac{B}{2} \right) $",\frac{(A+1) (A+2) B^2 (H+3) (H+4)}{4 (G+2) (G+3)}-\frac{(A+1) B (H+3)}{G+2}+1,(-(A + 1)*B*(H + 3) / (G + 2) + ((( (B**2) * ((H + 3)*(H + 4)))*(A + 2))*(A + 1)) / ((4*((G + 2)*(G + 3)))) ) + 1,Symbolic ,"ASyMOB
+Hypergeometrics
+Q10",Hypergeometrics
+166,"Solve the following differential equation:
+$ B \cdot x \cdot y' + B \cdot y = A \cdot x \cdot \sin(x), y(\pi) = G $
+Assume the parameters: A,B,G are real numbers.",\frac{A \sin (x)+A (-x) \cos (x)-\pi  A+\pi  B G}{B x},(-A*pi + A*sin(x) + B*G*pi + A*(-x)*cos(x)) / (B*x),Symbolic ,"ASyMOB
+Differential_Equations
+Q1",Differential Equations
+167,"Solve the following differential equation:
+$ A \cdot y' = B \cdot e^{J \cdot x} \cdot y , y(H) = G $
+Assume the parameters: A,B,G,H,J are real numbers.",G e^{\frac{B e^{J x}}{A J}-\frac{B e^{H J}}{A J}},G*e**(B*(-e**(H*J) + e**(J*x))/(A*J)),Symbolic ,"ASyMOB
+Differential_Equations
+Q2",Differential Equations
+168,"Solve the following differential equation:
+$ A \cdot y' = 2 \cdot B \cdot x \cdot y^2 - G \cdot y , y(H) = J $
+Assume the parameters: A,B,G,H,J are real numbers.","\frac{G^2 J e^{\frac{G H}{A}}}{-2 B G H J e^{\frac{G x}{A}}+2 B G J x e^{\frac{G
+   H}{A}}+2 A B J e^{\frac{G H}{A}}-2 A B J e^{\frac{G x}{A}}+G^2 e^{\frac{G
+   x}{A}}}",G**2*J*e**(G*H/A)/(2*A*B*J*e**(G*H/A) - 2*A*B*J*e**(G*x/A) - 2*B*G*H*J*e**(G*x/A) + 2*B*G*J*e**(G*H/A)*x + G**2*e**(G*x/A)),Symbolic ,"ASyMOB
+Differential_Equations
+Q3",Differential Equations
+169,"Solve the following differential equation:
+$ A \cdot y' = B \cdot x \cdot y^{G+1} - y , y(H) = J $
+Assume the parameters: A,B,G,H,J are real numbers.","\left(\frac{J^{-G} e^{\frac{G (x-H)}{A}} \left(-A B J^G-B G H J^G+G\right)+A B+B G
+   x}{G}\right)^{-1/G}",((B*J**G*(A + G*x) - e**(G*(-H + x) / A)*(A*B*J**G + B*G*H*J**G - G)) / (G*J**G))**(-1/G),Symbolic ,"ASyMOB
+Differential_Equations
+Q4",Differential Equations
+170,"Solve the following differential equation:
+$ A \cdot y' = \frac{(B+1) \cdot x \cdot y + G \cdot y^2}{x^2} , y(H) = J $
+Assume the parameters: A,B,G,H,J are real numbers.","\frac{H J (A-B-1) x^{\frac{A+B+1}{A}}}{-G J x H^{\frac{B+1}{A}}+G H J
+   x^{\frac{B+1}{A}}+x (A-B-1) H^{\frac{A+B+1}{A}}}",H*x**((A + B + 1)/A)*J*(A - B - 1) / (G*H*J*x**((B + 1)/A) - G*H**((B + 1)/A)*J*x + H**((A + B + 1)/A)*x*(A - B - 1)),Symbolic ,"ASyMOB
+Differential_Equations
+Q5",Differential Equations
+171,"Solve the following differential equation:
+$ y' = A \cdot e^{-G \cdot x} - 2 \cdot B \cdot y , y(H) = J $
+Assume the parameters: A,B,G,H,J are real and positive numbers.","\frac{e^{-2 B x} \left(A \left(-e^{H (2 B-G)}\right)+A e^{x (2 B-G)}-G J e^{2 B
+   H}+2 B J e^{2 B H}\right)}{2 B-G}",(A*e**(x*(2*B - G)) + 2*B*J*e**(2*B*H) - G*J*e**(2*B*H) + A*(-e**(H*(2*B - G)))) / (e**(2*B*x)*(2*B - G)),Symbolic ,"ASyMOB
+Differential_Equations
+Q6",Differential Equations
+172,"Solve the following differential equation:
+$ A \cdot y' = 3 \cdot x^2 \cdot \left( B + y^2 \right) , y(H) = J $
+Assume the parameters: A,B,G,H,J are real and positive numbers.","\sqrt{B} \tan \left(\frac{A \tan ^{-1}\left(\frac{J}{\sqrt{B}}\right)-\sqrt{B}
+   H^3+\sqrt{B} x^3}{A}\right)",sqrt(B)*tan((A*atan(J/sqrt(B)) - sqrt(B)*H**3 + sqrt(B)*x**3)/A),Symbolic ,"ASyMOB
+Differential_Equations
+Q7",Differential Equations
+173,"Solve the following differential equation:
+$ A \cdot y' = \frac{2 \cdot G \cdot (A \cdot y + B \cdot x)}{x} , y(H) = J $
+Assume the parameters: A,B,G,H,J are real and positive numbers.","-\frac{H^{-2 G} \left(A J x^{2 G}-2 A G J x^{2 G}+2 B G x H^{2 G}-2 B G H x^{2
+   G}\right)}{A (2 G-1)}",(2*A*G*J*x**(2*G) - A*J*x**(2*G) + 2*B*G*H*x**(2*G) - 2*B*G*H**(2*G)*x)/(H**(2*G)*A*(2*G - 1)),Symbolic ,"ASyMOB
+Differential_Equations
+Q8",Differential Equations
+174,"Solve the following differential equation:
+$ A \cdot y' = \frac{ (A \cdot y + B \cdot x)}{x} , y(H) = J $
+Assume the parameters: A,B,H,J are real and positive numbers.",\frac{x (A J+B H \log (x)-B H \log (H))}{A H},x*(A*J - B*H*log(H) + B*H*log(x))/(A*H),Symbolic ,"ASyMOB
+Differential_Equations
+Q9",Differential Equations
+175,"Solve the following differential equation:
+$ A \cdot y' = \left(\frac{x}{G}\right)^{B} , y(H) = J $
+Assume the parameters: A,B,G,H,J are real and positive numbers.",\frac{G^{-B} \left(A J G^B+A B J G^B-H^{B+1}+x^{B+1}\right)}{A (B+1)},(A*B*G**B*J + A*G**B*J - H**(B + 1) + x**(B + 1))/(G**B*A*(B + 1)),Symbolic ,"ASyMOB
+Differential_Equations
+Q10",Differential Equations
+176,"Solve the following differential equation:
+$ A \cdot y' = G \cdot x - 2 \cdot B \cdot x \cdot y , y(H) = J $
+Assume the parameters: A,B,G,H,J are real and positive numbers.","\frac{e^{-\frac{B x^2}{A}} \left(G \left(-e^{\frac{B H^2}{A}}\right)+G e^{\frac{B
+   x^2}{A}}+2 B J e^{\frac{B H^2}{A}}\right)}{2 B}",(2*B*J*e**(B*H**2/A) + G*e**(B*x**2/A) + G*(-e**(B*H**2/A)))/(2*B*e**(B*x**2/A)),Symbolic ,"ASyMOB
+Differential_Equations
+Q11",Differential Equations
+177,"Solve the following differential equation:
+$ y' = 2 \cdot A \cdot \sin (G \cdot x) + 5 \cdot B \cdot \sin (2 x) - y , y(H - 1) = J - 1 $
+Assume the parameters: A,B,G,H,J are real and positive numbers.","-\frac{e^{-x-1} \left(2 A e^H \sin (G (H-1))-2 A G e^H \cos (G (H-1))-2 A e^{x+1}
+   \sin (G x)+2 A G e^{x+1} \cos (G x)-2 B G^2 e^H \cos (2 (H-1))-2 B G^2 e^H \sin
+   (1-H) \cos (1-H)+2 B G^2 e^{x+1} \cos (2 x)-2 B G^2 e^{x+1} \sin (x) \cos (x)-2
+   B e^H \cos (2 (H-1))-2 B e^H \sin (1-H) \cos (1-H)+2 B e^{x+1} \cos (2 x)-2 B
+   e^{x+1} \sin (x) \cos (x)-G^2 e^H J+G^2 e^H-e^H J+e^H\right)}{G^2+1}",e**(-x - 1)*(2*A*G*e**H*cos(G*(H - 1)) - 2*A*G*e**(x + 1)*cos(G*x) - 2*A*e**H*sin(G*(H - 1)) + 2*A*e**(x + 1)*sin(G*x) - B*G**2*e**H*sin(2*H - 2) + 2*B*G**2*e**H*cos(2*H - 2) + B*G**2*e**(x + 1)*sin(2*x) - 2*B*G**2*e**(x + 1)*cos(2*x) - B*e**H*sin(2*H - 2) + 2*B*e**H*cos(2*H - 2) + B*e**(x + 1)*sin(2*x) - 2*B*e**(x + 1)*cos(2*x) + G**2*J*e**H - G**2*e**H + J*e**H - e**H)/(G**2 + 1),Symbolic ,"ASyMOB
+Differential_Equations
+Q12",Differential Equations
+178,"Solve the following differential equation:
+$ y' = A \cdot \tan (B \cdot y) , y(H) = J $
+Assume the parameters: A,B,H,J are real and positive numbers.",\frac{\sin ^{-1}\left(\sin (B J) e^{A B x-A B H}\right)}{B},asin(e**(A*B*(-H + x))*sin(B*J))/B,Symbolic ,"ASyMOB
+Differential_Equations
+Q13",Differential Equations
+179,"Solve the following differential equation:
+$ A \cdot y' = \sin^2(B \cdot y) + 2 \cdot \cos^2(B \cdot y) , y(H) = J $
+Assume the parameters: A,B,H,J are real and positive numbers.","\frac{\tan ^{-1}\left(\sqrt{2} \tan \left(\frac{\frac{\sqrt{2} A \tan
+   ^{-1}\left(\frac{\tan (B J)}{\sqrt{2}}\right)-2 B H}{\sqrt{2}}+\sqrt{2} B
+   x}{A}\right)\right)}{B}",atan(sqrt(2)*tan((A*atan(sqrt(2)*tan(B*J)/2) - sqrt(2)*B*H + sqrt(2)*B*x)/A))/B,Symbolic ,"ASyMOB
+Differential_Equations
+Q14",Differential Equations
+180,"Solve the following differential equation:
+$ A \cdot y' = 2 \cdot G \cdot \cos ^2(B \cdot y) - \sin ^2(B \cdot y) , y(H - 1) = J - 1 $
+Assume the parameters: A,B,G,H,J are real and positive numbers.","\frac{\tan ^{-1}\left(\sqrt{2} \sqrt{G} \tanh \left(\frac{\frac{\sqrt{2} A \tanh
+   ^{-1}\left(\frac{\tan (B (J-1))}{\sqrt{2} \sqrt{G}}\right)-2 B \sqrt{G} H+2 B
+   \sqrt{G}}{\sqrt{2}}+\sqrt{2} B \sqrt{G} x}{A}\right)\right)}{B}",atan(sqrt(2)*sqrt(G)*tanh((A*atanh(sqrt(2)*tan(B*(J - 1))/(2*sqrt(G))) - sqrt(2)*B*sqrt(G)*H + sqrt(2)*B*sqrt(G)*x + sqrt(2)*B*sqrt(G))/A))/B,Symbolic ,"ASyMOB
+Differential_Equations
+Q15",Differential Equations
+181,"Solve the following differential equation:
+$ G \cdot x + y'' + y' + y = 0 , y(0) = H, y'(0) = J $
+Assume the parameters: G,H,J are real and positive numbers.","-\frac{1}{3} e^{-x/2} \left(-3 G e^{x/2}+3 G e^{x/2} x-\sqrt{3} G \sin
+   \left(\frac{\sqrt{3} x}{2}\right)+3 G \cos \left(\frac{\sqrt{3}
+   x}{2}\right)-\sqrt{3} H \sin \left(\frac{\sqrt{3} x}{2}\right)-3 H \cos
+   \left(\frac{\sqrt{3} x}{2}\right)-2 \sqrt{3} J \sin \left(\frac{\sqrt{3}
+   x}{2}\right)\right)",(-3*G*e**(x/2)*x + 3*G*e**(x/2) - 2*sqrt(3)*G*cos(sqrt(3)*x/2 + pi/6) + 2*sqrt(3)*H*sin(sqrt(3)*x/2 + pi/3) + 2*sqrt(3)*J*sin(sqrt(3)*x/2))/(3*e**(x/2)),Symbolic ,"ASyMOB
+Differential_Equations
+Q16",Differential Equations
+182,"Solve the following differential equation:
+$ A \cdot y'' + B \cdot y' - 6 \cdot G \cdot y = 0 , y(0) = H - 1, y'(0) = J $
+Assume the parameters: A,B,G,H,J are real and positive numbers.","\frac{e^{-\frac{x \left(\sqrt{24 A G+B^2}+B\right)}{2 A}} \left(e^{\frac{x \sqrt{24
+   A G+B^2}}{A}} \left(H \sqrt{24 A G+B^2}-\sqrt{24 A G+B^2}+2 A J\right)+B (H-1)
+   \left(e^{\frac{x \sqrt{24 A G+B^2}}{A}}-1\right)+H \sqrt{24 A G+B^2}-\sqrt{24 A
+   G+B^2}-2 A J\right)}{2 \sqrt{24 A G+B^2}}",(-2*A*J + H*sqrt(24*A*G + B**2) + e**(x*sqrt(24*A*G + B**2)/A)*(2*A*J + H*sqrt(24*A*G + B**2) - sqrt(24*A*G + B**2)) + (e**(x*sqrt(24*A*G + B**2)/A) - 1)*B*(H - 1) - sqrt(24*A*G + B**2))/(2*e**(x*(B + sqrt(24*A*G + B**2))/(2*A))*sqrt(24*A*G + B**2)),Symbolic ,"ASyMOB
+Differential_Equations
+Q17",Differential Equations
+183,"Solve the following differential equation:
+$ G \cdot y + y'' = 0 , y(A) = H, y'(0) = J $
+Assume the parameters: A,G,H,J are real and positive numbers.","\frac{\sec \left(A \sqrt{G}\right) \left(\sqrt{G} H \cos \left(\sqrt{G} x\right)-J
+   \sin \left(\sqrt{G} (A-x)\right)\right)}{\sqrt{G}}",(sqrt(G)*H*cos(sqrt(G)*x) - J*sin(sqrt(G)*(A - x)))*sec(A*sqrt(G))/sqrt(G),Symbolic ,"ASyMOB
+Differential_Equations
+Q18",Differential Equations
+184,"Solve the following differential equation:
+$ y'' - G \cdot y = 0 , y(A) = H, y'(B) = J $
+Assume the parameters: A,B,G,H,J are real and positive numbers.","\frac{e^{-\sqrt{G} x} \left(\sqrt{G} H e^{\sqrt{G} (A+2 B)}-J e^{\sqrt{G} (2
+   A+B)}+\sqrt{G} H e^{\sqrt{G} (A+2 x)}+J e^{\sqrt{G} (B+2 x)}\right)}{\sqrt{G}
+   \left(e^{2 A \sqrt{G}}+e^{2 B \sqrt{G}}\right)}",(sqrt(G)*H*e**(sqrt(G)*(A + 2*B)) + sqrt(G)*H*e**(sqrt(G)*(A + 2*x)) - J*e**(sqrt(G)*(2*A + B)) + J*e**(sqrt(G)*(B + 2*x)))/(sqrt(G)*e**(sqrt(G)*x)*(e**(2*A*sqrt(G)) + e**(2*B*sqrt(G)))),Symbolic ,"ASyMOB
+Differential_Equations
+Q19",Differential Equations
+185,"Solve the following differential equation:
+$ y'' - 2 \cdot y' - 3 \cdot y = G \cdot \sin (x) , y(A) = H, y'(B) = J $
+Assume the parameters: A,B,G,H,J are real and positive numbers.","\frac{e^{-x} \left(-e^A G \cos (A) \left(3 e^{4 B}+e^{4 x}\right)-2 e^B G \left(e^{4
+   A}-e^{4 x}\right) \cos (B)+6 G e^{A+4 B} \sin (A)-G e^{4 A+B} \sin (B)+30 H
+   e^{A+4 B}-10 J e^{4 A+B}+2 G e^{A+4 x} \sin (A)-2 G e^{4 A+x} \sin (x)+G e^{4
+   A+x} \cos (x)+10 H e^{A+4 x}+G e^{B+4 x} \sin (B)-6 G e^{4 B+x} \sin (x)+3 G e^{4
+   B+x} \cos (x)+10 J e^{B+4 x}\right)}{10 \left(e^{4 A}+3 e^{4 B}\right)}",(-G*e**A*(3*e**(4*B) + e**(4*x))*cos(A) + 6*G*e**(A + 4*B)*sin(A) + 2*G*e**(A + 4*x)*sin(A) - G*e**(4*A + B)*sin(B) - 2*G*e**(4*A + x)*sin(x) + G*e**(4*A + x)*cos(x) + G*e**(B + 4*x)*sin(B) - 6*G*e**(4*B + x)*sin(x) + 3*G*e**(4*B + x)*cos(x) + 30*H*e**(A + 4*B) + 10*H*e**(A + 4*x) - 10*J*e**(4*A + B) + 10*J*e**(B + 4*x) - 2*e**B*G*(e**(4*A) - e**(4*x))*cos(B))/(10*e**x*(e**(4*A) + 3*e**(4*B))),Symbolic ,"ASyMOB
+Differential_Equations
+Q20",Differential Equations
+186,"Calculate the following infinite product. Give a finite, closed form answer. Assume the parameters: A,B are real and positive.
+$ \prod_{n=1}^\infty 1-\frac{\left(\frac{A}{2 B}+1\right)^4}{B^4 (n+1)^4} $","\frac{4 B^4 \sin \left(\frac{\pi  (A+2 B)}{2 B^2}\right) \sinh \left(\frac{\pi  (A+2
+   B)}{2 B^2}\right)}{\pi ^2 (A+2 B)^2 \left(1-\frac{(A+2 B)^4}{16 B^8}\right)}",64*B**12*sin(pi*(A + 2*B)/(2*B**2))*sinh(pi *(A + 2*B)/(2*B**2))/(pi**2*(A + 2*B)**2*(16*B**8 - (A + 2*B)**4)),Symbolic ,"ASyMOB
+Series
+Q1",Series
+187,"Calculate the following infinite product. Give a finite, closed form answer. Assume the parameters: A,B are real and positive.
+$ \prod_{n=1}^\infty \frac{\left((A+n)^3-1\right) \left(1-\frac{1}{(B+n)^2}\right)}{(A+n)^3+1} $",\frac{A \cdot (A+1) \cdot B}{\left(A^2+A+1\right) (B+1)},A*B*(A + 1)/((B + 1)*(A**2 + A + 1)),Symbolic ,"ASyMOB
+Series
+Q2",Series
+188,"Calculate the following infinite product. Give a finite, closed form answer. Assume the parameters: A,B are real and positive.
+$ \prod_{n=1}^\infty 1-\frac{B^2}{(A+1)^2 n^2} $",\frac{(A+1) \sin \left(\frac{\pi  B}{A+1}\right)}{\pi  B},(A + 1)*sin(B*pi/(A + 1))/(B*pi),Symbolic ,"ASyMOB
+Series
+Q3",Series
+189,"Calculate the following infinite product. Give a finite, closed form answer. Assume the parameters: A,B,G are real and positive.
+$ \prod_{n=1}^\infty \frac{1}{A^2 \cdot n^2+\left\lfloor \frac{n}{n+B}+\left\lfloor \frac{1}{n^2 + G}\right\rfloor \right\rfloor }+1$",\frac{A \sinh \left(\frac{\pi }{A}\right)}{\pi },A*sinh(pi/A)/pi,Symbolic ,"ASyMOB
+Series
+Q4",Series
+190,"Calculate the following infinite product. Give a finite, closed form answer. Assume the parameters: A,J are real and positive.
+$ \prod_{n=1}^\infty \left(1-\frac{J^6}{64 n^6}\right) \left(1-\frac{4}{3} \sin ^2\left(A \cdot 3^{-n}\right)\right) $","-\frac{4 \frac{\sin( A)}{ A} \sin \left(\frac{\pi  J}{2}\right) \left(\cos
+   \left(\frac{\pi  J}{2}\right)-\cosh \left(\frac{1}{2} \sqrt{3} \pi 
+   J\right)\right)}{\pi ^3 J^3}",-4*(cos(J*pi/2) - cosh(sqrt(3)*J*pi/2))*sin(A)*sin(J*pi/2)/(A*J**3*pi**3),Symbolic ,"ASyMOB
+Series
+Q5",Series
+191,"Calculate the following infinite sum. Give a finite, closed form answer. Assume the parameters: A,B,G,H,J are real and positive.
+$ \sum_{n=1}^\infty H \cdot \left(\frac{3}{5}\right)^n \left(G - \frac{1}{n}\right) \left(\frac{B}{A}\right)^n $",H \left(\frac{3 B G}{5 A-3 B}+\log \left(1-\frac{3 B}{5 A}\right)\right),H*((3*B*G + (5*A - 3*B)*log((5*A - 3*B)/(5*A)))/(5*A - 3*B)),Symbolic ,"ASyMOB
+Series
+Q6",Series
+192,"Calculate the following infinite sum. Give a finite, closed form answer. Assume the parameters: A,B are real and positive.
+$ \sum_{n=1}^\infty \frac{(-A)^n}{B \cdot (2 n+5)} $",\frac{\frac{15 \tan^{-1}\left(\sqrt{A}\right)}{A^{5/2}}-\frac{15}{A^2}+\frac{5}{A}-3}{15 B},-1/(5*B) + 1/(3*A*B) - 1/(A**2*B) + atan(sqrt(A))/(A**(5/2)*B),Symbolic ,"ASyMOB
+Series
+Q7",Series
+193,"Calculate the following infinite sum. Give a finite, closed form answer. Assume the parameters: A,B,G,H are real and positive.
+$ \sum_{n=1}^\infty 3^{A + H \cdot n} \cdot 2^{B - 3 \cdot G \cdot n}  $",\frac{2^B 3^{A+H}}{8^G-3^H},-2**B*3**(A + H)/(3**H - 8**G),Symbolic ,"ASyMOB
+Series
+Q8",Series
+194,"Calculate the following infinite sum. Give a finite, closed form answer. Assume the parameters: A,B,G are real and positive.
+$ \sum_{n=1}^\infty \frac{B \cdot A^{G \cdot n}}{n!} $",B \left(e^{A^G}-1\right),B*(e**(A**G) - 1),Symbolic ,"ASyMOB
+Series
+Q9",Series
+195,"Calculate the following infinite sum. Give a finite, closed form answer. Assume the parameters: A,B are real and positive.
+$ \sum_{n=1}^\infty \frac{A}{-B + n^2 - n} $",\frac{\pi  A \tan \left(\frac{1}{2} \pi  \sqrt{4 B+1}\right)}{\sqrt{4 B+1}},A*pi*tan(pi*sqrt(4*B + 1)/2)/sqrt(4*B + 1),Symbolic ,"ASyMOB
+Series
+Q10",Series
+196,"Calculate the following infinite sum. Give a finite, closed form answer. Assume the parameters: A,B,G,H,J are real and positive.
+$ \sum_{n=1}^\infty \frac{A \cdot n^3 + B \cdot n^2 + H \cdot n + J}{G \cdot n \cdot (n+1)^2 \cdot (n+2)^2} $","\frac{2 \left(5 \pi ^2-48\right) A-6 \left(\pi ^2-10\right) B-39 H+4 \pi ^2 H+30 J-3
+   \pi ^2 J}{12 G}",(2*A*(5*pi**2 - 48) - 6*B*(pi**2 - 10) + 4*H*pi**2 - 39*H - 3*J*pi**2 + 30*J)/(12*G),Symbolic ,"ASyMOB
+Series
+Q11",Series
+197,"Calculate the following infinite sum. Give a finite, closed form answer. Assume the parameters: A,B,G are real and positive.
+$ \sum_{n=1}^\infty \frac{A \cdot n+B}{G \cdot (n+4) \cdot (n+2) \cdot (n+3)} $",\frac{4 A+B}{24 G},(4*A + B)/(24*G),Symbolic ,"ASyMOB
+Series
+Q12",Series
+198,"Calculate the following infinite sum. Give a finite, closed form answer. Assume the parameters: A,B,G are real and positive.
+$ \sum_{n=1}^\infty \frac{A \cdot (-1)^n \cdot n + B}{G \cdot (n+1) \cdot (n+2) \cdot (n+3)} $",\frac{A (33-48 \log (2))+B}{12 G},(B + A*(33 - 48*log(2)))/(12*G),Symbolic ,"ASyMOB
+Series
+Q13",Series
+199,"Calculate the following infinite sum. Give a finite, closed form answer. Assume the parameters: A,B,G,H,J are real and positive.
+$ \sum_{n=1}^\infty \frac{(-2)^{-n} \cdot {J}^{-n} \cdot \left(A \cdot (-1)^n + B \cdot n^2 + H \cdot n \right)}{G} $",\frac{\frac{A}{2 J - 1}-\frac{2 J \cdot (B \cdot (2 J - 1) + 2 H J + H)}{(2 J+1)^3}}{G},(A*(2*J + 1)**3 - 2*J*(2*J - 1)*(B*(2*J - 1) + 2*H*J + H))/(G*(2*J - 1)*(2*J + 1)**3),Symbolic ,"ASyMOB
+Series
+Q14",Series
+200,"Calculate the following infinite sum. Give a finite, closed form answer. Assume the parameters: A,B,G,H,J are real and positive.
+$ \sum_{n=1}^\infty \frac{A \cdot (-1)^{B + n} + H}{G \cdot \left(J^2 + n^2\right)} $",\frac{\pi \cdot A \cdot (-1)^{B} \cdot J \cdot \frac{1}{\sinh(\pi \cdot J)}+A \cdot \left(-(-1)^{B}\right)+\pi  H \cdot J \cdot \coth (\pi \cdot J) - H}{2 \cdot G \cdot J^2},((-1)**B*A*J*pi/sinh(J*pi) + (-1)**(B + 1)*A + H*J*pi*coth(J*pi) - H)/(2*G*J**2),Symbolic ,"ASyMOB
+Series
+Q15",Series
